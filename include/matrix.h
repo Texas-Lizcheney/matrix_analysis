@@ -1,17 +1,11 @@
 #pragma once
 #include <Python.h>
-
-struct Complex
-{
-    double real;
-    double imag;
-    bool isArbitrarily;
-};
+#include <complexvar.h>
 
 struct PyMatrixObject
 {
     PyObject_HEAD;
-    Complex* elements;
+    ComplexVar *elements;
     int rows;
     int cols;
 };

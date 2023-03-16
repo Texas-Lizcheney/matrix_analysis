@@ -1,3 +1,3 @@
-import matrixcore
+from . import matrixcore,var
 
 matrix = matrixcore.matrix

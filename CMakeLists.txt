@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/libs)
 
 include_directories(${PROJECT_SOURCE_DIR}/include /usr/include/python3.11)
-add_library("matrix" STATIC 
+add_library("matrix" STATIC
     srcs/MatrixObject.cpp
+)
+add_library("var" STATIC
+    srcs/ComplexVarObject.cpp
 )
