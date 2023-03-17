@@ -2,7 +2,9 @@
     "python.formatting.provider": "autopep8",
     "files.associations": {
         "python.h": "c",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "compare": "cpp",
+        "type_traits": "cpp"
     },
     "python.languageServer": "Pylance"
 }

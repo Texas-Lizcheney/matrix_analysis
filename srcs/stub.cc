@@ -3,8 +3,8 @@
 #include <complexvar.h>
 #include <Python.h>
 
-extern PyTypeObject MatrixType;
-extern PyTypeObject ComplexVarType;
+extern PyTypeObject PyMatrixType;
+extern PyTypeObject PyComplexVarType;
 
 static PyModuleDef coreMoulde = {
     .m_base = PyModuleDef_HEAD_INIT,
@@ -20,7 +20,7 @@ static PyModuleDef varModule = {
 
 PyObject *Init_varModule()
 {
-    if (PyType_Ready(&ComplexVarType) < 0)
+    if (PyType_Ready(&PyComplexVarType) < 0)
     {
         return nullptr;
     }
@@ -29,10 +29,10 @@ PyObject *Init_varModule()
     {
         return nullptr;
     }
-    Py_INCREF(&ComplexVarType);
-    if (((PyModule_AddType(m, &ComplexVarType) < 0)))
+    Py_INCREF(&PyComplexVarType);
+    if (((PyModule_AddType(m, &PyComplexVarType) < 0)))
     {
-        Py_DECREF(&ComplexVarType);
+        Py_DECREF(&PyComplexVarType);
         Py_DECREF(m);
         return nullptr;
     }
@@ -47,7 +47,7 @@ PyMODINIT_FUNC PyInit_matrixcore()
         Py_XDECREF(varm);
         return nullptr;
     }
-    if (PyType_Ready(&MatrixType) < 0)
+    if (PyType_Ready(&PyMatrixType) < 0)
     {
         Py_DECREF(varm);
         return nullptr;
@@ -58,11 +58,11 @@ PyMODINIT_FUNC PyInit_matrixcore()
         Py_DECREF(varm);
         return nullptr;
     }
-    Py_INCREF(&MatrixType);
-    if ((PyModule_AddType(m, &MatrixType) < 0) ||
+    Py_INCREF(&PyMatrixType);
+    if ((PyModule_AddType(m, &PyMatrixType) < 0) ||
         (PyModule_AddObject(m, "varcore", varm) < 0))
     {
-        Py_DECREF(&MatrixType);
+        Py_DECREF(&PyMatrixType);
         Py_DECREF(varm);
         Py_DECREF(m);
         return nullptr;

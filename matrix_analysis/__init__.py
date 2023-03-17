@@ -1,3 +1,5 @@
-from . import matrixcore,var
+from . import matrixcore as __matrixcore
+from . import var 
 
-matrix = matrixcore.matrix
+matrix = __matrixcore.matrix
+
