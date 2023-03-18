@@ -66,7 +66,7 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
     }
     if (PyFloat_CheckExact(value))
     {
-        target.real = PyLong_AsDouble(value);
+        target.real = PyFloat_AsDouble(value);
         goto set_imag_zero;
     }
     if (PyComplex_CheckExact(value))
@@ -271,9 +271,86 @@ int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closur
     return 0;
 }
 
+PyObject *PyComplexVar_get_recpair(PyComplexVarObject *self, void *closure)
+{
+    if (self->num.isArbitrary)
+    {
+        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
+        Py_RETURN_NONE;
+    }
+    return Py_BuildValue("dd", self->num.real, self->num.imag);
+}
+
+int PyComplexVar_set_recpair(PyComplexVarObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.isArbitrary = true;
+        return 0;
+    }
+    if (PyTuple_CheckExact(value))
+    {
+        if (PyArg_ParseTuple(value, "dd|",
+                             &self->num.real,
+                             &self->num.imag))
+        {
+            self->num.isArbitrary = false;
+            return 0;
+        }
+    }
+    PyErr_SetString(PyExc_ValueError, "Only take tuple with two float elements.");
+    return -1;
+}
+
+PyObject *PyComplexVar_get_polarpair(PyComplexVarObject *self, void *closure)
+{
+    if (self->num.isArbitrary)
+    {
+        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
+        Py_RETURN_NONE;
+    }
+    double arg = ComplexVar_arg(self->num);
+    if (*((bool *)closure))
+    {
+        arg *= 180;
+        arg /= std::numbers::pi;
+    }
+    return Py_BuildValue("dd", ComplexVar_length(self->num), arg);
+}
+
+int PyComplexVar_set_polarpair(PyComplexVarObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.isArbitrary = true;
+        return 0;
+    }
+    if (PyTuple_CheckExact(value))
+    {
+        double r;
+        double a;
+        if (PyArg_ParseTuple(value, "dd|",
+                             &r,
+                             &a))
+        {
+            if (*((bool *)closure))
+            {
+                a *= std::numbers::pi;
+                a /= 180;
+            }
+            setvalue_frompolar(r, a, self->num);
+            return 0;
+        }
+    }
+    PyErr_SetString(PyExc_ValueError, "Only take tuple with two float elements.");
+    return -1;
+}
+
 static PyGetSetDef PyComplexVarGetSet[] = {
     {"length", (getter)PyComplexVar_get_len, (setter)PyComplexVar_set_len, nullptr, nullptr},
     {"arg", (getter)PyComplexVar_get_arg, (setter)PyComplexVar_set_arg, nullptr, &isdeg},
+    {"rec", (getter)PyComplexVar_get_recpair, (setter)PyComplexVar_set_recpair, nullptr, nullptr},
+    {"pol", (getter)PyComplexVar_get_polarpair, (setter)PyComplexVar_set_polarpair, nullptr, &isdeg},
     nullptr,
 };
 

@@ -11,8 +11,10 @@ def set_arg_format(format: str) -> None: ...
 class variable:
     real: float
     imag: float
+    rec: typing.Union[typing.Tuple[float, float], None]
     length: float
     arg: float
+    pol: typing.Union[typing.Tuple[float, float], None]
     is_arbitrary: bool
 
     @typing.overload
