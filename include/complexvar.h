@@ -18,6 +18,8 @@ struct ComplexVar
     bool isArbitrary;
 };
 
+ComplexVar ComplexVar_add(ComplexVar &, ComplexVar &);
+
 #define ComplexVar_length(x) sqrt(x.real *x.real + x.imag * x.imag)
 #define ComplexVar_arg(x) atan2(x.imag, x.real)
 void setvalue_frompolar(double r, double a, ComplexVar &);
@@ -35,8 +37,11 @@ extern PyTypeObject PyComplexVarType;
 void PyComplexVar_dealloc(PyComplexVarObject *);
 PyObject *PyComplexVar_repr(PyComplexVarObject *);
 PyObject *PyComplexVar_str(PyComplexVarObject *);
+PyObject *PyComplexVar_richcompare(PyComplexVarObject *, PyObject *, int);
 int PyComplexVar_init(PyComplexVarObject *, PyObject *, PyObject *);
 PyObject *PyComplexVar_new(PyTypeObject *, PyObject *, PyObject *);
+
+PyObject *PyComplexVar_add(PyComplexVarObject *, PyObject *);
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *, void *);
 int PyComplexVar_set_len(PyComplexVarObject *, PyObject *, void *);

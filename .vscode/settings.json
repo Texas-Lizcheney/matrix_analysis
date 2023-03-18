@@ -7,5 +7,8 @@
         "type_traits": "cpp",
         "numbers": "cpp"
     },
-    "python.languageServer": "Pylance"
+    "python.languageServer": "Pylance",
+    "diffEditor.wordWrap": "inherit",
+    "editor.wordWrap": "off",
+    "editor.wordWrapColumn": 80
 }

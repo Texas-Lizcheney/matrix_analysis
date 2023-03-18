@@ -45,8 +45,7 @@ PyObject *Init_varModule()
         return nullptr;
     }
     Py_INCREF(&PyComplexVarType);
-    if (((PyModule_AddType(m, &PyComplexVarType) < 0)) ||
-        (PyModule_AddObject(m, "Undefined", PyExc_Undefined) < 0))
+    if (((PyModule_AddType(m, &PyComplexVarType) < 0)) || (PyModule_AddObject(m, "Undefined", PyExc_Undefined) < 0))
     {
         Py_DECREF(&PyComplexVarType);
         Py_DECREF(PyExc_Undefined);
@@ -76,8 +75,7 @@ PyMODINIT_FUNC PyInit_matrixcore()
         return nullptr;
     }
     Py_INCREF(&PyMatrixType);
-    if ((PyModule_AddType(m, &PyMatrixType) < 0) ||
-        (PyModule_AddObject(m, "varcore", varm) < 0))
+    if ((PyModule_AddType(m, &PyMatrixType) < 0) || (PyModule_AddObject(m, "varcore", varm) < 0))
     {
         Py_DECREF(&PyMatrixType);
         Py_DECREF(varm);

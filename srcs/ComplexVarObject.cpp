@@ -17,11 +17,6 @@ PyObject *SetDoublePrecision(PyObject *self, PyObject *value)
         doubleprecision = 0;
         Py_RETURN_NONE;
     }
-    if (pre > 15)
-    {
-        doubleprecision = 15;
-        Py_RETURN_NONE;
-    }
     doubleprecision = pre;
     Py_RETURN_NONE;
 }
@@ -75,6 +70,7 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
         target.imag = PyComplex_ImagAsDouble(value);
         return 0;
     }
+    PyErr_Format(PyExc_ValueError, "Unsupported type: %s", value->ob_type->tp_name);
     return -1;
 set_both_zero:
     target.real = 0;
@@ -126,6 +122,45 @@ PyObject *PyComplexVar_str(PyComplexVarObject *self)
     return PyUnicode_FromString(tmp.str().c_str());
 }
 
+PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, int opid)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    switch (opid)
+    {
+    case Py_EQ:
+    {
+        if (self->num.isArbitrary || tmp.isArbitrary)
+        {
+            Py_RETURN_FALSE;
+        }
+        if (self->num.real == tmp.real && self->num.imag == tmp.imag)
+        {
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
+    }
+    case Py_NE:
+    {
+        if (self->num.isArbitrary || tmp.isArbitrary)
+        {
+            Py_RETURN_FALSE;
+        }
+        if (self->num.real != tmp.real || self->num.imag != tmp.imag)
+        {
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
+    }
+    default:
+        break;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
 int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
 {
     int argcount = 0;
@@ -153,14 +188,12 @@ int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
             nullptr,
         };
         PyObject *tmp;
-        if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
-                                         &tmp))
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist, &tmp))
         {
             return -1;
         }
         if (assignComplexVar(tmp, self->num))
         {
-            PyErr_Format(PyExc_ValueError, "Unsupported type: %s", tmp->ob_type->tp_name);
             return -1;
         }
         break;
@@ -172,9 +205,7 @@ int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
             (char *)"imag",
             nullptr,
         };
-        if (!PyArg_ParseTupleAndKeywords(args, kwds, "dd|", kwlist,
-                                         &self->num.real,
-                                         &self->num.imag))
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "dd|", kwlist, &self->num.real, &self->num.imag))
         {
             return -1;
         }
@@ -199,12 +230,21 @@ PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     return self;
 }
 
-static PyMemberDef PyComplexVarMember[] = {
-    {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real), 0, nullptr},
-    {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag), 0, nullptr},
-    {"is_arbitrary", T_BOOL, offsetof(PyComplexVarObject, num.isArbitrary), 0, nullptr},
-    nullptr,
-};
+// as number
+
+PyObject *PyComplexVar_add(PyComplexVarObject *self, PyObject *other)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_add(self->num, tmp);
+    return (PyObject *)result;
+}
+
+// get set methods
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
 {
@@ -290,9 +330,7 @@ int PyComplexVar_set_recpair(PyComplexVarObject *self, PyObject *value, void *cl
     }
     if (PyTuple_CheckExact(value))
     {
-        if (PyArg_ParseTuple(value, "dd|",
-                             &self->num.real,
-                             &self->num.imag))
+        if (PyArg_ParseTuple(value, "dd|", &self->num.real, &self->num.imag))
         {
             self->num.isArbitrary = false;
             return 0;
@@ -329,9 +367,7 @@ int PyComplexVar_set_polarpair(PyComplexVarObject *self, PyObject *value, void *
     {
         double r;
         double a;
-        if (PyArg_ParseTuple(value, "dd|",
-                             &r,
-                             &a))
+        if (PyArg_ParseTuple(value, "dd|", &r, &a))
         {
             if (*((bool *)closure))
             {
@@ -346,6 +382,17 @@ int PyComplexVar_set_polarpair(PyComplexVarObject *self, PyObject *value, void *
     return -1;
 }
 
+static PyNumberMethods PyComplexVarNumber = {
+    .nb_add = (binaryfunc)PyComplexVar_add,
+};
+
+static PyMemberDef PyComplexVarMember[] = {
+    {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real), 0, nullptr},
+    {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag), 0, nullptr},
+    {"is_arbitrary", T_BOOL, offsetof(PyComplexVarObject, num.isArbitrary), 0, nullptr},
+    nullptr,
+};
+
 static PyGetSetDef PyComplexVarGetSet[] = {
     {"length", (getter)PyComplexVar_get_len, (setter)PyComplexVar_set_len, nullptr, nullptr},
     {"arg", (getter)PyComplexVar_get_arg, (setter)PyComplexVar_set_arg, nullptr, &isdeg},
@@ -359,7 +406,9 @@ PyTypeObject PyComplexVarType = {
     .tp_basicsize = sizeof(PyComplexVarObject),
     .tp_dealloc = (destructor)PyComplexVar_dealloc,
     .tp_repr = (reprfunc)PyComplexVar_repr,
+    .tp_as_number = &PyComplexVarNumber,
     .tp_str = (reprfunc)PyComplexVar_str,
+    .tp_richcompare = (richcmpfunc)PyComplexVar_richcompare,
     .tp_members = PyComplexVarMember,
     .tp_getset = PyComplexVarGetSet,
     .tp_init = (initproc)PyComplexVar_init,
