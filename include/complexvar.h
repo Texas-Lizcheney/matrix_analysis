@@ -2,9 +2,14 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <math.h>
+#include <numbers>
 #include <Python.h>
+#include <structmember.h>
+#include <utilities.h>
 
 PyObject *SetDoublePrecision(PyObject *, PyObject *);
+PyObject *SetArgFormat(PyObject *, PyObject *);
 
 struct ComplexVar
 {
@@ -12,6 +17,10 @@ struct ComplexVar
     double imag;
     bool isArbitrary;
 };
+
+#define ComplexVar_length(x) sqrt(x.real *x.real + x.imag * x.imag)
+#define ComplexVar_arg(x) atan2(x.imag, x.real)
+void setvalue_frompolar(double r, double a, ComplexVar &);
 
 int assignComplexVar(PyObject *, ComplexVar &);
 
@@ -28,3 +37,8 @@ PyObject *PyComplexVar_repr(PyComplexVarObject *);
 PyObject *PyComplexVar_str(PyComplexVarObject *);
 int PyComplexVar_init(PyComplexVarObject *, PyObject *, PyObject *);
 PyObject *PyComplexVar_new(PyTypeObject *, PyObject *, PyObject *);
+
+PyObject *PyComplexVar_get_len(PyComplexVarObject *, void *);
+int PyComplexVar_set_len(PyComplexVarObject *, PyObject *, void *);
+PyObject *PyComplexVar_get_arg(PyComplexVarObject *, void *);
+int PyComplexVar_set_arg(PyComplexVarObject *, PyObject *, void *);

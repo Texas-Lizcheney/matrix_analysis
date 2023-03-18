@@ -9,5 +9,8 @@ add_library("matrix" STATIC
     srcs/MatrixObject.cpp
 )
 add_library("var" STATIC
+    srcs/ComplexVar.cpp
     srcs/ComplexVarObject.cpp
 )
+add_library("utility" STATIC
+    srcs/utilities.cpp)

@@ -1,15 +1,17 @@
 #include <complexvar.h>
 
 int doubleprecision = 7;
+bool isdeg = false;
+PyObject *PyExc_Undefined = nullptr;
 
-PyObject *SetDoublePrecision(PyObject *self, PyObject *p)
+PyObject *SetDoublePrecision(PyObject *self, PyObject *value)
 {
-    if (!PyLong_CheckExact(p))
+    if (!PyLong_CheckExact(value))
     {
-        PyErr_SetString(PyExc_ValueError, "Fail to set precision!");
+        PyErr_SetString(PyExc_ValueError, "Fail to set precision! Only accept int.");
         Py_RETURN_NONE;
     }
-    int pre = PyLong_AsLong(p);
+    int pre = PyLong_AsLong(value);
     if (pre < 0)
     {
         doubleprecision = 0;
@@ -21,6 +23,26 @@ PyObject *SetDoublePrecision(PyObject *self, PyObject *p)
         Py_RETURN_NONE;
     }
     doubleprecision = pre;
+    Py_RETURN_NONE;
+}
+
+PyObject *SetArgFormat(PyObject *self, PyObject *value)
+{
+    if (PyUnicode_CheckExact(value))
+    {
+        const char *format = PyUnicode_AsUTF8(value);
+        if (!strcmp(format, "deg"))
+        {
+            isdeg = true;
+            Py_RETURN_NONE;
+        }
+        if (!strcmp(format, "rad"))
+        {
+            isdeg = false;
+            Py_RETURN_NONE;
+        }
+    }
+    PyErr_SetString(PyExc_ValueError, "Fail to set format! Only accept \"deg\" and \"rad\".");
     Py_RETURN_NONE;
 }
 
@@ -177,12 +199,92 @@ PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     return self;
 }
 
+static PyMemberDef PyComplexVarMember[] = {
+    {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real), 0, nullptr},
+    {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag), 0, nullptr},
+    {"is_arbitrary", T_BOOL, offsetof(PyComplexVarObject, num.isArbitrary), 0, nullptr},
+    nullptr,
+};
+
+PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
+{
+    if (self->num.isArbitrary)
+    {
+        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
+        return PyFloat_FromDouble(nan(""));
+    }
+    return PyFloat_FromDouble(ComplexVar_length(self->num));
+}
+
+int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.isArbitrary = true;
+        return 0;
+    }
+    if (self->num.isArbitrary)
+    {
+        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
+        return -1;
+    }
+    double length = getdouble_fromPyObject(value);
+    setvalue_frompolar(length, ComplexVar_arg(self->num), self->num);
+    return 0;
+}
+
+PyObject *PyComplexVar_get_arg(PyComplexVarObject *self, void *closure)
+{
+    if (self->num.isArbitrary)
+    {
+        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
+        return PyFloat_FromDouble(nan(""));
+    }
+    double result = ComplexVar_arg(self->num);
+    if (*((bool *)closure))
+    {
+        result *= 180;
+        result /= std::numbers::pi;
+    }
+    return PyFloat_FromDouble(result);
+}
+
+int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.isArbitrary = true;
+        return 0;
+    }
+    if (self->num.isArbitrary)
+    {
+        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
+        return -1;
+    }
+    double arg = getdouble_fromPyObject(value);
+    if (*((bool *)closure))
+    {
+        arg *= std::numbers::pi;
+        arg /= 180;
+    }
+    setvalue_frompolar(ComplexVar_length(self->num), arg, self->num);
+    return 0;
+}
+
+static PyGetSetDef PyComplexVarGetSet[] = {
+    {"length", (getter)PyComplexVar_get_len, (setter)PyComplexVar_set_len, nullptr, nullptr},
+    {"arg", (getter)PyComplexVar_get_arg, (setter)PyComplexVar_set_arg, nullptr, &isdeg},
+    nullptr,
+};
+
 PyTypeObject PyComplexVarType = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "varcore.complexvar",
     .tp_basicsize = sizeof(PyComplexVarObject),
     .tp_dealloc = (destructor)PyComplexVar_dealloc,
     .tp_repr = (reprfunc)PyComplexVar_repr,
     .tp_str = (reprfunc)PyComplexVar_str,
+    .tp_members = PyComplexVarMember,
+    .tp_getset = PyComplexVarGetSet,
     .tp_init = (initproc)PyComplexVar_init,
     .tp_new = (newfunc)PyComplexVar_new,
 };

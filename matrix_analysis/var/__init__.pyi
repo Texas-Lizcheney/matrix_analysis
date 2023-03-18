@@ -5,11 +5,14 @@ __support_component = typing.Union[int, float]
 
 
 def set_print_precision(precision: int) -> None: ...
+def set_arg_format(format: str) -> None: ...
 
 
 class variable:
     real: float
     imag: float
+    length: float
+    arg: float
     is_arbitrary: bool
 
     @typing.overload

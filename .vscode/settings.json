@@ -4,7 +4,8 @@
         "python.h": "c",
         "iostream": "cpp",
         "compare": "cpp",
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "numbers": "cpp"
     },
     "python.languageServer": "Pylance"
 }

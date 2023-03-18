@@ -5,6 +5,7 @@
 
 extern PyTypeObject PyMatrixType;
 extern PyTypeObject PyComplexVarType;
+extern PyObject *PyExc_Undefined;
 
 static PyModuleDef coreMoulde = {
     .m_base = PyModuleDef_HEAD_INIT,
@@ -14,6 +15,7 @@ static PyModuleDef coreMoulde = {
 
 static PyMethodDef varModule_method[] = {
     {"set_print_precision", (PyCFunction)SetDoublePrecision, METH_O, nullptr},
+    {"set_arg_format", (PyCFunction)SetArgFormat, METH_O, nullptr},
     nullptr,
 };
 
@@ -30,15 +32,24 @@ PyObject *Init_varModule()
     {
         return nullptr;
     }
+    PyExc_Undefined = PyErr_NewException("varcore.Undefined", nullptr, nullptr);
+    if (!PyExc_Undefined)
+    {
+        Py_XDECREF(PyExc_Undefined);
+        return nullptr;
+    }
     PyObject *m = PyModule_Create(&varModule);
     if (!m)
     {
+        Py_DECREF(PyExc_Undefined);
         return nullptr;
     }
     Py_INCREF(&PyComplexVarType);
-    if (((PyModule_AddType(m, &PyComplexVarType) < 0)))
+    if (((PyModule_AddType(m, &PyComplexVarType) < 0)) ||
+        (PyModule_AddObject(m, "Undefined", PyExc_Undefined) < 0))
     {
         Py_DECREF(&PyComplexVarType);
+        Py_DECREF(PyExc_Undefined);
         Py_DECREF(m);
         return nullptr;
     }

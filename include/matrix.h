@@ -1,5 +1,6 @@
 #pragma once
 #include <Python.h>
+#include <structmember.h>
 #include <complexvar.h>
 
 struct PyMatrixObject
