@@ -12,10 +12,16 @@ static PyModuleDef coreMoulde = {
     .m_size = -1,
 };
 
+static PyMethodDef varModule_method[] = {
+    {"set_print_precision", (PyCFunction)SetDoublePrecision, METH_O, nullptr},
+    nullptr,
+};
+
 static PyModuleDef varModule = {
     .m_base = PyModuleDef_HEAD_INIT,
     .m_name = "varcore",
     .m_size = -1,
+    .m_methods = varModule_method,
 };
 
 PyObject *Init_varModule()

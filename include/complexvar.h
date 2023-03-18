@@ -1,6 +1,10 @@
 #pragma once
-#include <iostream>
+#include <sstream>
+#include <string>
+#include <iomanip>
 #include <Python.h>
+
+PyObject *SetDoublePrecision(PyObject *, PyObject *);
 
 struct ComplexVar
 {
@@ -21,5 +25,6 @@ extern PyTypeObject PyComplexVarType;
 
 void PyComplexVar_dealloc(PyComplexVarObject *);
 PyObject *PyComplexVar_repr(PyComplexVarObject *);
+PyObject *PyComplexVar_str(PyComplexVarObject *);
 int PyComplexVar_init(PyComplexVarObject *, PyObject *, PyObject *);
 PyObject *PyComplexVar_new(PyTypeObject *, PyObject *, PyObject *);

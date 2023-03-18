@@ -1,5 +1,29 @@
 #include <complexvar.h>
 
+int doubleprecision = 7;
+
+PyObject *SetDoublePrecision(PyObject *self, PyObject *p)
+{
+    if (!PyLong_CheckExact(p))
+    {
+        PyErr_SetString(PyExc_ValueError, "Fail to set precision!");
+        Py_RETURN_NONE;
+    }
+    int pre = PyLong_AsLong(p);
+    if (pre < 0)
+    {
+        doubleprecision = 0;
+        Py_RETURN_NONE;
+    }
+    if (pre > 15)
+    {
+        doubleprecision = 15;
+        Py_RETURN_NONE;
+    }
+    doubleprecision = pre;
+    Py_RETURN_NONE;
+}
+
 int assignComplexVar(PyObject *value, ComplexVar &target)
 {
     if (PyComplexVar_CheckExact(value))
@@ -40,6 +64,44 @@ set_imag_zero:
 void PyComplexVar_dealloc(PyComplexVarObject *self)
 {
     Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+PyObject *PyComplexVar_repr(PyComplexVarObject *self)
+{
+    std::stringstream tmp;
+    if (self->num.isArbitrary)
+    {
+        tmp << "None";
+    }
+    else
+    {
+        tmp << std::setprecision(doubleprecision) << self->num.real;
+        if (self->num.imag >= 0)
+        {
+            tmp << '+';
+        }
+        tmp << self->num.imag << 'j';
+    }
+    return PyUnicode_FromString(tmp.str().c_str());
+}
+
+PyObject *PyComplexVar_str(PyComplexVarObject *self)
+{
+    std::stringstream tmp;
+    if (self->num.isArbitrary)
+    {
+        tmp << "undefined";
+    }
+    else
+    {
+        tmp << std::setprecision(doubleprecision) << self->num.real;
+        if (self->num.imag >= 0)
+        {
+            tmp << '+';
+        }
+        tmp << self->num.imag << 'i';
+    }
+    return PyUnicode_FromString(tmp.str().c_str());
 }
 
 int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
@@ -119,6 +181,8 @@ PyTypeObject PyComplexVarType = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "varcore.complexvar",
     .tp_basicsize = sizeof(PyComplexVarObject),
     .tp_dealloc = (destructor)PyComplexVar_dealloc,
+    .tp_repr = (reprfunc)PyComplexVar_repr,
+    .tp_str = (reprfunc)PyComplexVar_str,
     .tp_init = (initproc)PyComplexVar_init,
     .tp_new = (newfunc)PyComplexVar_new,
 };

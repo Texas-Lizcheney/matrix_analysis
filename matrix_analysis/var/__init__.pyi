@@ -4,6 +4,9 @@ __support_num = typing.Union[None, int, float, complex, variable]
 __support_component = typing.Union[int, float]
 
 
+def set_print_precision(precision: int) -> None: ...
+
+
 class variable:
     real: float
     imag: float
@@ -18,7 +21,5 @@ class variable:
     @typing.overload
     def __init__(self, real: __support_component,
                  imag: __support_component) -> variable: ...
-    
+
     def __repr__(self) -> str: ...
-
-
