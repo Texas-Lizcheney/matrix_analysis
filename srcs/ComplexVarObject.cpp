@@ -234,13 +234,162 @@ PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 PyObject *PyComplexVar_add(PyComplexVarObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
     {
         Py_RETURN_NONE;
     }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
     result->num = ComplexVar_add(self->num, tmp);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_subtract(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_sub(self->num, tmp);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_multiply(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_mul(self->num, tmp);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_remainder(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_mod(self->num, tmp);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_divmod(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *D = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    PyComplexVarObject *M = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!D || !M)
+    {
+        Py_XDECREF(D);
+        Py_XDECREF(M);
+        Py_RETURN_NONE;
+    }
+    D->num = ComplexVar_fdv(self->num, tmp);
+    M->num = ComplexVar_sub(self->num, ComplexVar_mul(D->num, tmp));
+    PyObject *returnvalue = Py_BuildValue("OO", D, M);
+    Py_DECREF(D);
+    Py_DECREF(M);
+    return returnvalue;
+}
+
+PyObject *PyComplexVar_power(PyComplexVarObject *self, PyObject *other, PyObject *mod)
+{
+    ComplexVar tmp;
+    ComplexVar powvalue;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    powvalue = ComplexVar_pow(self->num, tmp);
+    if (Py_IsNone(mod))
+    {
+        result->num = powvalue;
+    }
+    else
+    {
+        ComplexVar tmp2;
+        if (assignComplexVar(mod, tmp2))
+        {
+            Py_DECREF(result);
+            Py_RETURN_NONE;
+        }
+        result->num = ComplexVar_mod(powvalue, tmp2);
+    }
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_negative(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_neg(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_floor_divide(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_fdv(self->num, tmp);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_true_divide(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_div(self->num, tmp);
     return (PyObject *)result;
 }
 
@@ -384,6 +533,14 @@ int PyComplexVar_set_polarpair(PyComplexVarObject *self, PyObject *value, void *
 
 static PyNumberMethods PyComplexVarNumber = {
     .nb_add = (binaryfunc)PyComplexVar_add,
+    .nb_subtract = (binaryfunc)PyComplexVar_subtract,
+    .nb_multiply = (binaryfunc)PyComplexVar_multiply,
+    .nb_remainder = (binaryfunc)PyComplexVar_remainder,
+    .nb_divmod = (binaryfunc)PyComplexVar_divmod,
+    .nb_power = (ternaryfunc)PyComplexVar_power,
+    .nb_negative = (unaryfunc)PyComplexVar_negative,
+    .nb_floor_divide = (binaryfunc)PyComplexVar_floor_divide,
+    .nb_true_divide = (binaryfunc)PyComplexVar_true_divide,
 };
 
 static PyMemberDef PyComplexVarMember[] = {

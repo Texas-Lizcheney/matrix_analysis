@@ -1,6 +1,7 @@
 import unittest
 import matrix_analysis
 import math
+import sys
 
 
 class externed_Testcase(unittest.TestCase):
@@ -108,12 +109,59 @@ class Test_var(externed_Testcase):
             x < y
         with self.assertRaises(TypeError):
             x < "abc"
+        self.assertEqual(z, 1)
+        self.assertEqual(z, 1.0)
+        w = matrix_analysis.var.variable(1-1j)
+        self.assertEqual(w, 1-1j)
 
     def test_add(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x+y
         self.assertTupleAlmostEqual(z.rec, (3, 5))
+
+    def test_sub(self):
+        x = matrix_analysis.var.variable(1+2j)
+        y = matrix_analysis.var.variable(2+3j)
+        z = x-y
+        self.assertTupleAlmostEqual(z.rec, (-1, -1))
+
+    def test_sub(self):
+        x = matrix_analysis.var.variable(1+2j)
+        y = matrix_analysis.var.variable(2+3j)
+        z = x*y
+        self.assertTupleAlmostEqual(z.rec, (-4, 7))
+
+    def test_div(self):
+        x = matrix_analysis.var.variable(1+2j)
+        y = matrix_analysis.var.variable(2+3j)
+        z1 = x/y
+        self.assertTupleAlmostEqual(z1.rec, (0.6153846154, 0.07692307692))
+        z2 = y//x
+        self.assertTupleAlmostEqual(z2.rec, (1, -1))
+        z3 = y % x
+        self.assertTupleAlmostEqual(z3.rec, (-1, 2))
+        z4 = divmod(y, x)
+        self.assertEqual(sys.getrefcount(z4[0]), 2)
+        self.assertEqual(sys.getrefcount(z4[1]), 2)
+        self.assertTupleAlmostEqual(z4[0].rec, (1, -1))
+        self.assertTupleAlmostEqual(z4[1].rec, (-1, 2))
+
+    def test_pow(self):
+        x = matrix_analysis.var.variable(1+2j)
+        y = matrix_analysis.var.variable(2+3j)
+        z = x**y
+        self.assertTupleAlmostEqual(z.rec, (-0.0151326724227, -0.179867483913))
+        a = matrix_analysis.var.variable(7, 9)
+        b = matrix_analysis.var.variable(5, 3)
+        c = matrix_analysis.var.variable(2, 3)
+        d = pow(a, b, c)
+        self.assertTupleAlmostEqual(d.rec, (-0.40462543, 3.33048064))
+
+    def test_unaryfuncs(self):
+        x = matrix_analysis.var.variable(1+2j)
+        a = -x
+        self.assertTupleAlmostEqual(a.rec, (-1, -2))
 
 
 if __name__ == "__main__":
