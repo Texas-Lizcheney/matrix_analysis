@@ -599,6 +599,72 @@ PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
     return (PyObject *)result;
 }
 
+PyObject *PyComplexVar_sin(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_sin(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_cos(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_cos(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_tan(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_tan(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_cot(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_cot(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_sec(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_sec(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_csc(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_csc(self->num);
+    return (PyObject *)result;
+}
+
 // get set methods
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
@@ -765,6 +831,12 @@ static PyMethodDef PyComplexVarMethod[] = {
     {"ln", (PyCFunction)PyComplexVar_ln, METH_NOARGS, nullptr},
     {"log", (PyCFunction)PyComplexVar_log, METH_O, nullptr},
     {"log_asbase", (PyCFunction)PyComplexVar_logasbase, METH_O, nullptr},
+    {"sin", (PyCFunction)PyComplexVar_sin, METH_NOARGS, nullptr},
+    {"cos", (PyCFunction)PyComplexVar_cos, METH_NOARGS, nullptr},
+    {"tan", (PyCFunction)PyComplexVar_tan, METH_NOARGS, nullptr},
+    {"cot", (PyCFunction)PyComplexVar_cot, METH_NOARGS, nullptr},
+    {"sec", (PyCFunction)PyComplexVar_sec, METH_NOARGS, nullptr},
+    {"csc", (PyCFunction)PyComplexVar_csc, METH_NOARGS, nullptr},
     nullptr,
 };
 

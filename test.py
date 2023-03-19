@@ -207,6 +207,10 @@ class Test_var(externed_Testcase):
         C = abs(y)
         self.assertAlmostEqual(c, 5**0.5)
         self.assertTrue(math.isnan(C))
+        d = ~x
+        D = ~y
+        self.assertTupleAlmostEqual(d.rec, (0.2, -0.4))
+        self.assertTrue(D.is_arbitrary)
 
     def test_bool(self):
         x = matrix_analysis.var.variable()
@@ -227,6 +231,18 @@ class Test_var(externed_Testcase):
             x.log(y).rec, (1.13173165582, -0.335771297901))
         self.assertTupleAlmostEqual(x.log_asbase(
             y).rec, (0.812116123353, 0.24094517758))
+        self.assertTupleAlmostEqual(
+            x.sin().rec, (9.15449914691, -4.16890695997))
+        self.assertTupleAlmostEqual(
+            x.cos().rec, (-4.18962569097, -9.10922789376))
+        self.assertTupleAlmostEqual(
+            x.tan().rec, (-0.0037640256415, 1.00323862735))
+        self.assertTupleAlmostEqual(
+            x.cot().rec, (-0.00373971037636, -0.996757796573))
+        self.assertTupleAlmostEqual(
+            x.sec().rec, (-0.0416749644111, 0.0906111371962))
+        self.assertTupleAlmostEqual(
+            x.csc().rec, (0.0904732097532, 0.04120099862886))
 
 
 if __name__ == "__main__":

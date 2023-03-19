@@ -1,5 +1,9 @@
 #include <complexvar.h>
 
+ComplexVar One = {1, 0, false};
+ComplexVar I = {0, 1, false};
+ComplexVar negI = {0, -1, false};
+
 void setvalue_frompolar(double r, double a, ComplexVar &x)
 {
     x.real = cos(a) * r;
@@ -204,9 +208,105 @@ ComplexVar ComplexVar_ivt(const ComplexVar &x)
         {
             PyErr_SetString(PyExc_ZeroDivisionError, "Devide by zero.");
         }
-        result.real = (x.real + x.imag) / l;
-        result.imag = (x.real - x.imag) / l;
+        result.real = x.real / l;
+        result.imag = -x.imag / l;
         result.isArbitrary = false;
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_sin(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {0, -0.5, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(I, x));
+        result = ComplexVar_mul(ComplexVar_sub(tmp, ComplexVar_ivt(tmp)), a);
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_cos(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {0.5, 0, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(I, x));
+        result = ComplexVar_mul(ComplexVar_add(tmp, ComplexVar_ivt(tmp)), a);
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_tan(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar i2 = {0, 2, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(i2, x));
+        result = ComplexVar_mul(ComplexVar_div(ComplexVar_sub(tmp, One), ComplexVar_add(tmp, One)), negI);
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_cot(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar i2 = {0, 2, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(i2, x));
+        result = ComplexVar_mul(ComplexVar_div(ComplexVar_add(tmp, One), ComplexVar_sub(tmp, One)), I);
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_sec(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {2, 0, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(I, x));
+        result = ComplexVar_div(a, ComplexVar_add(tmp, ComplexVar_ivt(tmp)));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_csc(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {0, 2, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(I, x));
+        result = ComplexVar_div(a, ComplexVar_sub(tmp, ComplexVar_ivt(tmp)));
     }
     return result;
 }
