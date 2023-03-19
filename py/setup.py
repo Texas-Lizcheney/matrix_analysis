@@ -10,7 +10,7 @@ def main():
                            extra_compile_args=["--std=c++20"],
                            library_dirs=["libs/"],
                            include_dirs=["include/"])
-    setup(name="matrix_analysis", version="1.0.4", ext_modules=[Ext_matrix])
+    setup(name="matrix_analysis", version="1.0.5", ext_modules=[Ext_matrix])
 
 
 if __name__ == "__main__":

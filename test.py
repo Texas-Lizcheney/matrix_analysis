@@ -160,8 +160,27 @@ class Test_var(externed_Testcase):
 
     def test_unaryfuncs(self):
         x = matrix_analysis.var.variable(1+2j)
+        y = matrix_analysis.var.variable()
         a = -x
+        A = -y
         self.assertTupleAlmostEqual(a.rec, (-1, -2))
+        self.assertTrue(A.is_arbitrary)
+        b = +x
+        B = +y
+        self.assertTupleAlmostEqual(b.rec, (1, 2))
+        self.assertTrue(B.is_arbitrary)
+        c = abs(x)
+        C = abs(y)
+        self.assertAlmostEqual(c, 5**0.5)
+        self.assertTrue(math.isnan(C))
+
+    def test_bool(self):
+        x = matrix_analysis.var.variable()
+        y = matrix_analysis.var.variable(0, 0)
+        z = matrix_analysis.var.variable(1, 1)
+        self.assertTrue(bool(x))
+        self.assertFalse(bool(y))
+        self.assertTrue(bool(z))
 
 
 if __name__ == "__main__":

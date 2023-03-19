@@ -361,6 +361,39 @@ PyObject *PyComplexVar_negative(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
+PyObject *PyComplexVar_positive(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = self->num;
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_absolute(PyComplexVarObject *self)
+{
+    if (self->num.isArbitrary)
+    {
+        return PyFloat_FromDouble(std::nan(""));
+    }
+    return PyFloat_FromDouble(ComplexVar_length(self->num));
+}
+
+int PyComplexVar_bool(PyComplexVarObject *self)
+{
+    if (self->num.isArbitrary)
+    {
+        return 1;
+    }
+    if (ComplexVar_iszero(self->num))
+    {
+        return 0;
+    }
+    return 1;
+}
+
 PyObject *PyComplexVar_floor_divide(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
@@ -539,6 +572,9 @@ static PyNumberMethods PyComplexVarNumber = {
     .nb_divmod = (binaryfunc)PyComplexVar_divmod,
     .nb_power = (ternaryfunc)PyComplexVar_power,
     .nb_negative = (unaryfunc)PyComplexVar_negative,
+    .nb_positive = (unaryfunc)PyComplexVar_positive,
+    .nb_absolute = (unaryfunc)PyComplexVar_absolute,
+    .nb_bool = (inquiry)PyComplexVar_bool,
     .nb_floor_divide = (binaryfunc)PyComplexVar_floor_divide,
     .nb_true_divide = (binaryfunc)PyComplexVar_true_divide,
 };

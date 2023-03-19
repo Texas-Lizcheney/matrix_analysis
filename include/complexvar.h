@@ -58,6 +58,9 @@ PyObject *PyComplexVar_remainder(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_divmod(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_power(PyComplexVarObject *, PyObject *, PyObject *);
 PyObject *PyComplexVar_negative(PyComplexVarObject *);
+PyObject *PyComplexVar_positive(PyComplexVarObject *);
+PyObject *PyComplexVar_absolute(PyComplexVarObject *);
+int PyComplexVar_bool(PyComplexVarObject *);
 PyObject *PyComplexVar_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_true_divide(PyComplexVarObject *, PyObject *);
 
