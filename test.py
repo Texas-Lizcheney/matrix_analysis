@@ -119,18 +119,30 @@ class Test_var(externed_Testcase):
         y = matrix_analysis.var.variable(2+3j)
         z = x+y
         self.assertTupleAlmostEqual(z.rec, (3, 5))
+        k = id(x)
+        x += y
+        self.assertEqual(id(x), k)
+        self.assertTupleAlmostEqual(z.rec, x.rec)
 
     def test_sub(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x-y
         self.assertTupleAlmostEqual(z.rec, (-1, -1))
+        k = id(x)
+        x -= y
+        self.assertEqual(id(x), k)
+        self.assertTupleAlmostEqual(z.rec, x.rec)
 
     def test_sub(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x*y
         self.assertTupleAlmostEqual(z.rec, (-4, 7))
+        k = id(x)
+        x *= y
+        self.assertEqual(id(x), k)
+        self.assertTupleAlmostEqual(z.rec, x.rec)
 
     def test_div(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -146,6 +158,20 @@ class Test_var(externed_Testcase):
         self.assertEqual(sys.getrefcount(z4[1]), 2)
         self.assertTupleAlmostEqual(z4[0].rec, (1, -1))
         self.assertTupleAlmostEqual(z4[1].rec, (-1, 2))
+        x1 = matrix_analysis.var.variable(1+2j)
+        k1 = id(x1)
+        x1 /= y
+        self.assertEqual(id(x1), k1)
+        self.assertTupleAlmostEqual(z1.rec, x1.rec)
+        x2 = matrix_analysis.var.variable(2+3j)
+        k2 = id(x2)
+        x2 //= x
+        self.assertEqual(id(x2), k2)
+        x3 = matrix_analysis.var.variable(2+3j)
+        k3 = id(x3)
+        x3 %= x
+        self.assertEqual(id(x3), k3)
+        self.assertTupleAlmostEqual(z3.rec, x3.rec)
 
     def test_pow(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -157,6 +183,14 @@ class Test_var(externed_Testcase):
         c = matrix_analysis.var.variable(2, 3)
         d = pow(a, b, c)
         self.assertTupleAlmostEqual(d.rec, (-0.40462543, 3.33048064))
+        k = id(x)
+        x **= y
+        self.assertEqual(k, id(x))
+        self.assertTupleAlmostEqual(z.rec, x.rec)
+        k = id(a)
+        a.__ipow__(b, c)
+        self.assertEqual(k, id(a))
+        self.assertTupleAlmostEqual(a.rec, d.rec)
 
     def test_unaryfuncs(self):
         x = matrix_analysis.var.variable(1+2j)

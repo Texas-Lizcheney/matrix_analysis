@@ -46,10 +46,16 @@ class variable:
     def __radd__(self, other: __support_num) -> variable:
         ...
 
+    def __iadd__(self, other: __support_num) -> variable:
+        ...
+
     def __sub__(self, other: __support_num) -> variable:
         ...
 
     def __rsub__(self, other: __support_num) -> variable:
+        ...
+
+    def __isub__(self, other: __support_num) -> variable:
         ...
 
     def __mul__(self, other: __support_num) -> variable:
@@ -58,10 +64,16 @@ class variable:
     def __rmul__(self, other: __support_num) -> variable:
         ...
 
+    def __imul__(self, other: __support_num) -> variable:
+        ...
+
     def __mod__(self, other: __support_num) -> variable:
         ...
 
     def __rmod__(self, other: __support_num) -> variable:
+        ...
+
+    def __imod__(self, other: __support_num) -> variable:
         ...
 
     def __divmod__(self, other: __support_num) -> typing.Union[variable, variable]:
@@ -74,6 +86,9 @@ class variable:
         ...
 
     def __rpow__(self, other: __support_num, mod: __support_component) -> variable:
+        ...
+
+    def __ipow__(self, other: __support_num, mod: __support_component) -> variable:
         ...
 
     def __neg__(self) -> variable:
@@ -91,7 +106,13 @@ class variable:
     def __floordiv__(self, other: __support_num) -> variable:
         ...
 
+    def __ifloordiv__(self, other: __support_num) -> variable:
+        ...
+
     def __truediv__(self, other: __support_num) -> variable:
+        ...
+
+    def __itruediv__(self, other: __support_num) -> variable:
         ...
 
 

@@ -33,6 +33,7 @@ ComplexVar ComplexVar_exp(const ComplexVar &);
 ComplexVar ComplexVar_ln(const ComplexVar &);
 ComplexVar ComplexVar_pow(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_neg(const ComplexVar &);
+ComplexVar ComplexVar_ivt(const ComplexVar &);
 
 int assignComplexVar(PyObject *, ComplexVar &);
 
@@ -61,8 +62,16 @@ PyObject *PyComplexVar_negative(PyComplexVarObject *);
 PyObject *PyComplexVar_positive(PyComplexVarObject *);
 PyObject *PyComplexVar_absolute(PyComplexVarObject *);
 int PyComplexVar_bool(PyComplexVarObject *);
+PyObject *PyComplexVar_invert(PyComplexVarObject *);
+PyObject *PyComplexVar_inplace_add(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_inplace_power(PyComplexVarObject *, PyObject *, PyObject *);
 PyObject *PyComplexVar_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_true_divide(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *, PyObject *);
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *, void *);
 int PyComplexVar_set_len(PyComplexVarObject *, PyObject *, void *);

@@ -394,6 +394,97 @@ int PyComplexVar_bool(PyComplexVarObject *self)
     return 1;
 }
 
+PyObject *PyComplexVar_invert(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_ivt(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_inplace_add(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    self->num = ComplexVar_add(self->num, tmp);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    self->num = ComplexVar_sub(self->num, tmp);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    self->num = ComplexVar_mul(self->num, tmp);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    self->num = ComplexVar_mod(self->num, tmp);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+PyObject *PyComplexVar_inplace_power(PyComplexVarObject *self, PyObject *other, PyObject *mod)
+{
+    ComplexVar tmp;
+    ComplexVar powvalue;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    powvalue = ComplexVar_pow(self->num, tmp);
+    if (Py_IsNone(mod))
+    {
+        self->num = powvalue;
+    }
+    else
+    {
+        ComplexVar tmp2;
+        if (assignComplexVar(mod, tmp2))
+        {
+            Py_INCREF(self);
+            return (PyObject *)self;
+        }
+        self->num = ComplexVar_mod(powvalue, tmp2);
+    }
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
 PyObject *PyComplexVar_floor_divide(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
@@ -424,6 +515,32 @@ PyObject *PyComplexVar_true_divide(PyComplexVarObject *self, PyObject *other)
     }
     result->num = ComplexVar_div(self->num, tmp);
     return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    self->num = ComplexVar_fdv(self->num, tmp);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    self->num = ComplexVar_div(self->num, tmp);
+    Py_INCREF(self);
+    return (PyObject *)self;
 }
 
 // get set methods
@@ -575,8 +692,16 @@ static PyNumberMethods PyComplexVarNumber = {
     .nb_positive = (unaryfunc)PyComplexVar_positive,
     .nb_absolute = (unaryfunc)PyComplexVar_absolute,
     .nb_bool = (inquiry)PyComplexVar_bool,
+    .nb_invert = (unaryfunc)PyComplexVar_invert,
+    .nb_inplace_add = (binaryfunc)PyComplexVar_inplace_add,
+    .nb_inplace_subtract = (binaryfunc)PyComplexVar_inplace_subtract,
+    .nb_inplace_multiply = (binaryfunc)PyComplexVar_inplace_multiply,
+    .nb_inplace_remainder = (binaryfunc)PyComplexVar_inplace_remainder,
+    .nb_inplace_power = (ternaryfunc)PyComplexVar_inplace_power,
     .nb_floor_divide = (binaryfunc)PyComplexVar_floor_divide,
     .nb_true_divide = (binaryfunc)PyComplexVar_true_divide,
+    .nb_inplace_floor_divide = (binaryfunc)PyComplexVar_inplace_floor_divide,
+    .nb_inplace_true_divide = (binaryfunc)PyComplexVar_inplace_true_divide,
 };
 
 static PyMemberDef PyComplexVarMember[] = {

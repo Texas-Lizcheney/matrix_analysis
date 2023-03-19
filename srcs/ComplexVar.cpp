@@ -184,3 +184,24 @@ ComplexVar ComplexVar_neg(const ComplexVar &x)
     }
     return result;
 }
+
+ComplexVar ComplexVar_ivt(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        double l = ComplexVar_L2(x);
+        if (l == 0)
+        {
+            PyErr_SetString(PyExc_ZeroDivisionError, "Devide by zero.");
+        }
+        result.real = (x.real + x.imag) / l;
+        result.imag = (x.real - x.imag) / l;
+        result.isArbitrary = false;
+    }
+    return result;
+}
