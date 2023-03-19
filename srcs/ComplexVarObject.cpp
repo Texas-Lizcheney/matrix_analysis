@@ -543,6 +543,62 @@ PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyObject *o
     return (PyObject *)self;
 }
 
+// methods
+
+PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_exp(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_ln(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(base, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_log(self->num, tmp);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(neur, tmp))
+    {
+        Py_RETURN_NONE;
+    }
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_log(tmp, self->num);
+    return (PyObject *)result;
+}
+
 // get set methods
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
@@ -704,6 +760,14 @@ static PyNumberMethods PyComplexVarNumber = {
     .nb_inplace_true_divide = (binaryfunc)PyComplexVar_inplace_true_divide,
 };
 
+static PyMethodDef PyComplexVarMethod[] = {
+    {"exp", (PyCFunction)PyComplexVar_exp, METH_NOARGS, nullptr},
+    {"ln", (PyCFunction)PyComplexVar_ln, METH_NOARGS, nullptr},
+    {"log", (PyCFunction)PyComplexVar_log, METH_O, nullptr},
+    {"log_asbase", (PyCFunction)PyComplexVar_logasbase, METH_O, nullptr},
+    nullptr,
+};
+
 static PyMemberDef PyComplexVarMember[] = {
     {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real), 0, nullptr},
     {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag), 0, nullptr},
@@ -727,6 +791,7 @@ PyTypeObject PyComplexVarType = {
     .tp_as_number = &PyComplexVarNumber,
     .tp_str = (reprfunc)PyComplexVar_str,
     .tp_richcompare = (richcmpfunc)PyComplexVar_richcompare,
+    .tp_methods = PyComplexVarMethod,
     .tp_members = PyComplexVarMember,
     .tp_getset = PyComplexVarGetSet,
     .tp_init = (initproc)PyComplexVar_init,

@@ -147,6 +147,11 @@ ComplexVar ComplexVar_ln(const ComplexVar &x)
     return result;
 }
 
+ComplexVar ComplexVar_log(const ComplexVar &x, const ComplexVar &y)
+{
+    return ComplexVar_div(ComplexVar_ln(x), ComplexVar_ln(y));
+}
+
 ComplexVar ComplexVar_pow(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;

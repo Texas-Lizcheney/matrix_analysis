@@ -31,6 +31,7 @@ ComplexVar ComplexVar_fdv(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_mod(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_exp(const ComplexVar &);
 ComplexVar ComplexVar_ln(const ComplexVar &);
+ComplexVar ComplexVar_log(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_pow(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_neg(const ComplexVar &);
 ComplexVar ComplexVar_ivt(const ComplexVar &);
@@ -42,6 +43,7 @@ struct PyComplexVarObject
     PyObject_HEAD;
     ComplexVar num;
 };
+
 extern PyTypeObject PyComplexVarType;
 #define PyComplexVar_CheckExact(op) Py_IS_TYPE(op, &PyComplexVarType)
 
@@ -72,6 +74,11 @@ PyObject *PyComplexVar_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_true_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *, PyObject *);
+
+PyObject *PyComplexVar_exp(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_ln(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_log(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_logasbase(PyComplexVarObject *, PyObject *);
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *, void *);
 int PyComplexVar_set_len(PyComplexVarObject *, PyObject *, void *);

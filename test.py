@@ -216,6 +216,18 @@ class Test_var(externed_Testcase):
         self.assertFalse(bool(y))
         self.assertTrue(bool(z))
 
+    def test_funcs(self):
+        x = matrix_analysis.var.variable(2, 3)
+        y = matrix_analysis.var.variable(1, 2)
+        self.assertTupleAlmostEqual(
+            x.exp().rec, (-7.31511009491, 1.04274365623))
+        self.assertTupleAlmostEqual(
+            x.ln().rec, (1.28247467873, 0.982793723247))
+        self.assertTupleAlmostEqual(
+            x.log(y).rec, (1.13173165582, -0.335771297901))
+        self.assertTupleAlmostEqual(x.log_asbase(
+            y).rec, (0.812116123353, 0.24094517758))
+
 
 if __name__ == "__main__":
     unittest.main(testLoader=seqTestLoader())
