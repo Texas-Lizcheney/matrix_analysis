@@ -232,6 +232,8 @@ class Test_var(externed_Testcase):
         self.assertTupleAlmostEqual(x.log_asbase(
             y).rec, (0.812116123353, 0.24094517758))
         self.assertTupleAlmostEqual(
+            x.sqrt().rec, (1.67414922804, 0.89597747613))
+        self.assertTupleAlmostEqual(
             x.sin().rec, (9.15449914691, -4.16890695997))
         self.assertTupleAlmostEqual(
             x.cos().rec, (-4.18962569097, -9.10922789376))
@@ -243,6 +245,18 @@ class Test_var(externed_Testcase):
             x.sec().rec, (-0.0416749644111, 0.0906111371962))
         self.assertTupleAlmostEqual(
             x.csc().rec, (0.0904732097532, 0.04120099862886))
+        self.assertTupleAlmostEqual(
+            x.arcsin().rec, (0.570652784321, 1.98338702992))
+        self.assertTupleAlmostEqual(
+            x.arccos().rec, (1.00014354247, -1.98338702992))
+        self.assertTupleAlmostEqual(
+            x.arctan().rec, (1.4099210496, 0.229072682969))
+        self.assertTupleAlmostEqual(
+            x.arccot().rec, (0.160875277198, -0.229072682968))
+        self.assertTupleAlmostEqual(
+            x.arcsec().rec, (-1.42041072247, -0.231334698574))
+        self.assertTupleAlmostEqual(
+            x.arccsc().rec, (0.150385604328, -0.231334698574))
 
 
 if __name__ == "__main__":

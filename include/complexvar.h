@@ -35,12 +35,19 @@ ComplexVar ComplexVar_log(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_pow(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_neg(const ComplexVar &);
 ComplexVar ComplexVar_ivt(const ComplexVar &);
+ComplexVar ComplexVar_sqrt(const ComplexVar &);
 ComplexVar ComplexVar_sin(const ComplexVar &);
 ComplexVar ComplexVar_cos(const ComplexVar &);
 ComplexVar ComplexVar_tan(const ComplexVar &);
 ComplexVar ComplexVar_cot(const ComplexVar &);
 ComplexVar ComplexVar_sec(const ComplexVar &);
 ComplexVar ComplexVar_csc(const ComplexVar &);
+ComplexVar ComplexVar_arcsin(const ComplexVar &);
+ComplexVar ComplexVar_arccos(const ComplexVar &);
+ComplexVar ComplexVar_arctan(const ComplexVar &);
+ComplexVar ComplexVar_arccot(const ComplexVar &);
+ComplexVar ComplexVar_arcsec(const ComplexVar &);
+ComplexVar ComplexVar_arccsc(const ComplexVar &);
 
 struct PyComplexVarObject
 {
@@ -84,6 +91,7 @@ PyObject *PyComplexVar_exp(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_ln(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_log(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_logasbase(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_sqrt(PyComplexVarObject *);
 PyObject *PyComplexVar_sin(PyComplexVarObject *);
 PyObject *PyComplexVar_cos(PyComplexVarObject *);
 PyObject *PyComplexVar_tan(PyComplexVarObject *);
