@@ -12,6 +12,13 @@ void setvalue_frompolar(double r, double a, ComplexVar &x)
     return;
 }
 
+ComplexVar ComplexVar_conj(const ComplexVar &x)
+{
+    ComplexVar result = x;
+    result.imag = -result.imag;
+    return result;
+}
+
 ComplexVar ComplexVar_add(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
@@ -72,7 +79,10 @@ ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
         double l = ComplexVar_L2(y);
         if (l == 0)
         {
-            PyErr_SetString(PyExc_ZeroDivisionError, "Devide by zero.");
+            result.real = std::nan("");
+            result.imag = std::nan("");
+            result.isArbitrary = false;
+            return result;
         }
         result.real = (x.real * y.real + x.imag * y.imag) / l;
         result.imag = (x.imag * y.real - x.real * y.imag) / l;
@@ -138,7 +148,6 @@ ComplexVar ComplexVar_ln(const ComplexVar &x)
         result.isArbitrary = false;
         if (ComplexVar_iszero(x))
         {
-            PyErr_SetString(PyExc_ValueError, "Ln domain error.");
             result.real = std::nan("");
             result.imag = std::nan("");
         }
@@ -206,7 +215,10 @@ ComplexVar ComplexVar_ivt(const ComplexVar &x)
         double l = ComplexVar_L2(x);
         if (l == 0)
         {
-            PyErr_SetString(PyExc_ZeroDivisionError, "Devide by zero.");
+            result.real = std::nan("");
+            result.imag = std::nan("");
+            result.isArbitrary = false;
+            return result;
         }
         result.real = x.real / l;
         result.imag = -x.imag / l;
@@ -335,7 +347,12 @@ ComplexVar ComplexVar_arccos(const ComplexVar &x)
     }
     else
     {
-        result = ComplexVar_mul(negI, ComplexVar_ln(ComplexVar_add(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One)))));
+        result = ComplexVar_mul(negI, ComplexVar_ln(ComplexVar_sub(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One)))));
+        if ((x.real >= 0 && x.imag >= 0) || (x.real < 0 && x.imag < 0))
+        {
+            result.real = -result.real;
+            result.imag = -result.imag;
+        }
     }
     return result;
 }
@@ -393,7 +410,6 @@ ComplexVar ComplexVar_arcsec(const ComplexVar &x)
             result.real = std::nan("");
             result.imag = std::nan("");
             result.isArbitrary = false;
-            PyErr_SetString(PyExc_ValueError, "Arcsec domain error.");
         }
         else
         {
@@ -417,11 +433,217 @@ ComplexVar ComplexVar_arccsc(const ComplexVar &x)
             result.real = std::nan("");
             result.imag = std::nan("");
             result.isArbitrary = false;
-            PyErr_SetString(PyExc_ValueError, "Arccsc domain error.");
         }
         else
         {
             result = ComplexVar_arcsin(ComplexVar_ivt(x));
+        }
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_sinh(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {0.5, 0, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(x);
+        result = ComplexVar_mul(ComplexVar_sub(tmp, ComplexVar_ivt(tmp)), a);
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_cosh(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {0.5, 0, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(x);
+        result = ComplexVar_mul(ComplexVar_add(tmp, ComplexVar_ivt(tmp)), a);
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_tanh(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar i2 = {2, 0, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(i2, x));
+        result = ComplexVar_div(ComplexVar_sub(tmp, One), ComplexVar_add(tmp, One));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_coth(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        result = ComplexVar_ivt(ComplexVar_tanh(x));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_sech(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        result = ComplexVar_ivt(ComplexVar_cosh(x));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_csch(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        result = ComplexVar_ivt(ComplexVar_sinh(x));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_arcsinh(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        result = ComplexVar_ln(ComplexVar_add(x, ComplexVar_sqrt(ComplexVar_add(One, ComplexVar_mul(x, x)))));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_arccosh(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        result = ComplexVar_ln(ComplexVar_sub(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One))));
+    }
+    if (x.real >= 0)
+    {
+        result.real = -result.real;
+        result.imag = -result.imag;
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_arctanh(const ComplexVar &x)
+{
+    ComplexVar result;
+    static ComplexVar a = {0.5, 0, false};
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        result = ComplexVar_mul(a, ComplexVar_ln(ComplexVar_div(ComplexVar_add(One, x), ComplexVar_sub(One, x))));
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_arccoth(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        if (ComplexVar_iszero(x))
+        {
+            result.real = 0;
+            result.imag = std::nan("");
+            result.isArbitrary = false;
+        }
+        else
+        {
+            result = ComplexVar_arctanh(ComplexVar_ivt(x));
+        }
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_arcsech(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        if (ComplexVar_iszero(x))
+        {
+            result.real = std::nan("");
+            result.imag = std::nan("");
+            result.isArbitrary = false;
+        }
+        else
+        {
+            result = ComplexVar_arccosh(ComplexVar_ivt(x));
+        }
+    }
+    return result;
+}
+
+ComplexVar ComplexVar_arccsch(const ComplexVar &x)
+{
+    ComplexVar result;
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        if (ComplexVar_iszero(x))
+        {
+            result.real = std::nan("");
+            result.imag = std::nan("");
+            result.isArbitrary = false;
+        }
+        else
+        {
+            result = ComplexVar_arcsinh(ComplexVar_ivt(x));
         }
     }
     return result;

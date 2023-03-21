@@ -23,6 +23,7 @@ struct ComplexVar
 #define ComplexVar_arg(x) atan2(x.imag, x.real)
 #define ComplexVar_iszero(x) (ComplexVar_L2(x) == 0)
 void setvalue_frompolar(double r, double a, ComplexVar &);
+ComplexVar ComplexVar_conj(const ComplexVar &);
 ComplexVar ComplexVar_add(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_sub(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_mul(const ComplexVar &, const ComplexVar &);
@@ -48,6 +49,18 @@ ComplexVar ComplexVar_arctan(const ComplexVar &);
 ComplexVar ComplexVar_arccot(const ComplexVar &);
 ComplexVar ComplexVar_arcsec(const ComplexVar &);
 ComplexVar ComplexVar_arccsc(const ComplexVar &);
+ComplexVar ComplexVar_sinh(const ComplexVar &);
+ComplexVar ComplexVar_cosh(const ComplexVar &);
+ComplexVar ComplexVar_tanh(const ComplexVar &);
+ComplexVar ComplexVar_coth(const ComplexVar &);
+ComplexVar ComplexVar_sech(const ComplexVar &);
+ComplexVar ComplexVar_csch(const ComplexVar &);
+ComplexVar ComplexVar_arcsinh(const ComplexVar &);
+ComplexVar ComplexVar_arccosh(const ComplexVar &);
+ComplexVar ComplexVar_arctanh(const ComplexVar &);
+ComplexVar ComplexVar_arccoth(const ComplexVar &);
+ComplexVar ComplexVar_arcsech(const ComplexVar &);
+ComplexVar ComplexVar_arccsch(const ComplexVar &);
 
 struct PyComplexVarObject
 {
@@ -87,6 +100,7 @@ PyObject *PyComplexVar_true_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *, PyObject *);
 
+PyObject *PyComlpexVar_conj(PyComplexVarObject *);
 PyObject *PyComplexVar_exp(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_ln(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_log(PyComplexVarObject *, PyObject *);
@@ -98,6 +112,24 @@ PyObject *PyComplexVar_tan(PyComplexVarObject *);
 PyObject *PyComplexVar_cot(PyComplexVarObject *);
 PyObject *PyComplexVar_sec(PyComplexVarObject *);
 PyObject *PyComplexVar_csc(PyComplexVarObject *);
+PyObject *PyComplexVar_arcsin(PyComplexVarObject *);
+PyObject *PyComplexVar_arccos(PyComplexVarObject *);
+PyObject *PyComplexVar_arctan(PyComplexVarObject *);
+PyObject *PyComplexVar_arccot(PyComplexVarObject *);
+PyObject *PyComplexVar_arcsec(PyComplexVarObject *);
+PyObject *PyComplexVar_arccsc(PyComplexVarObject *);
+PyObject *PyComplexVar_sinh(PyComplexVarObject *);
+PyObject *PyComplexVar_cosh(PyComplexVarObject *);
+PyObject *PyComplexVar_tanh(PyComplexVarObject *);
+PyObject *PyComplexVar_coth(PyComplexVarObject *);
+PyObject *PyComplexVar_sech(PyComplexVarObject *);
+PyObject *PyComplexVar_csch(PyComplexVarObject *);
+PyObject *PyComplexVar_arcsinh(PyComplexVarObject *);
+PyObject *PyComplexVar_arccosh(PyComplexVarObject *);
+PyObject *PyComplexVar_arctanh(PyComplexVarObject *);
+PyObject *PyComplexVar_arccoth(PyComplexVarObject *);
+PyObject *PyComplexVar_arcsech(PyComplexVarObject *);
+PyObject *PyComplexVar_arccsch(PyComplexVarObject *);
 
 PyObject *PyComplexVar_get_len(PyComplexVarObject *, void *);
 int PyComplexVar_set_len(PyComplexVarObject *, PyObject *, void *);

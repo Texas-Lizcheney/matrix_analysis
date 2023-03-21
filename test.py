@@ -223,6 +223,7 @@ class Test_var(externed_Testcase):
     def test_funcs(self):
         x = matrix_analysis.var.variable(2, 3)
         y = matrix_analysis.var.variable(1, 2)
+        self.assertTupleAlmostEqual(x.conj().rec, (2, -3))
         self.assertTupleAlmostEqual(
             x.exp().rec, (-7.31511009491, 1.04274365623))
         self.assertTupleAlmostEqual(
@@ -254,9 +255,33 @@ class Test_var(externed_Testcase):
         self.assertTupleAlmostEqual(
             x.arccot().rec, (0.160875277198, -0.229072682968))
         self.assertTupleAlmostEqual(
-            x.arcsec().rec, (-1.42041072247, -0.231334698574))
+            x.arcsec().rec, (1.42041072247, 0.231334698574))
         self.assertTupleAlmostEqual(
             x.arccsc().rec, (0.150385604328, -0.231334698574))
+        self.assertTupleAlmostEqual(
+            x.sinh().rec, (-3.59056458999, 0.530921086249))
+        self.assertTupleAlmostEqual(
+            x.cosh().rec, (-3.72454550492, 0.511822569937))
+        self.assertTupleAlmostEqual(
+            x.tanh().rec, (0.965385879022, -9.88437503832e-3))
+        self.assertTupleAlmostEqual(
+            x.coth().rec, (1.03574663777, 1.06047834703e-2))
+        self.assertTupleAlmostEqual(
+            x.sech().rec, (-0.263512975158, -3.62116365587e-2))
+        self.assertTupleAlmostEqual(
+            x.csch().rec, (-0.272548661463, -4.03005788568e-2))
+        self.assertTupleAlmostEqual(
+            x.arcsinh().rec, (1.96863792579, 0.964658504408))
+        self.assertTupleAlmostEqual(
+            x.arccosh().rec, (1.98338702992, 1.00014354247))
+        self.assertTupleAlmostEqual(
+            x.arctanh().rec, (0.146946666226, 1.33897252229))
+        self.assertTupleAlmostEqual(
+            x.arccoth().rec, (0.146946666225, -0.2318238045))
+        self.assertTupleAlmostEqual(
+            x.arcsech().rec, (0.231334698574, -1.42041072247))
+        self.assertTupleAlmostEqual(
+            x.arccsch().rec, (0.157355498845, -0.229962902377))
 
 
 if __name__ == "__main__":

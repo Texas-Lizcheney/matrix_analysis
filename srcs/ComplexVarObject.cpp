@@ -545,6 +545,17 @@ PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyObject *o
 
 // methods
 
+PyObject *PyComplexVar_conj(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_conj(self->num);
+    return (PyObject *)result;
+}
+
 PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
 {
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
@@ -697,6 +708,7 @@ PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
     result->num = ComplexVar_arccos(self->num);
     return (PyObject *)result;
 }
+
 PyObject *PyComplexVar_arctan(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
@@ -738,6 +750,138 @@ PyObject *PyComplexVar_arccsc(PyComplexVarObject *self)
         Py_RETURN_NONE;
     }
     result->num = ComplexVar_arccsc(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_sinh(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_sinh(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_cosh(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_cosh(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_tanh(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_tanh(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_coth(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_coth(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_sech(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_sech(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_csch(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_csch(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_arcsinh(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_arcsinh(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_arccosh(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_arccosh(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_arctanh(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_arctanh(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_arccoth(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_arccoth(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_arcsech(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_arcsech(self->num);
+    return (PyObject *)result;
+}
+
+PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
+{
+    PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        Py_RETURN_NONE;
+    }
+    result->num = ComplexVar_arccsch(self->num);
     return (PyObject *)result;
 }
 
@@ -903,6 +1047,7 @@ static PyNumberMethods PyComplexVarNumber = {
 };
 
 static PyMethodDef PyComplexVarMethod[] = {
+    {"conj", (PyCFunction)PyComplexVar_conj, METH_NOARGS, nullptr},
     {"exp", (PyCFunction)PyComplexVar_exp, METH_NOARGS, nullptr},
     {"ln", (PyCFunction)PyComplexVar_ln, METH_NOARGS, nullptr},
     {"log", (PyCFunction)PyComplexVar_log, METH_O, nullptr},
@@ -920,6 +1065,18 @@ static PyMethodDef PyComplexVarMethod[] = {
     {"arccot", (PyCFunction)PyComplexVar_arccot, METH_NOARGS, nullptr},
     {"arcsec", (PyCFunction)PyComplexVar_arcsec, METH_NOARGS, nullptr},
     {"arccsc", (PyCFunction)PyComplexVar_arccsc, METH_NOARGS, nullptr},
+    {"sinh", (PyCFunction)PyComplexVar_sinh, METH_NOARGS, nullptr},
+    {"cosh", (PyCFunction)PyComplexVar_cosh, METH_NOARGS, nullptr},
+    {"tanh", (PyCFunction)PyComplexVar_tanh, METH_NOARGS, nullptr},
+    {"coth", (PyCFunction)PyComplexVar_coth, METH_NOARGS, nullptr},
+    {"sech", (PyCFunction)PyComplexVar_sech, METH_NOARGS, nullptr},
+    {"csch", (PyCFunction)PyComplexVar_csch, METH_NOARGS, nullptr},
+    {"arcsinh", (PyCFunction)PyComplexVar_arcsinh, METH_NOARGS, nullptr},
+    {"arccosh", (PyCFunction)PyComplexVar_arccosh, METH_NOARGS, nullptr},
+    {"arctanh", (PyCFunction)PyComplexVar_arctanh, METH_NOARGS, nullptr},
+    {"arccoth", (PyCFunction)PyComplexVar_arccoth, METH_NOARGS, nullptr},
+    {"arcsech", (PyCFunction)PyComplexVar_arcsech, METH_NOARGS, nullptr},
+    {"arccsch", (PyCFunction)PyComplexVar_arccsch, METH_NOARGS, nullptr},
     nullptr,
 };
 
