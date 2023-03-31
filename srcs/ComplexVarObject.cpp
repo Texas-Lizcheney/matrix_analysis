@@ -48,7 +48,7 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
         target = ((PyComplexVarObject *)value)->num;
         return 0;
     }
-    if Py_IsNone (value)
+    if (Py_IsNone(value) || !value)
     {
         target.isArbitrary = true;
         goto set_both_zero;

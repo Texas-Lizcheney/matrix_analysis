@@ -4,5 +4,5 @@ rm -r ./libs/
 mkdir -p libs
 make
 python ./py/setup.py build_ext --inplace
-mv matrixcore.cpython-311-x86_64-linux-gnu.so ./matrix_analysis
+mv core.cpython-311-x86_64-linux-gnu.so ./matrix_analysis
 python ./test.py

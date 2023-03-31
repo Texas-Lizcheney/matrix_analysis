@@ -9,7 +9,7 @@ extern PyObject *PyExc_Undefined;
 
 static PyModuleDef coreMoulde = {
     .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = "matrixcore",
+    .m_name = "core",
     .m_size = -1,
 };
 
@@ -45,7 +45,7 @@ PyObject *Init_varModule()
         return nullptr;
     }
     Py_INCREF(&PyComplexVarType);
-    if (((PyModule_AddType(m, &PyComplexVarType) < 0)) || (PyModule_AddObject(m, "Undefined", PyExc_Undefined) < 0))
+    if ((PyModule_AddType(m, &PyComplexVarType) < 0) || (PyModule_AddObject(m, "Undefined", PyExc_Undefined) < 0))
     {
         Py_DECREF(&PyComplexVarType);
         Py_DECREF(PyExc_Undefined);
@@ -55,17 +55,41 @@ PyObject *Init_varModule()
     return m;
 }
 
-PyMODINIT_FUNC PyInit_matrixcore()
+static PyModuleDef matrixModule = {
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "matrixcore",
+    .m_size = -1,
+};
+
+PyObject *Init_matrixModule()
 {
-    PyObject *varm = Init_varModule();
-    if (!varm)
-    {
-        Py_XDECREF(varm);
-        return nullptr;
-    }
     if (PyType_Ready(&PyMatrixType) < 0)
     {
-        Py_DECREF(varm);
+        return nullptr;
+    }
+    PyObject *m = PyModule_Create(&matrixModule);
+    if (!m)
+    {
+        return nullptr;
+    }
+    Py_INCREF(&PyMatrixType);
+    if ((PyModule_AddType(m, &PyMatrixType) < 0))
+    {
+        Py_DECREF(&PyMatrixType);
+        Py_DECREF(m);
+        return nullptr;
+    }
+    return m;
+}
+
+PyMODINIT_FUNC PyInit_core()
+{
+    PyObject *varm = Init_varModule();
+    PyObject *matrixm = Init_matrixModule();
+    if (!varm || !matrixm)
+    {
+        Py_XDECREF(varm);
+        Py_XDECREF(matrixm);
         return nullptr;
     }
     PyObject *m = PyModule_Create(&coreMoulde);
@@ -74,11 +98,10 @@ PyMODINIT_FUNC PyInit_matrixcore()
         Py_DECREF(varm);
         return nullptr;
     }
-    Py_INCREF(&PyMatrixType);
-    if ((PyModule_AddType(m, &PyMatrixType) < 0) || (PyModule_AddObject(m, "varcore", varm) < 0))
+    if ((PyModule_AddObject(m, "matrixcore", matrixm) < 0) || (PyModule_AddObject(m, "varcore", varm) < 0))
     {
-        Py_DECREF(&PyMatrixType);
         Py_DECREF(varm);
+        Py_DECREF(matrixm);
         Py_DECREF(m);
         return nullptr;
     }

@@ -2,7 +2,7 @@ from setuptools import setup, Extension
 
 
 def main():
-    Ext_matrix = Extension("matrixcore",
+    Ext_matrix = Extension("core",
                            libraries=[":libmatrix.a",
                                       ":libvar.a", ":libutility.a"],
                            sources=["srcs/stub.cc"],
