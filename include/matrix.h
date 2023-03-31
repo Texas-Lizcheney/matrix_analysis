@@ -2,6 +2,7 @@
 #include <Python.h>
 #include <structmember.h>
 #include <complexvar.h>
+#include <iostream>
 
 struct PyMatrixObject
 {

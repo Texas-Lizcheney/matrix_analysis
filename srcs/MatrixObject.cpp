@@ -11,8 +11,7 @@ void PyMatrix_dealloc(PyMatrixObject *self)
 
 int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
 {
-    PyMatrixObject *tmp = (PyMatrixObject *)self;
-    tmp->elements = nullptr;
+    self->elements = nullptr;
     static char *kwlist[] = {
         (char *)"rows",
         (char *)"cols",
@@ -20,26 +19,31 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
         nullptr,
     };
     PyObject *tmp_object = nullptr;
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii|O", kwlist, tmp->rows, tmp->cols, &tmp_object))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii|O", kwlist, &self->rows, &self->cols, &tmp_object))
     {
-        Py_DECREF(self);
         return -1;
     }
-    self->total_elements = tmp->rows * tmp->cols;
+    if (self->rows <= 0 || self->cols <= 0)
+    {
+        PyErr_Format(PyExc_ValueError, "Invalid size. rows: %ld, cols: %ld", self->rows, self->cols);
+        return -1;
+    }
+    self->total_elements = ((int64_t)self->rows) * ((int64_t)self->cols);
     try
     {
-        tmp->elements = new ComplexVar[self->total_elements];
+        self->elements = new ComplexVar[self->total_elements];
     }
-    catch (const std::bad_alloc &e)
+    catch (const std::exception &e)
     {
+        std::cerr << e.what() << std::endl;
         PyErr_Format(PyExc_MemoryError, "Fail to allocate %lld numbers.", self->total_elements);
-        Py_DECREF(self);
         return -1;
     }
     ComplexVar tmp_value;
     if (assignComplexVar(tmp_object, tmp_value))
     {
         PyErr_Format(PyExc_ValueError, "Unsupported type: %s", tmp_object->ob_type->tp_name);
+        return -1;
     }
     for (int64_t i = 0; i < self->total_elements; i++)
     {
@@ -63,5 +67,6 @@ PyTypeObject PyMatrixType = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "matrixcore.matrix",
     .tp_basicsize = sizeof(PyMatrixObject),
     .tp_dealloc = (destructor)PyMatrix_dealloc,
+    .tp_init = (initproc)PyMatrix_init,
     .tp_new = (newfunc)PyMatrix_new,
 };

@@ -82,13 +82,13 @@ class variable:
     def __rdivmod__(self, other: __support_num) -> typing.Union[variable, variable]:
         ...
 
-    def __pow__(self, other: __support_num, mod: __support_component) -> variable:
+    def __pow__(self, other: __support_num, mod: __support_num) -> variable:
         ...
 
-    def __rpow__(self, other: __support_num, mod: __support_component) -> variable:
+    def __rpow__(self, other: __support_num, mod: __support_num) -> variable:
         ...
 
-    def __ipow__(self, other: __support_num, mod: __support_component) -> variable:
+    def __ipow__(self, other: __support_num, mod: __support_num) -> variable:
         ...
 
     def __neg__(self) -> variable:
@@ -124,10 +124,10 @@ class variable:
     def ln(self) -> variable:
         ...
 
-    def log(self, base: __support_component) -> variable:
+    def log(self, base: __support_num) -> variable:
         ...
 
-    def log_asbase(self, x: __support_component) -> variable:
+    def log_asbase(self, x: __support_num) -> variable:
         ...
 
     def sqrt(self) -> variable:
