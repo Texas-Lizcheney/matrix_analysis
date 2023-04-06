@@ -298,9 +298,15 @@ class Test_mat(externed_Testcase):
         with self.assertRaises(ValueError):
             Y = matrix_analysis.matrix.matrix(1, 1, "abc")
         with self.assertRaises(ValueError):
-            Z=matrix_analysis.matrix.matrix(0,1)
+            Z = matrix_analysis.matrix.matrix(0, 1)
         with self.assertRaises(ValueError):
-            Z=matrix_analysis.matrix.matrix(1,0)
+            Z = matrix_analysis.matrix.matrix(1, 0)
+
+    def test_members(self):
+        x = matrix_analysis.matrix.matrix(5, 10)
+        self.assertEqual(x.rows, 5)
+        self.assertEqual(x.cols, 10)
+        self.assertEqual(x.total, 50)
 
 
 if __name__ == "__main__":

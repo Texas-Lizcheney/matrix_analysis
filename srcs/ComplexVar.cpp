@@ -3,6 +3,7 @@
 ComplexVar One = {1, 0, false};
 ComplexVar I = {0, 1, false};
 ComplexVar negI = {0, -1, false};
+extern int doubleprecision;
 
 void setvalue_frompolar(double r, double a, ComplexVar &x)
 {
@@ -10,6 +11,44 @@ void setvalue_frompolar(double r, double a, ComplexVar &x)
     x.imag = sin(a) * r;
     x.isArbitrary = false;
     return;
+}
+
+std::stringstream ComplexVar_repr(const ComplexVar &x)
+{
+    std::stringstream tmp;
+    if (x.isArbitrary)
+    {
+        tmp << "None";
+    }
+    else
+    {
+        tmp << std::setprecision(doubleprecision) << x.real;
+        if (x.imag >= 0)
+        {
+            tmp << '+';
+        }
+        tmp << x.imag << 'j';
+    }
+    return tmp;
+}
+
+std::stringstream ComplexVar_str(const ComplexVar &x)
+{
+    std::stringstream tmp;
+    if (x.isArbitrary)
+    {
+        tmp << "undefined";
+    }
+    else
+    {
+        tmp << std::setprecision(doubleprecision) << x.real;
+        if (x.imag >= 0)
+        {
+            tmp << '+';
+        }
+        tmp << x.imag << 'i';
+    }
+    return tmp;
 }
 
 ComplexVar ComplexVar_conj(const ComplexVar &x)

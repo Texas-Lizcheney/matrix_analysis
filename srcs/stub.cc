@@ -55,10 +55,16 @@ PyObject *Init_varModule()
     return m;
 }
 
+static PyMethodDef matrixModule_method[] = {
+    {"set_fastprint", (PyCFunction)SetFastPrint, METH_O, nullptr},
+    nullptr,
+};
+
 static PyModuleDef matrixModule = {
     .m_base = PyModuleDef_HEAD_INIT,
     .m_name = "matrixcore",
     .m_size = -1,
+    .m_methods = matrixModule_method,
 };
 
 PyObject *Init_matrixModule()

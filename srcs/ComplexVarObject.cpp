@@ -91,40 +91,12 @@ void PyComplexVar_dealloc(PyComplexVarObject *self)
 
 PyObject *PyComplexVar_repr(PyComplexVarObject *self)
 {
-    std::stringstream tmp;
-    if (self->num.isArbitrary)
-    {
-        tmp << "None";
-    }
-    else
-    {
-        tmp << std::setprecision(doubleprecision) << self->num.real;
-        if (self->num.imag >= 0)
-        {
-            tmp << '+';
-        }
-        tmp << self->num.imag << 'j';
-    }
-    return PyUnicode_FromString(tmp.str().c_str());
+    return PyUnicode_FromString(ComplexVar_repr(self->num).str().c_str());
 }
 
 PyObject *PyComplexVar_str(PyComplexVarObject *self)
 {
-    std::stringstream tmp;
-    if (self->num.isArbitrary)
-    {
-        tmp << "undefined";
-    }
-    else
-    {
-        tmp << std::setprecision(doubleprecision) << self->num.real;
-        if (self->num.imag >= 0)
-        {
-            tmp << '+';
-        }
-        tmp << self->num.imag << 'i';
-    }
-    return PyUnicode_FromString(tmp.str().c_str());
+    return PyUnicode_FromString(ComplexVar_str(self->num).str().c_str());
 }
 
 PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, int opid)

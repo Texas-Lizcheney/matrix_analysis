@@ -1,1 +1,2 @@
-0932
+print(a)
+print(eval(repr(a)))

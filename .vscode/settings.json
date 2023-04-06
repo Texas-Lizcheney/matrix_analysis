@@ -31,7 +31,8 @@
         "string": "cpp",
         "string_view": "cpp",
         "system_error": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "algorithm": "cpp"
     },
     "python.languageServer": "Pylance",
     "python.analysis.diagnosticSeverityOverrides": {

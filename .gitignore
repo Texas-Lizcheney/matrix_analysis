@@ -9,3 +9,5 @@ cpptest
 tempCodeRunnerFile.sh
 /__pycache__/
 *.png
+fortran.f95
+fortran

@@ -7,6 +7,7 @@
 #include <Python.h>
 #include <structmember.h>
 #include <utilities.h>
+#include <sstream>
 
 PyObject *SetDoublePrecision(PyObject *, PyObject *);
 PyObject *SetArgFormat(PyObject *, PyObject *);
@@ -23,6 +24,8 @@ struct ComplexVar
 #define ComplexVar_arg(x) atan2(x.imag, x.real)
 #define ComplexVar_iszero(x) (ComplexVar_L2(x) == 0)
 void setvalue_frompolar(double r, double a, ComplexVar &);
+std::stringstream ComplexVar_repr(const ComplexVar &);
+std::stringstream ComplexVar_str(const ComplexVar &);
 ComplexVar ComplexVar_conj(const ComplexVar &);
 ComplexVar ComplexVar_add(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_sub(const ComplexVar &, const ComplexVar &);
