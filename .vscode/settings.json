@@ -32,7 +32,14 @@
         "string_view": "cpp",
         "system_error": "cpp",
         "typeinfo": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp"
     },
     "python.languageServer": "Pylance",
     "python.analysis.diagnosticSeverityOverrides": {

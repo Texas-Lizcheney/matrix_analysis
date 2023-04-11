@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include/c++/12/**",
-                "/usr/include/python3.11"
+                "/usr/include/python3.11",
+                "~/.local/lib/python3.11/site-packages/numpy/core/include/numpy/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

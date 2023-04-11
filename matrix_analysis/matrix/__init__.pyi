@@ -9,12 +9,16 @@ def set_fastprint(value: bool) -> None:
     ...
 
 
+def set_printarea(left: int, right: int, up: int, down: int) -> None:
+    ...
+
+
 class matrix:
     rows: int
     cols: int
     total: int
 
-    def __init__(self, rows: int, cols: int, number: __support_num) -> None:
+    def __init__(self, rows: int, cols: int, /, fill: __support_num) -> None:
         ...
 
     def __repr__(self) -> str:

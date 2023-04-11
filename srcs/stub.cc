@@ -1,7 +1,10 @@
 #define PY_SSIZE_T_CLEAN
-#include <matrix.h>
-#include <complexvar.h>
+#define NPY_NO_DEPRECATED_API NPY_1_24_API_VERSION
+#define PY_ARRAY_UNIQUE_SYMBOL np_array_api
 #include <Python.h>
+#include <arrayobject.h>
+#include <complexvar.h>
+#include <matrix.h>
 
 extern PyTypeObject PyMatrixType;
 extern PyTypeObject PyComplexVarType;
@@ -57,6 +60,7 @@ PyObject *Init_varModule()
 
 static PyMethodDef matrixModule_method[] = {
     {"set_fastprint", (PyCFunction)SetFastPrint, METH_O, nullptr},
+    {"set_printarea", (PyCFunction)SetPrintArea, METH_VARARGS | METH_KEYWORDS, nullptr},
     nullptr,
 };
 
@@ -90,6 +94,7 @@ PyObject *Init_matrixModule()
 
 PyMODINIT_FUNC PyInit_core()
 {
+    import_array();
     PyObject *varm = Init_varModule();
     PyObject *matrixm = Init_matrixModule();
     if (!varm || !matrixm)

@@ -1,4 +1,8 @@
 from setuptools import setup, Extension
+import numpy
+import os
+
+np_api = numpy.get_include()+"/numpy"
 
 
 def main():
@@ -8,9 +12,9 @@ def main():
                            sources=["srcs/stub.cc"],
                            language="c++",
                            extra_compile_args=["--std=c++20"],
-                           library_dirs=["libs/"],
-                           include_dirs=["include/"])
-    setup(name="matrix_analysis", version="1.1.4", ext_modules=[Ext_matrix])
+                           library_dirs=[f"{os.getcwd()}/libs"],
+                           include_dirs=[np_api, f"{os.getcwd()}/include"])
+    setup(name="matrix_analysis", version="1.1.5", ext_modules=[Ext_matrix])
 
 
 if __name__ == "__main__":

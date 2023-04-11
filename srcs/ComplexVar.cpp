@@ -93,7 +93,13 @@ ComplexVar ComplexVar_sub(const ComplexVar &x, const ComplexVar &y)
 ComplexVar ComplexVar_mul(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
-    if (x.isArbitrary || y.isArbitrary)
+    if (ComplexVar_iszero(x) || ComplexVar_iszero(y))
+    {
+        result.real = 0;
+        result.imag = 0;
+        result.isArbitrary = false;
+    }
+    else if (x.isArbitrary || y.isArbitrary)
     {
         result.isArbitrary = true;
     }
@@ -109,20 +115,25 @@ ComplexVar ComplexVar_mul(const ComplexVar &x, const ComplexVar &y)
 ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
-    if (x.isArbitrary || y.isArbitrary)
+    if (ComplexVar_iszero(x))
+    {
+        result.real = 0;
+        result.imag = 0;
+        result.isArbitrary = false;
+    }
+    else if (ComplexVar_iszero(y))
+    {
+        result.real = std::nan("");
+        result.imag = std::nan("");
+        result.isArbitrary = false;
+    }
+    else if (x.isArbitrary || y.isArbitrary)
     {
         result.isArbitrary = true;
     }
     else
     {
         double l = ComplexVar_L2(y);
-        if (l == 0)
-        {
-            result.real = std::nan("");
-            result.imag = std::nan("");
-            result.isArbitrary = false;
-            return result;
-        }
         result.real = (x.real * y.real + x.imag * y.imag) / l;
         result.imag = (x.imag * y.real - x.real * y.imag) / l;
         result.isArbitrary = false;

@@ -1,2 +1,2 @@
-print(a)
-print(eval(repr(a)))
+b=matrix_analysis.matrix.matrix([[1,2]],fill=None)
+print(b)
