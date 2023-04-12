@@ -1,4 +1,5 @@
 import typing
+import numpy
 from ..var import variable
 
 __support_num = typing.Union[None, int, float, complex, variable]
@@ -18,7 +19,20 @@ class matrix:
     cols: int
     total: int
 
+    @typing.overload
     def __init__(self, rows: int, cols: int, /, fill: __support_num) -> None:
+        ...
+
+    @typing.overload
+    def __init__(self, matrix: list[list[__support_num]], /, fill: __support_num) -> None:
+        ...
+
+    @typing.overload
+    def __init__(self, matrix: list[tuple[int, int, __support_num]], /, fill: __support_num) -> None:
+        ...
+
+    @typing.overload
+    def __init__(self, matrix: numpy.ndarray) -> None:
         ...
 
     def __repr__(self) -> str:

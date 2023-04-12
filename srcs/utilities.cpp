@@ -13,3 +13,15 @@ double getdouble_fromPyObject(PyObject *value)
     PyErr_Format(PyExc_ValueError, "Fail to convert into double, type:%s", value->ob_type->tp_name);
     return nan("");
 }
+
+double casthalf_to_double(const uint16_t &x)
+{
+    uint64_t result = 0;
+    result |= (((uint64_t)x) & (uint64_t)0x03ff) << 42;
+    result |= ((uint64_t)(((x >> 10) & 0x1f) - 0xf + 0x3ff)) << 52;
+    if (x & 0x8000)
+    {
+        result |= 0x8000000000000000;
+    }
+    return (double &)result;
+}

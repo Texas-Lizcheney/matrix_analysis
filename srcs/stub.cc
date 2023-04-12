@@ -1,7 +1,7 @@
 #define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #define NPY_NO_DEPRECATED_API NPY_1_24_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL np_array_api
-#include <Python.h>
 #include <arrayobject.h>
 #include <complexvar.h>
 #include <matrix.h>
@@ -94,7 +94,6 @@ PyObject *Init_matrixModule()
 
 PyMODINIT_FUNC PyInit_core()
 {
-    import_array();
     PyObject *varm = Init_varModule();
     PyObject *matrixm = Init_matrixModule();
     if (!varm || !matrixm)
@@ -103,6 +102,7 @@ PyMODINIT_FUNC PyInit_core()
         Py_XDECREF(matrixm);
         return nullptr;
     }
+    import_array();
     PyObject *m = PyModule_Create(&coreMoulde);
     if (!m)
     {

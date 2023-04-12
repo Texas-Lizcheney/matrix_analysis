@@ -7,6 +7,9 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <type_traits>
+#define PY_ARRAY_UNIQUE_SYMBOL np_array_api
+#define NO_IMPORT
 #include <arrayobject.h>
 #include <ndarraytypes.h>
 
@@ -27,5 +30,5 @@ void PyMatrixAssign(PyMatrixObject *, int, int, const ComplexVar &);
 void PyMatrix_dealloc(PyMatrixObject *);
 PyObject *PyMatrix_repr(PyMatrixObject *);
 PyObject *PyMatrix_str(PyMatrixObject *);
-int PyCMatrix_init(PyMatrixObject *, PyObject *, PyObject *);
+int PyMatrix_init(PyMatrixObject *, PyObject *, PyObject *);
 PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);

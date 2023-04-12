@@ -2,7 +2,8 @@ from .Testcase import externed_Testcase
 import matrix_analysis
 import math
 import sys
-print(matrix_analysis.__dir__())
+
+
 class Test_var(externed_Testcase):
     def test_init(self):
         x = matrix_analysis.var.variable()
