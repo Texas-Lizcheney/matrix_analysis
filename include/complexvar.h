@@ -22,7 +22,7 @@ struct ComplexVar
 #define ComplexVar_L2(x) (x.real * x.real + x.imag * x.imag)
 #define ComplexVar_length(x) sqrt(ComplexVar_L2(x))
 #define ComplexVar_arg(x) atan2(x.imag, x.real)
-#define ComplexVar_iszero(x) (x.real == 0 && x.imag == 0)
+#define ComplexVar_iszero(x) (x.real == 0 && x.imag == 0 && !x.isArbitrary)
 void setvalue_frompolar(double r, double a, ComplexVar &);
 std::stringstream ComplexVar_repr(const ComplexVar &);
 std::stringstream ComplexVar_str(const ComplexVar &);

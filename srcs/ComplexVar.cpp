@@ -23,7 +23,7 @@ std::stringstream ComplexVar_repr(const ComplexVar &x)
     else
     {
         tmp << std::setprecision(doubleprecision) << x.real;
-        if (x.imag >= 0)
+        if (x.imag >= 0 || (std::isnan(x.imag) && !(((uint64_t &)x.imag) & (uint64_t(1) << 63))))
         {
             tmp << '+';
         }
@@ -42,7 +42,7 @@ std::stringstream ComplexVar_str(const ComplexVar &x)
     else
     {
         tmp << std::setprecision(doubleprecision) << x.real;
-        if (x.imag >= 0)
+        if (x.imag >= 0 || (std::isnan(x.imag) && !(((uint64_t &)x.imag) & (uint64_t(1) << 63))))
         {
             tmp << '+';
         }
@@ -126,6 +126,7 @@ ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
         result.real = std::nan("");
         result.imag = std::nan("");
         result.isArbitrary = false;
+        PyErr_WarnEx(PyExc_RuntimeWarning, "Divide by 0.", 2);
     }
     else if (x.isArbitrary || y.isArbitrary)
     {
@@ -280,7 +281,14 @@ ComplexVar ComplexVar_ivt(const ComplexVar &x)
 ComplexVar ComplexVar_sqrt(const ComplexVar &x)
 {
     ComplexVar result;
-    setvalue_frompolar(sqrt(ComplexVar_length(x)), ComplexVar_arg(x) / 2, result);
+    if (x.isArbitrary)
+    {
+        result.isArbitrary = true;
+    }
+    else
+    {
+        setvalue_frompolar(sqrt(ComplexVar_length(x)), ComplexVar_arg(x) / 2, result);
+    }
     return result;
 }
 

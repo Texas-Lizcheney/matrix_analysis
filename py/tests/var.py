@@ -103,36 +103,53 @@ class Test_var(externed_Testcase):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x+y
+        self.assertFalse(z.is_arbitrary)
         self.assertTupleAlmostEqual(z.rec, (3, 5))
         k = id(x)
         x += y
         self.assertEqual(id(x), k)
         self.assertTupleAlmostEqual(z.rec, x.rec)
+        f = matrix_analysis.var.variable(None)
+        z = x+f
+        self.assertTrue(z.is_arbitrary)
 
     def test_sub(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x-y
+        self.assertFalse(z.is_arbitrary)
         self.assertTupleAlmostEqual(z.rec, (-1, -1))
         k = id(x)
         x -= y
         self.assertEqual(id(x), k)
         self.assertTupleAlmostEqual(z.rec, x.rec)
+        f = matrix_analysis.var.variable(None)
+        z = x-f
+        self.assertTrue(z.is_arbitrary)
 
-    def test_sub(self):
+    def test_mul(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x*y
+        self.assertFalse(z.is_arbitrary)
         self.assertTupleAlmostEqual(z.rec, (-4, 7))
         k = id(x)
         x *= y
         self.assertEqual(id(x), k)
         self.assertTupleAlmostEqual(z.rec, x.rec)
+        f = matrix_analysis.var.variable(None)
+        z = x*f
+        self.assertTrue(z.is_arbitrary)
+        g = matrix_analysis.var.variable(0)
+        z = g*f
+        self.assertFalse(z.is_arbitrary)
+        self.assertTupleAlmostEqual(z.rec, (0, 0))
 
     def test_div(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z1 = x/y
+        self.assertFalse(z1.is_arbitrary)
         self.assertTupleAlmostEqual(z1.rec, (0.6153846154, 0.07692307692))
         z2 = y//x
         self.assertTupleAlmostEqual(z2.rec, (1, -1))
@@ -157,11 +174,23 @@ class Test_var(externed_Testcase):
         x3 %= x
         self.assertEqual(id(x3), k3)
         self.assertTupleAlmostEqual(z3.rec, x3.rec)
+        f = matrix_analysis.var.variable(None)
+        z1 = x/f
+        z2=f/x
+        self.assertTrue(z1.is_arbitrary)
+        self.assertTrue(z2.is_arbitrary)
+        g = matrix_analysis.var.variable(0)
+        z3 = g/f
+        self.assertFalse(z3.is_arbitrary)
+        self.assertTupleAlmostEqual(z3.rec, (0, 0))
+        with self.assertWarns(RuntimeWarning):
+            z4=f/g
 
     def test_pow(self):
         x = matrix_analysis.var.variable(1+2j)
         y = matrix_analysis.var.variable(2+3j)
         z = x**y
+        self.assertFalse(z.is_arbitrary)
         self.assertTupleAlmostEqual(z.rec, (-0.0151326724227, -0.179867483913))
         a = matrix_analysis.var.variable(7, 9)
         b = matrix_analysis.var.variable(5, 3)
@@ -183,10 +212,12 @@ class Test_var(externed_Testcase):
         a = -x
         A = -y
         self.assertTupleAlmostEqual(a.rec, (-1, -2))
+        self.assertFalse(a.is_arbitrary)
         self.assertTrue(A.is_arbitrary)
         b = +x
         B = +y
         self.assertTupleAlmostEqual(b.rec, (1, 2))
+        self.assertFalse(b.is_arbitrary)
         self.assertTrue(B.is_arbitrary)
         c = abs(x)
         C = abs(y)
@@ -195,6 +226,7 @@ class Test_var(externed_Testcase):
         d = ~x
         D = ~y
         self.assertTupleAlmostEqual(d.rec, (0.2, -0.4))
+        self.assertFalse(d.is_arbitrary)
         self.assertTrue(D.is_arbitrary)
 
     def test_bool(self):
@@ -208,62 +240,123 @@ class Test_var(externed_Testcase):
     def test_funcs(self):
         x = matrix_analysis.var.variable(2, 3)
         y = matrix_analysis.var.variable(1, 2)
-        self.assertTupleAlmostEqual(x.conj().rec, (2, -3))
+        p = matrix_analysis.var.variable(None)
+        self.assertTupleAlmostEqual((z := x.conj()).rec, (2, -3))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.conj().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.exp().rec, (-7.31511009491, 1.04274365623))
+            (z := x.exp()).rec, (-7.31511009491, 1.04274365623))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.exp().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.ln().rec, (1.28247467873, 0.982793723247))
+            (z := x.ln()).rec, (1.28247467873, 0.982793723247))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.ln().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.log(y).rec, (1.13173165582, -0.335771297901))
-        self.assertTupleAlmostEqual(x.log_asbase(
-            y).rec, (0.812116123353, 0.24094517758))
+            (z := x.log(y)).rec, (1.13173165582, -0.335771297901))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.log(y).is_arbitrary)
+        self.assertTupleAlmostEqual((z := x.log_asbase(
+            y)).rec, (0.812116123353, 0.24094517758))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.log_asbase(y).is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.sqrt().rec, (1.67414922804, 0.89597747613))
+            (z := x.sqrt()).rec, (1.67414922804, 0.89597747613))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.sqrt().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.sin().rec, (9.15449914691, -4.16890695997))
+            (z := x.sin()).rec, (9.15449914691, -4.16890695997))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.sin().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.cos().rec, (-4.18962569097, -9.10922789376))
+            (z := x.cos()).rec, (-4.18962569097, -9.10922789376))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.cos().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.tan().rec, (-0.0037640256415, 1.00323862735))
+            (z := x.tan()).rec, (-0.0037640256415, 1.00323862735))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.tan().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.cot().rec, (-0.00373971037636, -0.996757796573))
+            (z := x.cot()).rec, (-0.00373971037636, -0.996757796573))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.cot().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.sec().rec, (-0.0416749644111, 0.0906111371962))
+            (z := x.sec()).rec, (-0.0416749644111, 0.0906111371962))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.sec().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.csc().rec, (0.0904732097532, 0.04120099862886))
+            (z := x.csc()).rec, (0.0904732097532, 0.04120099862886))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.csc().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arcsin().rec, (0.570652784321, 1.98338702992))
+            (z := x.arcsin()).rec, (0.570652784321, 1.98338702992))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arcsin().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arccos().rec, (1.00014354247, -1.98338702992))
+            (z := x.arccos()).rec, (1.00014354247, -1.98338702992))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arccos().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arctan().rec, (1.4099210496, 0.229072682969))
+            (z := x.arctan()).rec, (1.4099210496, 0.229072682969))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arctan().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arccot().rec, (0.160875277198, -0.229072682968))
+            (z := x.arccot()).rec, (0.160875277198, -0.229072682968))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arccot().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arcsec().rec, (1.42041072247, 0.231334698574))
+            (z := x.arcsec()).rec, (1.42041072247, 0.231334698574))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arcsec().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arccsc().rec, (0.150385604328, -0.231334698574))
+            (z := x.arccsc()).rec, (0.150385604328, -0.231334698574))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arccsc().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.sinh().rec, (-3.59056458999, 0.530921086249))
+            (z := x.sinh()).rec, (-3.59056458999, 0.530921086249))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.sinh().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.cosh().rec, (-3.72454550492, 0.511822569937))
+            (z := x.cosh()).rec, (-3.72454550492, 0.511822569937))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.cosh().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.tanh().rec, (0.965385879022, -9.88437503832e-3))
+            (z := x.tanh()).rec, (0.965385879022, -9.88437503832e-3))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.tanh().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.coth().rec, (1.03574663777, 1.06047834703e-2))
+            (z := x.coth()).rec, (1.03574663777, 1.06047834703e-2))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.coth().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.sech().rec, (-0.263512975158, -3.62116365587e-2))
+            (z := x.sech()).rec, (-0.263512975158, -3.62116365587e-2))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.sech().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.csch().rec, (-0.272548661463, -4.03005788568e-2))
+            (z := x.csch()).rec, (-0.272548661463, -4.03005788568e-2))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.csch().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arcsinh().rec, (1.96863792579, 0.964658504408))
+            (z := x.arcsinh()).rec, (1.96863792579, 0.964658504408))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arcsinh().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arccosh().rec, (1.98338702992, 1.00014354247))
+            (z := x.arccosh()).rec, (1.98338702992, 1.00014354247))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arccosh().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arctanh().rec, (0.146946666226, 1.33897252229))
+            (z := x.arctanh()).rec, (0.146946666226, 1.33897252229))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arctanh().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arccoth().rec, (0.146946666225, -0.2318238045))
+            (z := x.arccoth()).rec, (0.146946666225, -0.2318238045))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arccoth().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arcsech().rec, (0.231334698574, -1.42041072247))
+            (z := x.arcsech()).rec, (0.231334698574, -1.42041072247))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arcsech().is_arbitrary)
         self.assertTupleAlmostEqual(
-            x.arccsch().rec, (0.157355498845, -0.229962902377))
+            (z := x.arccsch()).rec, (0.157355498845, -0.229962902377))
+        self.assertFalse(z.is_arbitrary)
+        self.assertTrue(p.arccsch().is_arbitrary)

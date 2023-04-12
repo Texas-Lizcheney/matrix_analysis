@@ -118,6 +118,9 @@ class variable:
     def __itruediv__(self, other: __support_num) -> variable:
         ...
 
+    def conj(self) -> variable:
+        ...
+
     def exp(self) -> variable:
         ...
 
