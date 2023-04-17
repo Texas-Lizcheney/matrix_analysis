@@ -20,10 +20,13 @@ class Test_var(externed_Testcase):
     def test_repr(self):
         x = matrix_analysis.var.variable(-1.23456789, 2.34567891)
         self.assertEqual(repr(x), "-1.234568+2.345679j")
+        self.assertEqual(str(x), "-1.234568+2.345679i")
         matrix_analysis.var.set_print_precision(-10)
         self.assertEqual(repr(x), "-1+2j")
+        self.assertEqual(str(x), "-1+2i")
         matrix_analysis.var.set_print_precision(3)
         self.assertEqual(repr(x), "-1.23+2.35j")
+        self.assertEqual(str(x), "-1.23+2.35i")
         matrix_analysis.var.set_print_precision(20)
         self.assertEqual(
             repr(x), "-1.2345678899999998901+2.3456789100000001724j")
@@ -176,7 +179,7 @@ class Test_var(externed_Testcase):
         self.assertTupleAlmostEqual(z3.rec, x3.rec)
         f = matrix_analysis.var.variable(None)
         z1 = x/f
-        z2=f/x
+        z2 = f/x
         self.assertTrue(z1.is_arbitrary)
         self.assertTrue(z2.is_arbitrary)
         g = matrix_analysis.var.variable(0)
@@ -184,7 +187,7 @@ class Test_var(externed_Testcase):
         self.assertFalse(z3.is_arbitrary)
         self.assertTupleAlmostEqual(z3.rec, (0, 0))
         with self.assertWarns(RuntimeWarning):
-            z4=f/g
+            z4 = f/g
 
     def test_pow(self):
         x = matrix_analysis.var.variable(1+2j)

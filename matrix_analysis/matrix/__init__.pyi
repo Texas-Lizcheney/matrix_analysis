@@ -10,7 +10,7 @@ def set_fastprint(value: bool) -> None:
     ...
 
 
-def set_printarea(left: int, right: int, up: int, down: int) -> None:
+def set_printarea(*, left: int, right: int, up: int, down: int) -> None:
     ...
 
 
@@ -20,15 +20,15 @@ class matrix:
     total: int
 
     @typing.overload
-    def __init__(self, rows: int, cols: int, /, fill: __support_num) -> None:
+    def __init__(self, rows: int, cols: int, *, fill: __support_num) -> None:
         ...
 
     @typing.overload
-    def __init__(self, matrix: list[list[__support_num]], /, fill: __support_num) -> None:
+    def __init__(self, matrix: list[list[__support_num]], *, fill: __support_num) -> None:
         ...
 
     @typing.overload
-    def __init__(self, matrix: list[tuple[int, int, __support_num]], /, fill: __support_num) -> None:
+    def __init__(self, matrix: list[tuple[int, int, __support_num]], *, fill: __support_num) -> None:
         ...
 
     @typing.overload
@@ -36,4 +36,10 @@ class matrix:
         ...
 
     def __repr__(self) -> str:
+        ...
+
+    def __str__(self) -> str:
+        ...
+
+    def __len__(self) -> int:
         ...

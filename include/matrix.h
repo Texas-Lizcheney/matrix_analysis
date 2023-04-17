@@ -32,3 +32,6 @@ PyObject *PyMatrix_repr(PyMatrixObject *);
 PyObject *PyMatrix_str(PyMatrixObject *);
 int PyMatrix_init(PyMatrixObject *, PyObject *, PyObject *);
 PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);
+
+Py_ssize_t PyMatrix_length(PyMatrixObject *);
+PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);

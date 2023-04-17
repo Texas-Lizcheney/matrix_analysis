@@ -83,60 +83,17 @@ PyObject *PyMatrix_repr(PyMatrixObject *self)
 {
     std::string repr;
     repr += "[";
-    if (fastprint)
+    for (int r = 0; r < self->rows; r++)
     {
-        bool rowskipped = false;
-        bool colskipped;
-        int rowd = self->rows - escape_rows_to;
-        int cold = self->cols - escape_cols_to;
-        for (int r = 0; r < self->rows; r++)
+        repr += "[";
+        for (int c = 0; c < self->cols; c++)
         {
-            if (r < escape_rows_from || rowd <= r)
-            {
-                repr += "[";
-                colskipped = false;
-                for (int c = 0; c < self->cols; c++)
-                {
-                    if (c < escape_cols_from || cold <= c)
-                    {
-                        repr += ComplexVar_repr(self->elements[r * self->cols + c]).str().c_str();
-                        repr += ",";
-                    }
-                    else if (!colskipped)
-                    {
-                        repr += "...,";
-                        colskipped = true;
-                    }
-                }
-                repr += "],";
-            }
-            else if (!rowskipped)
-            {
-                repr += "[";
-                for (int c = 0; c < std::min(self->cols, escape_cols_from + escape_cols_to + 1); c++)
-                {
-                    repr += "...,";
-                }
-                repr += "],";
-                rowskipped = true;
-            }
+            repr += ComplexVar_repr(self->elements[r * self->cols + c]).str().c_str();
+            repr += ",";
         }
-        repr += "]";
+        repr += "],";
     }
-    else
-    {
-        for (int r = 0; r < self->rows; r++)
-        {
-            repr += "[";
-            for (int c = 0; c < self->cols; c++)
-            {
-                repr += ComplexVar_repr(self->elements[r * self->cols + c]).str().c_str();
-                repr += ",";
-            }
-            repr += "],";
-        }
-        repr += "]";
-    }
+    repr += "]";
     return PyUnicode_FromString(repr.c_str());
 }
 
@@ -667,6 +624,19 @@ PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     return self;
 }
 
+// as map
+
+Py_ssize_t PyMatrix_length(PyMatrixObject *self)
+{
+    return self->total_elements;
+}
+
+PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
+{
+    std::cout << index->ob_type->tp_name << std::endl;
+    Py_RETURN_NONE;
+}
+
 static PyMemberDef PyMatrixMember[] = {
     {"rows", T_INT, offsetof(PyMatrixObject, rows), READONLY, nullptr},
     {"cols", T_INT, offsetof(PyMatrixObject, cols), READONLY, nullptr},
@@ -674,11 +644,17 @@ static PyMemberDef PyMatrixMember[] = {
     nullptr,
 };
 
+static PyMappingMethods PyMatrixMap = {
+    .mp_length = (lenfunc)PyMatrix_length,
+    .mp_subscript = (binaryfunc)PyMatrix_subscript,
+};
+
 PyTypeObject PyMatrixType = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "matrixcore.matrix",
     .tp_basicsize = sizeof(PyMatrixObject),
     .tp_dealloc = (destructor)PyMatrix_dealloc,
     .tp_repr = (reprfunc)PyMatrix_repr,
+    .tp_as_mapping = &PyMatrixMap,
     .tp_str = (reprfunc)PyMatrix_str,
     .tp_members = PyMatrixMember,
     .tp_init = (initproc)PyMatrix_init,

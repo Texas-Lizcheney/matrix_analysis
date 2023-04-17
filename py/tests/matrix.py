@@ -75,6 +75,26 @@ class Test_mat(externed_Testcase):
             x = matrix_analysis.matrix.matrix(
                 numpy.array([["abc"]], dtype=object))
 
+    def test_repr(self):
+        x = matrix_analysis.matrix.matrix(
+            [[1, 2.0, None], [None, 3+4j], [5, matrix_analysis.var.variable(1+1j)]])
+        self.assertEqual(str(
+            x), "[1+0i\t2+0i\tundefined]\n[undefined\t3+4i\tundefined]\n[5+0i\t1+1i\tundefined]")
+        self.assertEqual(
+            repr(x), "[[1+0j,2+0j,None,],[None,3+4j,None,],[5+0j,1+1j,None,],]")
+        matrix_analysis.matrix.set_fastprint(True)
+        matrix_analysis.matrix.set_printarea(left=1, right=1, up=1, down=1)
+        self.assertEqual(
+            repr(x), "[[1+0j,2+0j,None,],[None,3+4j,None,],[5+0j,1+1j,None,],]")
+        self.assertEqual(str(
+            x), "[1+0i\t...\tundefined]\n[...\t...\t...]\n[5+0i\t...\tundefined]")
+        matrix_analysis.matrix.set_fastprint(False)
+
+    def test_asmap(self):
+        x = matrix_analysis.matrix.matrix(
+            [[1, 2.0, None], [None, 3+4j], [5, matrix_analysis.var.variable(1+1j)]])
+        self.assertEqual(len(x), 9)
+
     def test_members(self):
         x = matrix_analysis.matrix.matrix(5, 10)
         self.assertEqual(x.rows, 5)
