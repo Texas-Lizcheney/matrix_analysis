@@ -43,3 +43,6 @@ class matrix:
 
     def __len__(self) -> int:
         ...
+
+    def __getitem__(self, index: tuple[int | slice, int | slice]) -> variable | matrix:
+        ...

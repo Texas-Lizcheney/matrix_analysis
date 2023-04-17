@@ -27,6 +27,9 @@ struct PyMatrixObject
 
 int PyMatrixAlloc(PyMatrixObject *);
 void PyMatrixAssign(PyMatrixObject *, int, int, const ComplexVar &);
+ComplexVar PyMatrixGet_withcheck(PyMatrixObject *, int, int);
+int PyMatrixAssign_withcheck(PyMatrixObject *, int, int, const ComplexVar &);
+int PyMatrixGet_withcheck(PyMatrixObject *, int, int, ComplexVar &);
 void PyMatrix_dealloc(PyMatrixObject *);
 PyObject *PyMatrix_repr(PyMatrixObject *);
 PyObject *PyMatrix_str(PyMatrixObject *);
@@ -35,3 +38,5 @@ PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);
 
 Py_ssize_t PyMatrix_length(PyMatrixObject *);
 PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);
+
+extern PyTypeObject PyMatrixType;

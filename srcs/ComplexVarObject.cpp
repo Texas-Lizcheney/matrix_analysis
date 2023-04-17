@@ -549,7 +549,8 @@ PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-        Py_RETURN_NONE;
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
     }
     result->num = ComplexVar_ln(self->num);
     return (PyObject *)result;

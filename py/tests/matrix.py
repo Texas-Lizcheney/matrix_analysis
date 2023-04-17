@@ -61,6 +61,12 @@ class Test_mat(externed_Testcase):
                 [(0, 0, 1), (1, 1, 2.0), (2, 2, None), (3, 3, 1+2j)], fill="abc")
         with self.assertRaises(ValueError):
             z = matrix_analysis.matrix.matrix([(1, 1, "Abc")])
+        with self.assertRaises(ValueError):
+            z = matrix_analysis.matrix.matrix([])
+        with self.assertRaises(ValueError):
+            z = matrix_analysis.matrix.matrix([[]])
+        with self.assertRaises(ValueError):
+            z = matrix_analysis.matrix.matrix([[[]]])
         for D in numpy_dtypes:
             x = matrix_analysis.matrix.matrix(numpy.array([[1]], dtype=D))
             self.assertEqual(str(x), "[1+0i]")
@@ -94,6 +100,14 @@ class Test_mat(externed_Testcase):
         x = matrix_analysis.matrix.matrix(
             [[1, 2.0, None], [None, 3+4j], [5, matrix_analysis.var.variable(1+1j)]])
         self.assertEqual(len(x), 9)
+        a = x[0, 0]
+        self.assertAlmostEqual(a.rec, (1, 0))
+        with self.assertRaises(IndexError):
+            a = x[3, 3]
+        self.assertEqual(str(x[0, :]), "[1+0i\t2+0i\tundefined]")
+        self.assertEqual(str(x[0, 0:3:2]), "[1+0i\tundefined]")
+        self.assertEqual(str(x[0, ::-1]), "[undefined\t2+0i\t1+0i]")
+        self.assertEqual(str(x[0, ::-2]), "[undefined\t1+0i]")
 
     def test_members(self):
         x = matrix_analysis.matrix.matrix(5, 10)

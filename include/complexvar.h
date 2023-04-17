@@ -142,3 +142,5 @@ PyObject *PyComplexVar_get_recpair(PyComplexVarObject *, void *);
 int PyComplexVar_set_recpair(PyComplexVarObject *, PyObject *, void *);
 PyObject *PyComplexVar_get_polarpair(PyComplexVarObject *, void *);
 int PyComplexVar_set_polarpair(PyComplexVarObject *, PyObject *, void *);
+
+extern PyTypeObject PyComplexVarType;

@@ -45,6 +45,11 @@ PyObject *SetPrintArea(PyObject *self, PyObject *args, PyObject *kwds)
 
 int PyMatrixAlloc(PyMatrixObject *self)
 {
+    if (self->rows <= 0 || self->cols <= 0)
+    {
+        PyErr_Format(PyExc_ValueError, "Invalid size. rows: %ld, cols: %ld", self->rows, self->cols);
+        return -1;
+    }
     self->total_elements = ((int64_t)self->rows) * ((int64_t)self->cols);
     try
     {
@@ -68,6 +73,53 @@ int PyMatrixAlloc(PyMatrixObject *self)
 void PyMatrixAssign(PyMatrixObject *self, int r, int c, const ComplexVar &value)
 {
     self->elements[r * self->cols + c] = value;
+}
+
+ComplexVar PyMatrixGet(PyMatrixObject *self, int r, int c)
+{
+    return self->elements[r * self->cols + c];
+}
+
+int PyMatrixAssign_withcheck(PyMatrixObject *self, int r, int c, const ComplexVar &value)
+{
+    int R = r;
+    int C = c;
+    if (r < 0)
+    {
+        R = self->rows + r;
+    }
+    if (c < 0)
+    {
+        C = self->cols + c;
+    }
+    if ((R >= self->rows) || (C >= self->cols) || (R < 0) || (C < 0))
+    {
+        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        return -1;
+    }
+    self->elements[R * self->cols + C] = value;
+    return 0;
+}
+
+int PyMatrixGet_withcheck(PyMatrixObject *self, int r, int c, ComplexVar &value)
+{
+    int R = r;
+    int C = c;
+    if (r < 0)
+    {
+        R = self->rows + r;
+    }
+    if (c < 0)
+    {
+        C = self->cols + c;
+    }
+    if ((R >= self->rows) || (C >= self->cols) || (R < 0) || (C < 0))
+    {
+        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        return -1;
+    }
+    value = self->elements[R * self->cols + C];
+    return 0;
 }
 
 void PyMatrix_dealloc(PyMatrixObject *self)
@@ -183,11 +235,6 @@ PyObject *PyMatrix_str(PyMatrixObject *self)
 
 static int PyMatrix_init_from_rcf(PyMatrixObject *self, PyObject *fill)
 {
-    if (self->rows <= 0 || self->cols <= 0)
-    {
-        PyErr_Format(PyExc_ValueError, "Invalid size. rows: %ld, cols: %ld", self->rows, self->cols);
-        return -1;
-    }
     ComplexVar tmp_value;
     if (assignComplexVar(fill, tmp_value))
     {
@@ -618,7 +665,8 @@ PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     PyObject *self = type->tp_alloc(type, 0);
     if (!self)
     {
-        Py_RETURN_NONE;
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
     }
     ((PyMatrixObject *)self)->elements = nullptr;
     return self;
@@ -633,7 +681,154 @@ Py_ssize_t PyMatrix_length(PyMatrixObject *self)
 
 PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
 {
-    std::cout << index->ob_type->tp_name << std::endl;
+    if (!PyTuple_CheckExact(index))
+    {
+        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a tuple with 2 elements.", index->ob_type->tp_name);
+        return nullptr;
+    }
+    if (PyTuple_Size(index) != 2)
+    {
+        PyErr_Format(PyExc_IndexError, "Get %ld items. Only take a tuple with 2 elements.", PyTuple_Size(index));
+        return nullptr;
+    }
+    PyObject *a = PyTuple_GetItem(index, 0);
+    PyObject *b = PyTuple_GetItem(index, 1);
+    if (PyLong_CheckExact(a) && PyLong_CheckExact(b))
+    {
+        int r = PyLong_AS_LONG(a);
+        int c = PyLong_AS_LONG(b);
+        PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+        if (!result)
+        {
+            return nullptr;
+        }
+        if (PyMatrixGet_withcheck(self, r, c, result->num))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
+    }
+    else if (PyLong_CheckExact(a) && PySlice_Check(b))
+    {
+        int r = PyLong_AsLong(a);
+        if (r < 0)
+        {
+            r = self->rows + r;
+        }
+        if ((r < 0) || (r >= self->rows))
+        {
+            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            return nullptr;
+        }
+        PyMatrixObject *result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+        if (!result)
+        {
+            return nullptr;
+        }
+        result->rows = 1;
+        Py_ssize_t b_start;
+        Py_ssize_t b_stop;
+        Py_ssize_t b_step;
+        PySlice_Unpack(b, &b_start, &b_stop, &b_step);
+        result->cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
+        if (PyMatrixAlloc(result))
+        {
+            if (PyErr_ExceptionMatches(PyExc_ValueError))
+            {
+                PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            }
+            Py_DECREF(result);
+            return nullptr;
+        }
+        Py_ssize_t c = b_start;
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            PyMatrixAssign(result, 0, j, PyMatrixGet(self, r, c));
+            c += b_step;
+        }
+        return (PyObject *)result;
+    }
+    else if (PySlice_Check(a) && PyLong_CheckExact(b))
+    {
+        int c = PyLong_AsLong(b);
+        if (c < 0)
+        {
+            c = self->rows + c;
+        }
+        if ((c < 0) || (c >= self->rows))
+        {
+            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            return nullptr;
+        }
+        PyMatrixObject *result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+        if (!result)
+        {
+            return nullptr;
+        }
+        result->cols = 1;
+        Py_ssize_t a_start;
+        Py_ssize_t a_stop;
+        Py_ssize_t a_step;
+        PySlice_Unpack(a, &a_start, &a_stop, &a_step);
+        result->rows = PySlice_AdjustIndices(self->cols, &a_start, &a_stop, a_step);
+        if (PyMatrixAlloc(result))
+        {
+            if (PyErr_ExceptionMatches(PyExc_ValueError))
+            {
+                PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            }
+            Py_DECREF(result);
+            return nullptr;
+        }
+        Py_ssize_t r = a_start;
+        for (Py_ssize_t i = 0; i < result->rows; i++)
+        {
+            PyMatrixAssign(result, i, 0, PyMatrixGet(self, r, c));
+            r += a_step;
+        }
+        return (PyObject *)result;
+    }
+    else if (PySlice_Check(a) && PySlice_Check(b))
+    {
+        PyMatrixObject *result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+        if (!result)
+        {
+            return nullptr;
+        }
+        Py_ssize_t a_start;
+        Py_ssize_t a_stop;
+        Py_ssize_t a_step;
+        PySlice_Unpack(a, &a_start, &a_stop, &a_step);
+        result->rows = PySlice_AdjustIndices(self->cols, &a_start, &a_stop, a_step);
+        Py_ssize_t b_start;
+        Py_ssize_t b_stop;
+        Py_ssize_t b_step;
+        PySlice_Unpack(b, &b_start, &b_stop, &b_step);
+        result->cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
+        if (PyMatrixAlloc(result))
+        {
+            if (PyErr_ExceptionMatches(PyExc_ValueError))
+            {
+                PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            }
+            Py_DECREF(result);
+            return nullptr;
+        }
+        Py_ssize_t r = a_start;
+        Py_ssize_t c = b_start;
+        for (Py_ssize_t i = 0; i < result->rows; i++)
+        {
+            for (Py_ssize_t j = 0; j < result->cols; j++)
+            {
+                PyMatrixAssign(result, i, j, PyMatrixGet(self, r, c));
+                c += b_step;
+            }
+            r += a_step;
+        }
+        return (PyObject *)result;
+    }
+    PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s and %s.", a->ob_type->tp_name, b->ob_type->tp_name);
     Py_RETURN_NONE;
 }
 
