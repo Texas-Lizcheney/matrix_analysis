@@ -197,6 +197,20 @@ class Test_mat(externed_Testcase):
             matrix_analysis.matrix.matrix([[None, None], [None, None]])))
         with self.assertRaises(IndexError):
             x[3, 3] = None
+        x = matrix_analysis.matrix.matrix(2, 2, 0)
+        x[...] = [(0, 1, None), (1, 0, 1+1j)]
+        self.assertEqual(str(x), str(
+            matrix_analysis.matrix.matrix([[0, None], [1+1j, 0]])))
+        with self.assertRaises(TypeError):
+            x[...] = "abc"
+        with self.assertRaises(TypeError):
+            x[...] = ["abc"]
+        with self.assertRaises(ValueError):
+            x[...] = [(1, 2)]
+        with self.assertRaises(ValueError):
+            x[...] = [("abc", 2, 3)]
+        with self.assertRaises(TypeError):
+            x[...] = [(1, 2, "abc")]
 
     def test_members(self):
         x = matrix_analysis.matrix.matrix(5, 10)

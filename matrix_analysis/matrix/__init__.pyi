@@ -52,6 +52,22 @@ class matrix:
     def __getitem__(self, index: ellipsis) -> matrix:
         ...
 
+    @typing.overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: __support_num) -> matrix:
+        ...
+
+    @typing.overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: list[list[__support_num]]) -> matrix:
+        ...
+
+    @typing.overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: list[tuple[int, int, __support_num]]) -> matrix:
+        ...
+
+    @typing.overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: numpy.ndarray) -> matrix:
+        ...
+
 
 class ShapeError(Exception):
     ...

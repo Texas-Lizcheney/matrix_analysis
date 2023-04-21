@@ -926,6 +926,67 @@ static int index_process(PyObject *x, Py_ssize_t Ml, Py_ssize_t &x_start, Py_ssi
     return 0;
 }
 
+static int PyMatrix_ass_subscript_sM(PyMatrixObject *self, PyObject *value)
+{
+    if (!PyList_CheckExact(value))
+    {
+        PyErr_SetNone(PyExc_TypeError);
+        return -1;
+    }
+    PyObject *tmp;
+    int mrows = 0;
+    int mcols = 0;
+    int rtmp;
+    int ctmp;
+    PyObject *tmp_element;
+    for (Py_ssize_t i = 0; i < PyList_Size(value); i++)
+    {
+        tmp = PyList_GetItem(value, i);
+        if (!PyTuple_CheckExact(tmp))
+        {
+            PyErr_SetNone(PyExc_TypeError);
+            return -1;
+        }
+        if (PyTuple_Size(tmp) != 3)
+        {
+            PyErr_Format(PyExc_ValueError, "Only take 3 items. On index:%ld", i);
+            return -1;
+        }
+        if (!PyArg_ParseTuple(tmp, "iiO", &rtmp, &ctmp, &tmp_element))
+        {
+            PyErr_Format(PyExc_ValueError, "Fail to parse tuple. On index:%ld", i);
+            return -1;
+        }
+        if (!CanBeComplexVar(tmp_element))
+        {
+            PyErr_Format(PyExc_TypeError, "Can turn %s into complexvar. On index:%ld", tmp_element->ob_type->tp_name, i);
+            return -1;
+        }
+        if (rtmp > mrows)
+        {
+            mrows = rtmp;
+        }
+        if (ctmp > mcols)
+        {
+            mcols = ctmp;
+        }
+    }
+    if ((mrows >= self->rows) || (mcols >= self->cols))
+    {
+        PyErr_SetNone(PyExc_IndexError);
+        return -1;
+    }
+    ComplexVar tmp_element_value;
+    for (Py_ssize_t i = 0; i < PyList_Size(value); i++)
+    {
+        tmp = PyList_GetItem(value, i);
+        PyArg_ParseTuple(tmp, "iiO", &rtmp, &ctmp, &tmp_element);
+        assignComplexVar(tmp_element, tmp_element_value);
+        PyMatrixAssign(self, rtmp, ctmp, tmp_element_value);
+    }
+    return 0;
+}
+
 static int PyMatrix_ass_subscript_M(PyMatrixObject *self, PyObject *a, PyObject *b, PyMatrixObject *value)
 {
     Py_ssize_t a_start;
@@ -1365,6 +1426,10 @@ static int PyMatrix_ass_subscript_SSV(PyMatrixObject *self, PyObject *a, PyObjec
 
 int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *value)
 {
+    if (index == Py_Ellipsis)
+    {
+        return PyMatrix_ass_subscript_sM(self, value);
+    }
     if (!PyTuple_CheckExact(index))
     {
         PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a tuple with 2 elements.", index->ob_type->tp_name);
