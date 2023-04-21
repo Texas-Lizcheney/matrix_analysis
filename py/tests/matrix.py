@@ -179,6 +179,24 @@ class Test_mat(externed_Testcase):
             [[0, 0, 0, 0], [None, 0, 1, 0], [0, 0, 0, 0], [2.0, 0, -1-1j, 0]])))
         with self.assertRaises(ValueError):
             x[0, 0] = numpy.array([["abc"]], dtype=object)
+        x = matrix_analysis.matrix.matrix(2, 2, 0)
+        x[0, 0] = None
+        self.assertEqual(str(x), str(
+            matrix_analysis.matrix.matrix([[None, 0], [0, 0]])))
+        x = matrix_analysis.matrix.matrix(2, 2, 0)
+        x[:, 0] = None
+        self.assertEqual(str(x), str(
+            matrix_analysis.matrix.matrix([[None, 0], [None, 0]])))
+        x = matrix_analysis.matrix.matrix(2, 2, 0)
+        x[0, :] = None
+        self.assertEqual(str(x), str(
+            matrix_analysis.matrix.matrix([[None, None], [0, 0]])))
+        x = matrix_analysis.matrix.matrix(2, 2, 0)
+        x[:, :] = None
+        self.assertEqual(str(x), str(
+            matrix_analysis.matrix.matrix([[None, None], [None, None]])))
+        with self.assertRaises(IndexError):
+            x[3, 3] = None
 
     def test_members(self):
         x = matrix_analysis.matrix.matrix(5, 10)

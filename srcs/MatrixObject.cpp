@@ -1300,6 +1300,69 @@ static int PyMatrix_ass_subscript_LSV(PyMatrixObject *self, PyObject *a, PyObjec
     return 0;
 }
 
+static int PyMatrix_ass_subscript_SLV(PyMatrixObject *self, PyObject *a, PyObject *b, PyObject *value)
+{
+    int c = PyLong_AsLong(b);
+    if (c < 0)
+    {
+        c = self->cols + c;
+    }
+    if ((c < 0) || (c >= self->cols))
+    {
+        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        return -1;
+    }
+    ComplexVar tmp;
+    if (assignComplexVar(value, tmp))
+    {
+        return -1;
+    }
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    PySlice_Unpack(a, &a_start, &a_stop, &a_step);
+    Py_ssize_t rows = PySlice_AdjustIndices(self->rows, &a_start, &a_stop, a_step);
+    Py_ssize_t r = a_start;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        PyMatrixAssign(self, r, c, tmp);
+        r += a_step;
+    }
+    return 0;
+}
+
+static int PyMatrix_ass_subscript_SSV(PyMatrixObject *self, PyObject *a, PyObject *b, PyObject *value)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(value, tmp))
+    {
+        return -1;
+    }
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    PySlice_Unpack(a, &a_start, &a_stop, &a_step);
+    Py_ssize_t rows = PySlice_AdjustIndices(self->rows, &a_start, &a_stop, a_step);
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    PySlice_Unpack(b, &b_start, &b_stop, &b_step);
+    Py_ssize_t cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < cols; j++)
+        {
+            PyMatrixAssign(self, r, c, tmp);
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+    return 0;
+}
+
 int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *value)
 {
     if (!PyTuple_CheckExact(index))
@@ -1336,9 +1399,11 @@ int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *valu
     }
     else if (PySlice_Check(a) && PyLong_CheckExact(b))
     {
+        return PyMatrix_ass_subscript_SLV(self, a, b, value);
     }
     else if (PySlice_Check(a) && PySlice_Check(b))
     {
+        return PyMatrix_ass_subscript_SSV(self, a, b, value);
     }
     return -1;
 }
