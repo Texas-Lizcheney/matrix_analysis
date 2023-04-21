@@ -6,6 +6,16 @@ int escape_rows_from = 3;
 int escape_rows_to = 3;
 int escape_cols_from = 3;
 int escape_cols_to = 3;
+PyObject *PyExc_ShapeError = nullptr;
+
+template <typename T>
+concept npy_real = std::is_integral<T>::value || std::is_floating_point<T>::value;
+
+template <typename T>
+concept npy_complex = requires(T a) {
+                          a.real;
+                          a.imag;
+                      };
 
 PyObject *SetFastPrint(PyObject *self, PyObject *value)
 {
@@ -373,8 +383,6 @@ static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObj
     return 0;
 }
 
-template <typename T>
-concept npy_real = std::is_integral<T>::value || std::is_floating_point<T>::value;
 static void assign_from_np_R(ComplexVar *target, int rows, int cols, npy_real auto *data)
 {
     int64_t pos;
@@ -390,11 +398,6 @@ static void assign_from_np_R(ComplexVar *target, int rows, int cols, npy_real au
     }
 }
 
-template <typename T>
-concept npy_complex = requires(T a) {
-                          a.real;
-                          a.imag;
-                      };
 static void assign_from_np_C(ComplexVar *target, int rows, int cols, npy_complex auto *data)
 {
     int64_t pos;
@@ -679,11 +682,189 @@ Py_ssize_t PyMatrix_length(PyMatrixObject *self)
     return self->total_elements;
 }
 
+static PyObject *PyMatrix_subscript_LL(PyMatrixObject *self, PyObject *a, PyObject *b)
+{
+    int r = PyLong_AS_LONG(a);
+    int c = PyLong_AS_LONG(b);
+    PyComplexVarObject *result = nullptr;
+    result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    if (PyMatrixGet_withcheck(self, r, c, result->num))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
+}
+
+static PyObject *PyMatrix_subscript_LS(PyMatrixObject *self, PyObject *a, PyObject *b)
+{
+    int r = PyLong_AsLong(a);
+    if (r < 0)
+    {
+        r = self->rows + r;
+    }
+    if ((r < 0) || (r >= self->rows))
+    {
+        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        return nullptr;
+    }
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = 1;
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    PySlice_Unpack(b, &b_start, &b_stop, &b_step);
+    result->cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
+    if (PyMatrixAlloc(result))
+    {
+        if (PyErr_ExceptionMatches(PyExc_ValueError))
+        {
+            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        }
+        Py_DECREF(result);
+        return nullptr;
+    }
+    Py_ssize_t c = b_start;
+    for (Py_ssize_t j = 0; j < result->cols; j++)
+    {
+        PyMatrixAssign(result, 0, j, PyMatrixGet(self, r, c));
+        c += b_step;
+    }
+    return (PyObject *)result;
+}
+
+static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObject *b)
+{
+    int c = PyLong_AsLong(b);
+    if (c < 0)
+    {
+        c = self->rows + c;
+    }
+    if ((c < 0) || (c >= self->rows))
+    {
+        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        return nullptr;
+    }
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->cols = 1;
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    PySlice_Unpack(a, &a_start, &a_stop, &a_step);
+    result->rows = PySlice_AdjustIndices(self->cols, &a_start, &a_stop, a_step);
+    if (PyMatrixAlloc(result))
+    {
+        if (PyErr_ExceptionMatches(PyExc_ValueError))
+        {
+            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        }
+        Py_DECREF(result);
+        return nullptr;
+    }
+    Py_ssize_t r = a_start;
+    for (Py_ssize_t i = 0; i < result->rows; i++)
+    {
+        PyMatrixAssign(result, i, 0, PyMatrixGet(self, r, c));
+        r += a_step;
+    }
+    return (PyObject *)result;
+}
+
+static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObject *b)
+{
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    PySlice_Unpack(a, &a_start, &a_stop, &a_step);
+    result->rows = PySlice_AdjustIndices(self->cols, &a_start, &a_stop, a_step);
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    PySlice_Unpack(b, &b_start, &b_stop, &b_step);
+    result->cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
+    if (PyMatrixAlloc(result))
+    {
+        if (PyErr_ExceptionMatches(PyExc_ValueError))
+        {
+            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        }
+        Py_DECREF(result);
+        return nullptr;
+    }
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    for (Py_ssize_t i = 0; i < result->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            PyMatrixAssign(result, i, j, PyMatrixGet(self, r, c));
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+    return (PyObject *)result;
+}
+
+PyObject *PyMatrix_copy(PyMatrixObject *self)
+{
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = self->rows;
+    result->cols = self->cols;
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    for (Py_ssize_t i = 0; i < result->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            PyMatrixAssign(result, i, j, PyMatrixGet(self, i, j));
+        }
+    }
+    return (PyObject *)result;
+}
+
 PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
 {
+    if (index == Py_Ellipsis)
+    {
+        return PyMatrix_copy(self);
+    }
     if (!PyTuple_CheckExact(index))
     {
-        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a tuple with 2 elements.", index->ob_type->tp_name);
+        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a ellipsis a tuple with 2 elements.", index->ob_type->tp_name);
         return nullptr;
     }
     if (PyTuple_Size(index) != 2)
@@ -695,141 +876,471 @@ PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
     PyObject *b = PyTuple_GetItem(index, 1);
     if (PyLong_CheckExact(a) && PyLong_CheckExact(b))
     {
-        int r = PyLong_AS_LONG(a);
-        int c = PyLong_AS_LONG(b);
-        PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
-        if (!result)
-        {
-            return nullptr;
-        }
-        if (PyMatrixGet_withcheck(self, r, c, result->num))
-        {
-            Py_DECREF(result);
-            return nullptr;
-        }
-        return (PyObject *)result;
+        return PyMatrix_subscript_LL(self, a, b);
     }
     else if (PyLong_CheckExact(a) && PySlice_Check(b))
     {
-        int r = PyLong_AsLong(a);
-        if (r < 0)
-        {
-            r = self->rows + r;
-        }
-        if ((r < 0) || (r >= self->rows))
-        {
-            PyErr_SetString(PyExc_IndexError, "Index out of range.");
-            return nullptr;
-        }
-        PyMatrixObject *result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
-        if (!result)
-        {
-            return nullptr;
-        }
-        result->rows = 1;
-        Py_ssize_t b_start;
-        Py_ssize_t b_stop;
-        Py_ssize_t b_step;
-        PySlice_Unpack(b, &b_start, &b_stop, &b_step);
-        result->cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
-        if (PyMatrixAlloc(result))
-        {
-            if (PyErr_ExceptionMatches(PyExc_ValueError))
-            {
-                PyErr_SetString(PyExc_IndexError, "Index out of range.");
-            }
-            Py_DECREF(result);
-            return nullptr;
-        }
-        Py_ssize_t c = b_start;
-        for (Py_ssize_t j = 0; j < result->cols; j++)
-        {
-            PyMatrixAssign(result, 0, j, PyMatrixGet(self, r, c));
-            c += b_step;
-        }
-        return (PyObject *)result;
+        return PyMatrix_subscript_LS(self, a, b);
     }
     else if (PySlice_Check(a) && PyLong_CheckExact(b))
     {
-        int c = PyLong_AsLong(b);
-        if (c < 0)
-        {
-            c = self->rows + c;
-        }
-        if ((c < 0) || (c >= self->rows))
-        {
-            PyErr_SetString(PyExc_IndexError, "Index out of range.");
-            return nullptr;
-        }
-        PyMatrixObject *result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
-        if (!result)
-        {
-            return nullptr;
-        }
-        result->cols = 1;
-        Py_ssize_t a_start;
-        Py_ssize_t a_stop;
-        Py_ssize_t a_step;
-        PySlice_Unpack(a, &a_start, &a_stop, &a_step);
-        result->rows = PySlice_AdjustIndices(self->cols, &a_start, &a_stop, a_step);
-        if (PyMatrixAlloc(result))
-        {
-            if (PyErr_ExceptionMatches(PyExc_ValueError))
-            {
-                PyErr_SetString(PyExc_IndexError, "Index out of range.");
-            }
-            Py_DECREF(result);
-            return nullptr;
-        }
-        Py_ssize_t r = a_start;
-        for (Py_ssize_t i = 0; i < result->rows; i++)
-        {
-            PyMatrixAssign(result, i, 0, PyMatrixGet(self, r, c));
-            r += a_step;
-        }
-        return (PyObject *)result;
+        return PyMatrix_subscript_SL(self, a, b);
     }
     else if (PySlice_Check(a) && PySlice_Check(b))
     {
-        PyMatrixObject *result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
-        if (!result)
-        {
-            return nullptr;
-        }
-        Py_ssize_t a_start;
-        Py_ssize_t a_stop;
-        Py_ssize_t a_step;
-        PySlice_Unpack(a, &a_start, &a_stop, &a_step);
-        result->rows = PySlice_AdjustIndices(self->cols, &a_start, &a_stop, a_step);
-        Py_ssize_t b_start;
-        Py_ssize_t b_stop;
-        Py_ssize_t b_step;
-        PySlice_Unpack(b, &b_start, &b_stop, &b_step);
-        result->cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
-        if (PyMatrixAlloc(result))
-        {
-            if (PyErr_ExceptionMatches(PyExc_ValueError))
-            {
-                PyErr_SetString(PyExc_IndexError, "Index out of range.");
-            }
-            Py_DECREF(result);
-            return nullptr;
-        }
-        Py_ssize_t r = a_start;
-        Py_ssize_t c = b_start;
-        for (Py_ssize_t i = 0; i < result->rows; i++)
-        {
-            for (Py_ssize_t j = 0; j < result->cols; j++)
-            {
-                PyMatrixAssign(result, i, j, PyMatrixGet(self, r, c));
-                c += b_step;
-            }
-            r += a_step;
-        }
-        return (PyObject *)result;
+        return PyMatrix_subscript_SS(self, a, b);
     }
     PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s and %s.", a->ob_type->tp_name, b->ob_type->tp_name);
-    Py_RETURN_NONE;
+    return nullptr;
+}
+
+static int index_process(PyObject *x, Py_ssize_t Ml, Py_ssize_t &x_start, Py_ssize_t &x_stop, Py_ssize_t &x_step, Py_ssize_t &l, Py_ssize_t supposel)
+{
+    if (PySlice_Check(x))
+    {
+        PySlice_Unpack(x, &x_start, &x_stop, &x_step);
+        l = PySlice_AdjustIndices(Ml, &x_start, &x_stop, x_step);
+        if (!l)
+        {
+            PyErr_SetNone(PyExc_IndexError);
+            return -1;
+        }
+    }
+    else if (PyLong_CheckExact(x))
+    {
+        l = 1;
+        x_start = PyLong_AsSsize_t(x);
+        x_stop = 0;
+        x_step = 0;
+    }
+    else
+    {
+        PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s.", x->ob_type->tp_name);
+        return -1;
+    }
+    if (l != supposel)
+    {
+        PyErr_SetNone(PyExc_ShapeError);
+        return -1;
+    }
+    return 0;
+}
+
+static int PyMatrix_ass_subscript_M(PyMatrixObject *self, PyObject *a, PyObject *b, PyMatrixObject *value)
+{
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    Py_ssize_t rows;
+    if (index_process(a, self->rows, a_start, a_stop, a_step, rows, value->rows))
+    {
+        return -1;
+    }
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    Py_ssize_t cols;
+    if (index_process(b, self->cols, b_start, b_stop, b_step, cols, value->cols))
+    {
+        return -1;
+    }
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < cols; j++)
+        {
+            PyMatrixAssign(self, r, c, PyMatrixGet(value, i, j));
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+    return 0;
+}
+
+static int PyMatrix_ass_subscript_List(PyMatrixObject *self, PyObject *a, PyObject *b, PyObject *value)
+{
+    Py_ssize_t mrows = PyList_Size(value);
+    Py_ssize_t mcols = 0;
+    PyObject *tmp;
+    for (Py_ssize_t i = 0; i < mrows; i++)
+    {
+        tmp = PyList_GetItem(value, i);
+        if (!PyList_CheckExact(tmp))
+        {
+            PyErr_Format(PyExc_ValueError, "Inconsistency value format. On index:%ld", i);
+            return -1;
+        }
+        for (Py_ssize_t j = 0; j < PyList_Size(tmp); j++)
+        {
+            if (!CanBeComplexVar(PyList_GetItem(tmp, j)))
+            {
+                PyErr_Format(PyExc_ValueError, "Unsupported type at %ld %ld", i, j);
+                return -1;
+            }
+        }
+        if (mcols < PyList_Size(tmp))
+        {
+            mcols = PyList_Size(tmp);
+        }
+    }
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    Py_ssize_t rows;
+    if (index_process(a, self->rows, a_start, a_stop, a_step, rows, mrows))
+    {
+        return -1;
+    }
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    Py_ssize_t cols;
+    if (index_process(b, self->cols, b_start, b_stop, b_step, cols, mcols))
+    {
+        return -1;
+    }
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    ComplexVar num;
+    for (Py_ssize_t i = 0; i < mrows; i++)
+    {
+        tmp = PyList_GetItem(value, i);
+        for (Py_ssize_t j = 0; j < PyList_Size(tmp); j++)
+        {
+            assignComplexVar(PyList_GetItem(tmp, j), self->elements[r * self->cols + c]);
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+    return 0;
+}
+
+static void PyMatrix_ass_subscript_nparray_r(PyMatrixObject *self, Py_ssize_t a_start, Py_ssize_t a_step, Py_ssize_t b_start, Py_ssize_t b_step, Py_ssize_t rows, Py_ssize_t cols, npy_real auto *data)
+{
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    int64_t pos;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < cols; j++)
+        {
+            pos = r * self->cols + c;
+            self->elements[pos].real = data[i * cols + j];
+            self->elements[pos].imag = 0;
+            self->elements[pos].isArbitrary = false;
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+}
+
+static void PyMatrix_ass_subscript_nparray_c(PyMatrixObject *self, Py_ssize_t a_start, Py_ssize_t a_step, Py_ssize_t b_start, Py_ssize_t b_step, Py_ssize_t rows, Py_ssize_t cols, npy_complex auto *data)
+{
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    int64_t pos;
+    int64_t dpos;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < cols; j++)
+        {
+            pos = r * self->cols + c;
+            dpos = i * cols + j;
+            self->elements[pos].real = data[dpos].real;
+            self->elements[pos].imag = data[dpos].imag;
+            self->elements[pos].isArbitrary = false;
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+}
+
+static void PyMatrix_ass_subscript_nparray_half(PyMatrixObject *self, Py_ssize_t a_start, Py_ssize_t a_step, Py_ssize_t b_start, Py_ssize_t b_step, Py_ssize_t rows, Py_ssize_t cols, npy_half *data)
+{
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    int64_t pos;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < cols; j++)
+        {
+            pos = r * self->cols + c;
+            self->elements[pos].real = casthalf_to_double(data[i * cols + j]);
+            self->elements[pos].imag = 0;
+            self->elements[pos].isArbitrary = false;
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+}
+
+static int PyMatrix_ass_subscript_nparray_obj(PyMatrixObject *self, Py_ssize_t a_start, Py_ssize_t a_step, Py_ssize_t b_start, Py_ssize_t b_step, Py_ssize_t rows, Py_ssize_t cols, PyObject **data)
+{
+    Py_ssize_t r = a_start;
+    Py_ssize_t c = b_start;
+    for (Py_ssize_t i = 0; i < rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < cols; j++)
+        {
+            if (assignComplexVar(data[i * cols + j], self->elements[r * self->cols + c]))
+            {
+                PyObject *type;
+                PyObject *value;
+                PyObject *traceback;
+                PyErr_Fetch(&type, &value, &traceback);
+                PyObject *newvalue = PyUnicode_FromFormat("%S\nTrying to assign object at %ld %ld to %ld %ld.", value, i, j, r, c);
+                PyErr_Restore(type, newvalue, traceback);
+                Py_DECREF(value);
+                return -1;
+            }
+            c += b_step;
+        }
+        c = b_start;
+        r += a_step;
+    }
+    return 0;
+}
+
+static int PyMatrix_ass_subscript_nparray(PyMatrixObject *self, PyObject *a, PyObject *b, PyArrayObject *value)
+{
+    if (PyArray_NDIM(value) != 2)
+    {
+        PyErr_SetString(PyExc_ValueError, "Only take 2 dimension array");
+        return -1;
+    }
+    Py_ssize_t a_start;
+    Py_ssize_t a_stop;
+    Py_ssize_t a_step;
+    Py_ssize_t rows;
+    if (index_process(a, self->rows, a_start, a_stop, a_step, rows, PyArray_DIM(value, 0)))
+    {
+        return -1;
+    }
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    Py_ssize_t cols;
+    if (index_process(b, self->cols, b_start, b_stop, b_step, cols, PyArray_DIM(value, 1)))
+    {
+        return -1;
+    }
+    void *data = PyArray_DATA(value);
+    switch (PyArray_DESCR(value)->type_num)
+    {
+    case NPY_BYTE:
+    {
+        npy_byte *A = (npy_byte *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_UBYTE:
+    {
+        npy_ubyte *A = (npy_ubyte *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_SHORT:
+    {
+        npy_short *A = (npy_short *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_USHORT:
+    {
+        npy_ushort *A = (npy_ushort *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_INT:
+    {
+        npy_int *A = (npy_int *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_UINT:
+    {
+        npy_uint *A = (npy_uint *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_LONG:
+    {
+        npy_long *A = (npy_long *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_ULONG:
+    {
+        npy_ulong *A = (npy_ulong *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_LONGLONG:
+    {
+        npy_longlong *A = (npy_longlong *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_ULONGLONG:
+    {
+        npy_ulonglong *A = (npy_ulonglong *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_FLOAT:
+    {
+        npy_float *A = (npy_float *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_DOUBLE:
+    {
+        npy_double *A = (npy_double *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_LONGDOUBLE:
+    {
+        npy_longdouble *A = (npy_longdouble *)data;
+        PyMatrix_ass_subscript_nparray_r(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_CFLOAT:
+    {
+        npy_cfloat *A = (npy_cfloat *)data;
+        PyMatrix_ass_subscript_nparray_c(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_CDOUBLE:
+    {
+        npy_cdouble *A = (npy_cdouble *)data;
+        PyMatrix_ass_subscript_nparray_c(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_CLONGDOUBLE:
+    {
+        npy_clongdouble *A = (npy_clongdouble *)data;
+        PyMatrix_ass_subscript_nparray_c(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    case NPY_OBJECT:
+    {
+        PyObject **A = (PyObject **)data;
+        if (PyMatrix_ass_subscript_nparray_obj(self, a_start, a_step, b_start, b_step, rows, cols, A))
+        {
+            return -1;
+        }
+        break;
+    }
+    case NPY_HALF:
+    {
+        npy_half *A = (npy_half *)data;
+        PyMatrix_ass_subscript_nparray_half(self, a_start, a_step, b_start, b_step, rows, cols, A);
+        break;
+    }
+    default:
+    {
+        PyErr_SetString(PyExc_ValueError, "Unsupport dtype.");
+        return -1;
+    }
+    }
+    return 0;
+}
+
+static int PyMatrix_ass_subscript_LLV(PyMatrixObject *self, PyObject *a, PyObject *b, PyObject *value)
+{
+    int r = PyLong_AS_LONG(a);
+    int c = PyLong_AS_LONG(b);
+    ComplexVar tmp;
+    if (assignComplexVar(value, tmp))
+    {
+        return -1;
+    }
+    if (PyMatrixAssign_withcheck(self, r, c, tmp))
+    {
+        return -1;
+    }
+    return 0;
+}
+
+static int PyMatrix_ass_subscript_LSV(PyMatrixObject *self, PyObject *a, PyObject *b, PyObject *value)
+{
+    int r = PyLong_AsLong(a);
+    if (r < 0)
+    {
+        r = self->rows + r;
+    }
+    if ((r < 0) || (r >= self->rows))
+    {
+        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        return -1;
+    }
+    ComplexVar tmp;
+    if (assignComplexVar(value, tmp))
+    {
+        return -1;
+    }
+    Py_ssize_t b_start;
+    Py_ssize_t b_stop;
+    Py_ssize_t b_step;
+    PySlice_Unpack(b, &b_start, &b_stop, &b_step);
+    Py_ssize_t cols = PySlice_AdjustIndices(self->cols, &b_start, &b_stop, b_step);
+    Py_ssize_t c = b_start;
+    for (Py_ssize_t j = 0; j < cols; j++)
+    {
+        PyMatrixAssign(self, r, c, tmp);
+        c += b_step;
+    }
+    return 0;
+}
+
+int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *value)
+{
+    if (!PyTuple_CheckExact(index))
+    {
+        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a tuple with 2 elements.", index->ob_type->tp_name);
+        return -1;
+    }
+    if (PyTuple_Size(index) != 2)
+    {
+        PyErr_Format(PyExc_IndexError, "Get %ld items. Only take a tuple with 2 elements.", PyTuple_Size(index));
+        return -1;
+    }
+    PyObject *a = PyTuple_GetItem(index, 0);
+    PyObject *b = PyTuple_GetItem(index, 1);
+    if (PyMatrix_Check(value))
+    {
+        return PyMatrix_ass_subscript_M(self, a, b, (PyMatrixObject *)value);
+    }
+    if (PyList_CheckExact(value))
+    {
+        return PyMatrix_ass_subscript_List(self, a, b, value);
+    }
+    if (PyArray_Check(value))
+    {
+        return PyMatrix_ass_subscript_nparray(self, a, b, (PyArrayObject *)value);
+    }
+    if (PyLong_CheckExact(a) && PyLong_CheckExact(b))
+    {
+        return PyMatrix_ass_subscript_LLV(self, a, b, value);
+    }
+    else if (PyLong_CheckExact(a) && PySlice_Check(b))
+    {
+        return PyMatrix_ass_subscript_LSV(self, a, b, value);
+    }
+    else if (PySlice_Check(a) && PyLong_CheckExact(b))
+    {
+    }
+    else if (PySlice_Check(a) && PySlice_Check(b))
+    {
+    }
+    return -1;
 }
 
 static PyMemberDef PyMatrixMember[] = {
@@ -842,6 +1353,7 @@ static PyMemberDef PyMatrixMember[] = {
 static PyMappingMethods PyMatrixMap = {
     .mp_length = (lenfunc)PyMatrix_length,
     .mp_subscript = (binaryfunc)PyMatrix_subscript,
+    .mp_ass_subscript = (objobjargproc)PyMatrix_ass_subscript,
 };
 
 PyTypeObject PyMatrixType = {

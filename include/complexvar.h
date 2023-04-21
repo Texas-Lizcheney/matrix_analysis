@@ -74,6 +74,7 @@ struct PyComplexVarObject
 int assignComplexVar(PyObject *, ComplexVar &);
 extern PyTypeObject PyComplexVarType;
 #define PyComplexVar_CheckExact(op) Py_IS_TYPE(op, &PyComplexVarType)
+#define CanBeComplexVar(op) (PyComplexVar_CheckExact(op) || Py_IsNone(op) || PyLong_CheckExact(op) || PyFloat_CheckExact(op) || PyComplex_CheckExact(op))
 
 void PyComplexVar_dealloc(PyComplexVarObject *);
 PyObject *PyComplexVar_repr(PyComplexVarObject *);
@@ -103,7 +104,7 @@ PyObject *PyComplexVar_true_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *, PyObject *);
 
-PyObject *PyComlpexVar_conj(PyComplexVarObject *);
+PyObject *PyComplexVar_conj(PyComplexVarObject *);
 PyObject *PyComplexVar_exp(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_ln(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_log(PyComplexVarObject *, PyObject *);

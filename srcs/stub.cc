@@ -9,6 +9,7 @@
 extern PyTypeObject PyMatrixType;
 extern PyTypeObject PyComplexVarType;
 extern PyObject *PyExc_Undefined;
+extern PyObject *PyExc_ShapeError;
 
 static PyModuleDef coreMoulde = {
     .m_base = PyModuleDef_HEAD_INIT,
@@ -77,13 +78,14 @@ PyObject *Init_matrixModule()
     {
         return nullptr;
     }
+    PyExc_ShapeError = PyErr_NewException("matrixcore.ShapeError", nullptr, nullptr);
     PyObject *m = PyModule_Create(&matrixModule);
     if (!m)
     {
         return nullptr;
     }
     Py_INCREF(&PyMatrixType);
-    if ((PyModule_AddType(m, &PyMatrixType) < 0))
+    if ((PyModule_AddType(m, &PyMatrixType) < 0) || (PyModule_AddObject(m, "ShapeError", PyExc_ShapeError) < 0))
     {
         Py_DECREF(&PyMatrixType);
         Py_DECREF(m);

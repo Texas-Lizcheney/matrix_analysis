@@ -44,5 +44,14 @@ class matrix:
     def __len__(self) -> int:
         ...
 
+    @typing.overload
     def __getitem__(self, index: tuple[int | slice, int | slice]) -> variable | matrix:
         ...
+
+    @typing.overload
+    def __getitem__(self, index: ellipsis) -> matrix:
+        ...
+
+
+class ShapeError(Exception):
+    ...

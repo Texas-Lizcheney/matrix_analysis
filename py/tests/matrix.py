@@ -96,10 +96,14 @@ class Test_mat(externed_Testcase):
             x), "[1+0i\t...\tundefined]\n[...\t...\t...]\n[5+0i\t...\tundefined]")
         matrix_analysis.matrix.set_fastprint(False)
 
-    def test_asmap(self):
+    def test_len(self):
         x = matrix_analysis.matrix.matrix(
             [[1, 2.0, None], [None, 3+4j], [5, matrix_analysis.var.variable(1+1j)]])
         self.assertEqual(len(x), 9)
+
+    def test_getitem(self):
+        x = matrix_analysis.matrix.matrix(
+            [[1, 2.0, None], [None, 3+4j], [5, matrix_analysis.var.variable(1+1j)]])
         a = x[0, 0]
         self.assertAlmostEqual(a.rec, (1, 0))
         with self.assertRaises(IndexError):
@@ -108,6 +112,73 @@ class Test_mat(externed_Testcase):
         self.assertEqual(str(x[0, 0:3:2]), "[1+0i\tundefined]")
         self.assertEqual(str(x[0, ::-1]), "[undefined\t2+0i\t1+0i]")
         self.assertEqual(str(x[0, ::-2]), "[undefined\t1+0i]")
+        with self.assertRaises(IndexError):
+            a = x[3, :]
+        with self.assertRaises(IndexError):
+            a = x[-4, :]
+        self.assertEqual(str(x[:, 0]), "[1+0i]\n[undefined]\n[5+0i]")
+        self.assertEqual(str(x[0:3:2, 0]), "[1+0i]\n[5+0i]")
+        self.assertEqual(str(x[::-1, 0]), "[5+0i]\n[undefined]\n[1+0i]")
+        self.assertEqual(str(x[::-2, 0]), "[5+0i]\n[1+0i]")
+        with self.assertRaises(IndexError):
+            a = x[:, 3]
+        with self.assertRaises(IndexError):
+            a = x[:, -4]
+        self.assertEqual(str(x[:, :]), str(x))
+        self.assertEqual(str(x[1:3, 1:3]),
+                         "[3+4i\tundefined]\n[1+1i\tundefined]")
+        self.assertEqual(str(x[-1:-3:-1, -1:-3:-2]),
+                         "[undefined]\n[undefined]")
+        with self.assertRaises(IndexError):
+            a = x[4:10, 4:10]
+        with self.assertRaises(TypeError):
+            a = x["abc"]
+        with self.assertRaises(IndexError):
+            a = x[1, 2, :]
+        with self.assertRaises(TypeError):
+            a = x[1, "abc"]
+        y = x[...]
+        self.assertEqual(str(x), str(y))
+        self.assertNotEqual(id(x), id(y))
+
+    def test_setitem(self):
+        x = matrix_analysis.matrix.matrix(4, 4, 0)
+        with self.assertRaises(TypeError):
+            x["abc"] = matrix_analysis.matrix.matrix([[1]])
+        with self.assertRaises(IndexError):
+            x[:, :, :] = matrix_analysis.matrix.matrix([[1]])
+        x[0:3, 0:4:2] = matrix_analysis.matrix.matrix([[1, 2], [3, 4], [5, 6]])
+        self.assertEqual(str(x), str(
+            matrix_analysis.matrix.matrix([[1, 0, 2, 0], [3, 0, 4, 0], [5, 0, 6, 0], [0, 0, 0, 0]])))
+        with self.assertRaises(IndexError):
+            x[4:5, 4:5] = matrix_analysis.matrix.matrix([[1]])
+        with self.assertRaises(matrix_analysis.matrix.ShapeError):
+            x[0:3, 0:4:2] = matrix_analysis.matrix.matrix([[1, 2], [3, 4]])
+        x = matrix_analysis.matrix.matrix(4, 4, 0)
+        x[0:3, 0:4:2] = [[1, 2], [3, None], [5]]
+        self.assertEqual(str(x), str(matrix_analysis.matrix.matrix([[1, 0, 2, 0], [
+                         3, 0, None, 0], [5, 0, 0, 0], [0, 0, 0, 0]])))
+        with self.assertRaises(ValueError):
+            x[0:1, 0] = [[1], (2)]
+        with self.assertRaises(ValueError):
+            x[0:1, 0] = [[1], ["abc"]]
+        with self.assertRaises(matrix_analysis.matrix.ShapeError):
+            x[1:2, 0] = [[1], [2, 3]]
+        y = str(matrix_analysis.matrix.matrix(
+            [[1, 0, 1, 0], [0, 0, 0, 0], [1, 0, 1, 0], [0, 0, 0, 0]]))
+        for D in numpy_dtypes:
+            x = matrix_analysis.matrix.matrix(4, 4, 0)
+            x[0:4:2, 0:4:2] = numpy.ones((2, 2), dtype=D)
+            self.assertEqual(str(x), y)
+        x = matrix_analysis.matrix.matrix(4, 4, 0)
+        with self.assertRaises(ValueError):
+            x[0, 0] = matrix_analysis.matrix.matrix(
+                numpy.array([[1]], dtype=numpy.timedelta64))
+        x[1:4:2, 0:4:2] = numpy.array([[None, 1], [2.0, -1-1j]], dtype=object)
+        self.assertEqual(str(x), str(matrix_analysis.matrix.matrix(
+            [[0, 0, 0, 0], [None, 0, 1, 0], [0, 0, 0, 0], [2.0, 0, -1-1j, 0]])))
+        with self.assertRaises(ValueError):
+            x[0, 0] = numpy.array([["abc"]], dtype=object)
 
     def test_members(self):
         x = matrix_analysis.matrix.matrix(5, 10)
