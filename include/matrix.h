@@ -3,7 +3,6 @@
 #include <Python.h>
 #include <structmember.h>
 #include <complexvar.h>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <algorithm>
@@ -25,16 +24,22 @@ struct PyMatrixObject
     int64_t total_elements;
 };
 
+#define Matrix_sameshape(x, y) ((x->rows == y->rows) && (x->cols == y->cols))
+PyMatrixObject *MatrixAdd(const PyMatrixObject *const, const PyMatrixObject *const);
+PyMatrixObject *MatrixAddConstant(const PyMatrixObject *const, const ComplexVar);
+
 int PyMatrixAlloc(PyMatrixObject *);
 void PyMatrixAssign(PyMatrixObject *, int, int, const ComplexVar &);
-ComplexVar PyMatrixGet_withcheck(PyMatrixObject *, int, int);
+ComplexVar PyMatrixGetitem(const PyMatrixObject *const, int, int);
 int PyMatrixAssign_withcheck(PyMatrixObject *, int, int, const ComplexVar &);
-int PyMatrixGet_withcheck(PyMatrixObject *, int, int, ComplexVar &);
+int PyMatrixGet_withcheck(const PyMatrixObject *const, int, int, ComplexVar &);
 void PyMatrix_dealloc(PyMatrixObject *);
 PyObject *PyMatrix_repr(PyMatrixObject *);
 PyObject *PyMatrix_str(PyMatrixObject *);
 int PyMatrix_init(PyMatrixObject *, PyObject *, PyObject *);
 PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);
+
+PyObject *PyMatrix_add(PyMatrixObject *, PyObject *);
 
 Py_ssize_t PyMatrix_length(PyMatrixObject *);
 PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);

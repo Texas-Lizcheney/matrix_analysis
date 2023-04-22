@@ -73,6 +73,7 @@ struct PyComplexVarObject
 
 int assignComplexVar(PyObject *, ComplexVar &);
 extern PyTypeObject PyComplexVarType;
+#define PyComplexVar_Check(op) PyObject_TypeCheck(op, &PyComplexVarType)
 #define PyComplexVar_CheckExact(op) Py_IS_TYPE(op, &PyComplexVarType)
 #define CanBeComplexVar(op) (PyComplexVar_CheckExact(op) || Py_IsNone(op) || PyLong_CheckExact(op) || PyFloat_CheckExact(op) || PyComplex_CheckExact(op))
 
@@ -83,24 +84,24 @@ PyObject *PyComplexVar_richcompare(PyComplexVarObject *, PyObject *, int);
 int PyComplexVar_init(PyComplexVarObject *, PyObject *, PyObject *);
 PyObject *PyComplexVar_new(PyTypeObject *, PyObject *, PyObject *);
 
-PyObject *PyComplexVar_add(PyComplexVarObject *, PyObject *);
-PyObject *PyComplexVar_subtract(PyComplexVarObject *, PyObject *);
-PyObject *PyComplexVar_multiply(PyComplexVarObject *, PyObject *);
-PyObject *PyComplexVar_remainder(PyComplexVarObject *, PyObject *);
-PyObject *PyComplexVar_divmod(PyComplexVarObject *, PyObject *);
-PyObject *PyComplexVar_power(PyComplexVarObject *, PyObject *, PyObject *);
-PyObject *PyComplexVar_negative(PyComplexVarObject *);
-PyObject *PyComplexVar_positive(PyComplexVarObject *);
-PyObject *PyComplexVar_absolute(PyComplexVarObject *);
-int PyComplexVar_bool(PyComplexVarObject *);
-PyObject *PyComplexVar_invert(PyComplexVarObject *);
+PyObject *PyComplexVar_add(PyObject *, PyObject *);
+PyObject *PyComplexVar_subtract(PyObject *, PyObject *);
+PyObject *PyComplexVar_multiply(PyObject *, PyObject *);
+PyObject *PyComplexVar_remainder(PyObject *, PyObject *);
+PyObject *PyComplexVar_divmod(PyObject *, PyObject *);
+PyObject *PyComplexVar_power(PyObject *, PyObject *, PyObject *);
+PyObject *PyComplexVar_negative(PyObject *);
+PyObject *PyComplexVar_positive(PyObject *);
+PyObject *PyComplexVar_absolute(PyObject *);
+int PyComplexVar_bool(PyObject *);
+PyObject *PyComplexVar_invert(PyObject *);
 PyObject *PyComplexVar_inplace_add(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_power(PyComplexVarObject *, PyObject *, PyObject *);
-PyObject *PyComplexVar_floor_divide(PyComplexVarObject *, PyObject *);
-PyObject *PyComplexVar_true_divide(PyComplexVarObject *, PyObject *);
+PyObject *PyComplexVar_floor_divide(PyObject *, PyObject *);
+PyObject *PyComplexVar_true_divide(PyObject *, PyObject *);
 PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *, PyObject *);
 PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *, PyObject *);
 
@@ -143,5 +144,3 @@ PyObject *PyComplexVar_get_recpair(PyComplexVarObject *, void *);
 int PyComplexVar_set_recpair(PyComplexVarObject *, PyObject *, void *);
 PyObject *PyComplexVar_get_polarpair(PyComplexVarObject *, void *);
 int PyComplexVar_set_polarpair(PyComplexVarObject *, PyObject *, void *);
-
-extern PyTypeObject PyComplexVarType;

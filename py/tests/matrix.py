@@ -77,7 +77,7 @@ class Test_mat(externed_Testcase):
             numpy.array([[1, 2.0], [None, 3+4j], [5, matrix_analysis.var.variable(1+1j)]], dtype=object))
         self.assertEqual(
             str(x), "[1+0i\t2+0i]\n[undefined\t3+4i]\n[5+0i\t1+1i]")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.matrix(
                 numpy.array([["abc"]], dtype=object))
 
@@ -177,7 +177,7 @@ class Test_mat(externed_Testcase):
         x[1:4:2, 0:4:2] = numpy.array([[None, 1], [2.0, -1-1j]], dtype=object)
         self.assertEqual(str(x), str(matrix_analysis.matrix.matrix(
             [[0, 0, 0, 0], [None, 0, 1, 0], [0, 0, 0, 0], [2.0, 0, -1-1j, 0]])))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             x[0, 0] = numpy.array([["abc"]], dtype=object)
         x = matrix_analysis.matrix.matrix(2, 2, 0)
         x[0, 0] = None

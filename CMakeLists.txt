@@ -11,6 +11,7 @@ include_directories(
 )
 add_library("matrix" STATIC
     srcs/MatrixObject.cpp
+    srcs/MatrixObjectCal.cpp
 )
 add_library("var" STATIC
     srcs/ComplexVar.cpp

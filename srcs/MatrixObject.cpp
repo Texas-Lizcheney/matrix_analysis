@@ -85,7 +85,7 @@ void PyMatrixAssign(PyMatrixObject *self, int r, int c, const ComplexVar &value)
     self->elements[r * self->cols + c] = value;
 }
 
-ComplexVar PyMatrixGetitem(PyMatrixObject *self, int r, int c)
+ComplexVar PyMatrixGetitem(const PyMatrixObject *const self, int r, int c)
 {
     return self->elements[r * self->cols + c];
 }
@@ -111,7 +111,7 @@ int PyMatrixAssign_withcheck(PyMatrixObject *self, int r, int c, const ComplexVa
     return 0;
 }
 
-int PyMatrixGet_withcheck(PyMatrixObject *self, int r, int c, ComplexVar &value)
+int PyMatrixGet_withcheck(const PyMatrixObject *const self, int r, int c, ComplexVar &value)
 {
     int R = r;
     int C = c;
@@ -673,6 +673,22 @@ PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     }
     ((PyMatrixObject *)self)->elements = nullptr;
     return self;
+}
+
+// as number
+extern PyTypeObject PyComplexVarType;
+PyObject *PyMatrix_add(PyMatrixObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(other))
+    {
+        return (PyObject *)MatrixAdd(self, (PyMatrixObject *)other);
+    }
+    ComplexVar tmp;
+    if (assignComplexVar(other, tmp))
+    {
+        return nullptr;
+    }
+    return (PyObject *)MatrixAddConstant(self, tmp);
 }
 
 // as map
@@ -1480,6 +1496,10 @@ PyObject *PyMatrix_get_shape(PyMatrixObject *self, void *closure)
     return Py_BuildValue("ii", self->rows, self->cols);
 }
 
+static PyNumberMethods PyMatrixNumber = {
+    .nb_add = (binaryfunc)PyMatrix_add,
+};
+
 static PyMappingMethods PyMatrixMap = {
     .mp_length = (lenfunc)PyMatrix_length,
     .mp_subscript = (binaryfunc)PyMatrix_subscript,
@@ -1503,6 +1523,7 @@ PyTypeObject PyMatrixType = {
     .tp_basicsize = sizeof(PyMatrixObject),
     .tp_dealloc = (destructor)PyMatrix_dealloc,
     .tp_repr = (reprfunc)PyMatrix_repr,
+    .tp_as_number = &PyMatrixNumber,
     .tp_as_mapping = &PyMatrixMap,
     .tp_str = (reprfunc)PyMatrix_str,
     .tp_members = PyMatrixMember,
