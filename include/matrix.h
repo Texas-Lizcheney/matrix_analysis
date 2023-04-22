@@ -40,6 +40,8 @@ Py_ssize_t PyMatrix_length(PyMatrixObject *);
 PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);
 int PyMatrix_ass_subscript(PyMatrixObject *, PyObject *, PyObject *);
 
+PyObject *PyMatrix_get_shape(PyMatrixObject *, void *);
+
 extern PyTypeObject PyMatrixType;
 #define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrixType)
 #define PyMatrix_CheckExact(op) Py_IS_TYPE(((PyObject *)((a))), &PyMatrixType)

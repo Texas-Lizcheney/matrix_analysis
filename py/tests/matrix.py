@@ -217,3 +217,7 @@ class Test_mat(externed_Testcase):
         self.assertEqual(x.rows, 5)
         self.assertEqual(x.cols, 10)
         self.assertEqual(x.total, 50)
+
+    def test_property(self):
+        x = matrix_analysis.matrix.matrix(3, 5)
+        self.assertEqual(x.shape, (3, 5))

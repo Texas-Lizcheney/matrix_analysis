@@ -85,7 +85,7 @@ void PyMatrixAssign(PyMatrixObject *self, int r, int c, const ComplexVar &value)
     self->elements[r * self->cols + c] = value;
 }
 
-ComplexVar PyMatrixGet(PyMatrixObject *self, int r, int c)
+ComplexVar PyMatrixGetitem(PyMatrixObject *self, int r, int c)
 {
     return self->elements[r * self->cols + c];
 }
@@ -738,7 +738,7 @@ static PyObject *PyMatrix_subscript_LS(PyMatrixObject *self, PyObject *a, PyObje
     Py_ssize_t c = b_start;
     for (Py_ssize_t j = 0; j < result->cols; j++)
     {
-        PyMatrixAssign(result, 0, j, PyMatrixGet(self, r, c));
+        PyMatrixAssign(result, 0, j, PyMatrixGetitem(self, r, c));
         c += b_step;
     }
     return (PyObject *)result;
@@ -781,7 +781,7 @@ static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObje
     Py_ssize_t r = a_start;
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
-        PyMatrixAssign(result, i, 0, PyMatrixGet(self, r, c));
+        PyMatrixAssign(result, i, 0, PyMatrixGetitem(self, r, c));
         r += a_step;
     }
     return (PyObject *)result;
@@ -821,7 +821,7 @@ static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObje
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, PyMatrixGet(self, r, c));
+            PyMatrixAssign(result, i, j, PyMatrixGetitem(self, r, c));
             c += b_step;
         }
         c = b_start;
@@ -850,7 +850,7 @@ PyObject *PyMatrix_copy(PyMatrixObject *self)
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, PyMatrixGet(self, i, j));
+            PyMatrixAssign(result, i, j, PyMatrixGetitem(self, i, j));
         }
     }
     return (PyObject *)result;
@@ -1011,7 +1011,7 @@ static int PyMatrix_ass_subscript_M(PyMatrixObject *self, PyObject *a, PyObject 
     {
         for (Py_ssize_t j = 0; j < cols; j++)
         {
-            PyMatrixAssign(self, r, c, PyMatrixGet(value, i, j));
+            PyMatrixAssign(self, r, c, PyMatrixGetitem(value, i, j));
             c += b_step;
         }
         c = b_start;
@@ -1473,6 +1473,19 @@ int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *valu
     return -1;
 }
 
+// get set
+
+PyObject *PyMatrix_get_shape(PyMatrixObject *self, void *closure)
+{
+    return Py_BuildValue("ii", self->rows, self->cols);
+}
+
+static PyMappingMethods PyMatrixMap = {
+    .mp_length = (lenfunc)PyMatrix_length,
+    .mp_subscript = (binaryfunc)PyMatrix_subscript,
+    .mp_ass_subscript = (objobjargproc)PyMatrix_ass_subscript,
+};
+
 static PyMemberDef PyMatrixMember[] = {
     {"rows", T_INT, offsetof(PyMatrixObject, rows), READONLY, nullptr},
     {"cols", T_INT, offsetof(PyMatrixObject, cols), READONLY, nullptr},
@@ -1480,10 +1493,9 @@ static PyMemberDef PyMatrixMember[] = {
     nullptr,
 };
 
-static PyMappingMethods PyMatrixMap = {
-    .mp_length = (lenfunc)PyMatrix_length,
-    .mp_subscript = (binaryfunc)PyMatrix_subscript,
-    .mp_ass_subscript = (objobjargproc)PyMatrix_ass_subscript,
+static PyGetSetDef PyMatrixGetSet[] = {
+    {"shape", (getter)PyMatrix_get_shape, nullptr, nullptr, nullptr},
+    nullptr,
 };
 
 PyTypeObject PyMatrixType = {
@@ -1494,6 +1506,7 @@ PyTypeObject PyMatrixType = {
     .tp_as_mapping = &PyMatrixMap,
     .tp_str = (reprfunc)PyMatrix_str,
     .tp_members = PyMatrixMember,
+    .tp_getset = PyMatrixGetSet,
     .tp_init = (initproc)PyMatrix_init,
     .tp_new = (newfunc)PyMatrix_new,
 };
