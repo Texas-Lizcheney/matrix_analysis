@@ -2,7 +2,8 @@ import var as var
 import matrix as matrix
 
 
-Unsure: object
+class Unsure():
+    ...
 
 
 class ShapeError(Exception):

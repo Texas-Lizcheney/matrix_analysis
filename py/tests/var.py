@@ -2,6 +2,7 @@ from .Testcase import externed_Testcase
 import matrix_analysis
 import math
 import sys
+Unsure = matrix_analysis.Unsure
 
 
 class Test_var(externed_Testcase):
@@ -111,13 +112,13 @@ class Test_var(externed_Testcase):
         k = id(x)
         x += y
         self.assertEqual(id(x), k)
-        self.assertTupleAlmostEqual(z.rec, x.rec)
-        f = matrix_analysis.var.variable(matrix_analysis.Unsure)
+        self.assertVarAlmostEqual(z, x)
+        f = matrix_analysis.var.variable(Unsure)
         z = x+f
         self.assertTrue(z.is_arbitrary)
         with self.assertRaises(TypeError):
             x+"abc"
-        self.assertTupleAlmostEqual((x+1).rec, (1+x).rec)
+        self.assertVarAlmostEqual(x+1, 1+x)
 
     def test_sub(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -128,13 +129,13 @@ class Test_var(externed_Testcase):
         k = id(x)
         x -= y
         self.assertEqual(id(x), k)
-        self.assertTupleAlmostEqual(z.rec, x.rec)
-        f = matrix_analysis.var.variable(matrix_analysis.Unsure)
+        self.assertVarAlmostEqual(z, x)
+        f = matrix_analysis.var.variable(Unsure)
         z = x-f
         self.assertTrue(z.is_arbitrary)
         with self.assertRaises(TypeError):
             x-"abc"
-        self.assertTupleAlmostEqual((x-1).rec, (-(1-x)).rec)
+        self.assertVarAlmostEqual(x-1, -(1-x))
 
     def test_mul(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -145,8 +146,8 @@ class Test_var(externed_Testcase):
         k = id(x)
         x *= y
         self.assertEqual(id(x), k)
-        self.assertTupleAlmostEqual(z.rec, x.rec)
-        f = matrix_analysis.var.variable(matrix_analysis.Unsure)
+        self.assertVarAlmostEqual(z, x)
+        f = matrix_analysis.var.variable(Unsure)
         z = x*f
         self.assertTrue(z.is_arbitrary)
         g = matrix_analysis.var.variable(0)
@@ -155,7 +156,7 @@ class Test_var(externed_Testcase):
         self.assertTupleAlmostEqual(z.rec, (0, 0))
         with self.assertRaises(TypeError):
             x*"abc"
-        self.assertTupleAlmostEqual((x*1).rec, (1*x).rec)
+        self.assertVarAlmostEqual(x*1, 1*x)
 
     def test_div(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -176,7 +177,7 @@ class Test_var(externed_Testcase):
         k1 = id(x1)
         x1 /= y
         self.assertEqual(id(x1), k1)
-        self.assertTupleAlmostEqual(z1.rec, x1.rec)
+        self.assertVarAlmostEqual(z1, x1)
         x2 = matrix_analysis.var.variable(2+3j)
         k2 = id(x2)
         x2 //= x
@@ -185,8 +186,8 @@ class Test_var(externed_Testcase):
         k3 = id(x3)
         x3 %= x
         self.assertEqual(id(x3), k3)
-        self.assertTupleAlmostEqual(z3.rec, x3.rec)
-        f = matrix_analysis.var.variable(matrix_analysis.Unsure)
+        self.assertVarAlmostEqual(z3, x3)
+        f = matrix_analysis.var.variable(Unsure)
         z1 = x/f
         z2 = f/x
         self.assertTrue(z1.is_arbitrary)
@@ -203,7 +204,7 @@ class Test_var(externed_Testcase):
             x//"abc"
         with self.assertRaises(TypeError):
             x % "abc"
-        self.assertTupleAlmostEqual((x/1).rec, (~(1/x)).rec)
+        self.assertVarAlmostEqual(x/1, ~(1/x))
         self.assertTupleAlmostEqual((1//x).rec, (0, -1))
         self.assertTupleAlmostEqual((1 % x).rec, (-1, 1))
 
@@ -221,11 +222,11 @@ class Test_var(externed_Testcase):
         k = id(x)
         x **= y
         self.assertEqual(k, id(x))
-        self.assertTupleAlmostEqual(z.rec, x.rec)
+        self.assertVarAlmostEqual(z, x)
         k = id(a)
         a.__ipow__(b, c)
         self.assertEqual(k, id(a))
-        self.assertTupleAlmostEqual(a.rec, d.rec)
+        self.assertVarAlmostEqual(a, d)
         with self.assertRaises(TypeError):
             x**"abc"
         self.assertTupleAlmostEqual((2**y).rec, (-1.94797767186, 3.4936203271))
@@ -264,7 +265,7 @@ class Test_var(externed_Testcase):
     def test_funcs(self):
         x = matrix_analysis.var.variable(2, 3)
         y = matrix_analysis.var.variable(1, 2)
-        p = matrix_analysis.var.variable(matrix_analysis.Unsure)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTupleAlmostEqual((z := x.conj()).rec, (2, -3))
         self.assertFalse(z.is_arbitrary)
         self.assertTrue(p.conj().is_arbitrary)

@@ -7,7 +7,6 @@ int escape_rows_to = 3;
 int escape_cols_from = 3;
 int escape_cols_to = 3;
 extern PyObject *PyExc_ShapeError;
-
 template <typename T>
 concept npy_real = std::is_integral<T>::value || std::is_floating_point<T>::value;
 
@@ -246,9 +245,8 @@ PyObject *PyMatrix_str(PyMatrixObject *self)
 static int PyMatrix_init_from_rcf(PyMatrixObject *self, PyObject *fill)
 {
     ComplexVar tmp_value;
-    if (assignComplexVar(fill, tmp_value))
+    if (assignComplexVar_withExc(fill, tmp_value))
     {
-        PyErr_Format(PyExc_ValueError, "Unsupported type: %s", fill->ob_type->tp_name);
         return -1;
     }
     if (PyMatrixAlloc(self))
@@ -280,9 +278,8 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
         }
     }
     ComplexVar tmp_value;
-    if (assignComplexVar(fill, tmp_value))
+    if (assignComplexVar_withExc(fill, tmp_value))
     {
-        PyErr_Format(PyExc_ValueError, "Unsupported type: %s", fill->ob_type->tp_name);
         return -1;
     }
     if (PyMatrixAlloc(self))
@@ -299,9 +296,15 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
         {
             if (j < cc)
             {
-                if (assignComplexVar(PyList_GetItem(tmp, j), tmp_matrix_value))
+                if (assignComplexVar_withExc(PyList_GetItem(tmp, j), tmp_matrix_value))
                 {
-                    PyErr_Format(PyExc_ValueError, "Unsupported type: at row %ld col %ld", i, j);
+                    PyObject *type;
+                    PyObject *value;
+                    PyObject *traceback;
+                    PyErr_Fetch(&type, &value, &traceback);
+                    PyObject *newvalue = PyUnicode_FromFormat("%S\nAt row:%ld\tcol%ld", value, i, j);
+                    PyErr_Restore(type, newvalue, traceback);
+                    Py_DECREF(value);
                     return -1;
                 }
                 PyMatrixAssign(self, i, j, tmp_matrix_value);
@@ -353,9 +356,8 @@ static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObj
     ++self->rows;
     ++self->cols;
     ComplexVar tmp_value;
-    if (assignComplexVar(fill, tmp_value))
+    if (assignComplexVar_withExc(fill, tmp_value))
     {
-        PyErr_Format(PyExc_ValueError, "Unsupported type: %s", fill->ob_type->tp_name);
         return -1;
     }
     if (PyMatrixAlloc(self))
@@ -373,9 +375,15 @@ static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObj
     for (Py_ssize_t i = 0; i < total; i++)
     {
         PyArg_ParseTuple(PyList_GetItem(smatrix, i), "iiO", &r, &c, &pair);
-        if (assignComplexVar(pair, tmp_matrix_value))
+        if (assignComplexVar_withExc(pair, tmp_matrix_value))
         {
-            PyErr_Format(PyExc_ValueError, "Unsupport type: %s On index:%ld", pair->ob_type->tp_name, i);
+            PyObject *type;
+            PyObject *value;
+            PyObject *traceback;
+            PyErr_Fetch(&type, &value, &traceback);
+            PyObject *newvalue = PyUnicode_FromFormat("%S\nOn index:%ld", value, i);
+            PyErr_Restore(type, newvalue, traceback);
+            Py_DECREF(value);
             return -1;
         }
         PyMatrixAssign(self, r, c, tmp_matrix_value);
@@ -436,7 +444,7 @@ static int assign_from_obj(ComplexVar *target, int rows, int cols, PyObject **da
         for (int j = 0; j < cols; j++)
         {
             pos = i * cols + j;
-            if (assignComplexVar(data[pos], target[pos]))
+            if (assignComplexVar_withExc(data[pos], target[pos]))
             {
                 PyObject *type;
                 PyObject *value;
@@ -676,19 +684,48 @@ PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 }
 
 // as number
-extern PyTypeObject PyComplexVarType;
-PyObject *PyMatrix_add(PyMatrixObject *self, PyObject *other)
+
+PyObject *PyMatrix_add(PyObject *self, PyObject *other)
 {
-    if (PyMatrix_Check(other))
+    if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)MatrixAdd(self, (PyMatrixObject *)other);
+        return (PyObject *)MatrixAdd((PyMatrixObject *)self, (PyMatrixObject *)other);
     }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(self) && PyMatrix_Check(other))
+    {
+        return (PyObject *)MatrixSub((PyMatrixObject *)self, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
+{
     ComplexVar tmp;
-    if (assignComplexVar(other, tmp))
+    if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
-        return nullptr;
+        assignComplexVar(other, tmp);
+        return (PyObject *)MatrixMulConstant((PyMatrixObject *)self, tmp);
     }
-    return (PyObject *)MatrixAddConstant(self, tmp);
+    if (PyMatrix_Check(other) && CanBeComplexVar(self))
+    {
+        assignComplexVar(self, tmp);
+        return (PyObject *)MatrixMulConstant((PyMatrixObject *)other, tmp);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(self) && PyMatrix_Check(other))
+    {
+        return (PyObject *)MatrixMatmul((PyMatrixObject *)self, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
 }
 
 // as map
@@ -1165,7 +1202,7 @@ static int PyMatrix_ass_subscript_nparray_obj(PyMatrixObject *self, Py_ssize_t a
     {
         for (Py_ssize_t j = 0; j < cols; j++)
         {
-            if (assignComplexVar(data[i * cols + j], self->elements[r * self->cols + c]))
+            if (assignComplexVar_withExc(data[i * cols + j], self->elements[r * self->cols + c]))
             {
                 PyObject *type;
                 PyObject *value;
@@ -1335,7 +1372,7 @@ static int PyMatrix_ass_subscript_LLV(PyMatrixObject *self, PyObject *a, PyObjec
     int r = PyLong_AS_LONG(a);
     int c = PyLong_AS_LONG(b);
     ComplexVar tmp;
-    if (assignComplexVar(value, tmp))
+    if (assignComplexVar_withExc(value, tmp))
     {
         return -1;
     }
@@ -1359,7 +1396,7 @@ static int PyMatrix_ass_subscript_LSV(PyMatrixObject *self, PyObject *a, PyObjec
         return -1;
     }
     ComplexVar tmp;
-    if (assignComplexVar(value, tmp))
+    if (assignComplexVar_withExc(value, tmp))
     {
         return -1;
     }
@@ -1390,7 +1427,7 @@ static int PyMatrix_ass_subscript_SLV(PyMatrixObject *self, PyObject *a, PyObjec
         return -1;
     }
     ComplexVar tmp;
-    if (assignComplexVar(value, tmp))
+    if (assignComplexVar_withExc(value, tmp))
     {
         return -1;
     }
@@ -1411,7 +1448,7 @@ static int PyMatrix_ass_subscript_SLV(PyMatrixObject *self, PyObject *a, PyObjec
 static int PyMatrix_ass_subscript_SSV(PyMatrixObject *self, PyObject *a, PyObject *b, PyObject *value)
 {
     ComplexVar tmp;
-    if (assignComplexVar(value, tmp))
+    if (assignComplexVar_withExc(value, tmp))
     {
         return -1;
     }
@@ -1498,6 +1535,9 @@ PyObject *PyMatrix_get_shape(PyMatrixObject *self, void *closure)
 
 static PyNumberMethods PyMatrixNumber = {
     .nb_add = (binaryfunc)PyMatrix_add,
+    .nb_subtract = (binaryfunc)PyMatrix_subtract,
+    .nb_multiply = (binaryfunc)PyMatrix_multiply,
+    .nb_matrix_multiply = (binaryfunc)PyMatrix_matrix_multiply,
 };
 
 static PyMappingMethods PyMatrixMap = {

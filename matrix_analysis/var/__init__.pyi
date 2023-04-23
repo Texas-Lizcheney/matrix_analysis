@@ -41,10 +41,10 @@ class variable:
     def __str__(self) -> str:
         ...
 
-    def __eq__(self,other:__support_component)->bool|Unsure:
+    def __eq__(self, other: __support_component) -> bool | Unsure:
         ...
 
-    def __ne__(self,other:__support_component)->bool|Unsure:
+    def __ne__(self, other: __support_component) -> bool | Unsure:
         ...
 
     def __add__(self, other: __support_num) -> variable:
@@ -89,13 +89,28 @@ class variable:
     def __rdivmod__(self, other: __support_num) -> typing.Union[variable, variable]:
         ...
 
-    def __pow__(self, other: __support_num, mod: __support_num) -> variable:
+    @typing.overload
+    def __pow__(self, other: __support_num) -> variable:
         ...
 
-    def __rpow__(self, other: __support_num, mod: __support_num) -> variable:
+    @typing.overload
+    def __pow__(self, other: __support_num, mod: __support_num | None) -> variable:
         ...
 
-    def __ipow__(self, other: __support_num, mod: __support_num) -> typing.Self:
+    @typing.overload
+    def __rpow__(self, other: __support_num) -> variable:
+        ...
+
+    @typing.overload
+    def __rpow__(self, other: __support_num, mod: __support_num | None) -> variable:
+        ...
+
+    @typing.overload
+    def __ipow__(self, other: __support_num) -> typing.Self:
+        ...
+
+    @typing.overload
+    def __ipow__(self, other: __support_num, mod: __support_num | None) -> typing.Self:
         ...
 
     def __neg__(self) -> variable:
@@ -116,10 +131,16 @@ class variable:
     def __floordiv__(self, other: __support_num) -> variable:
         ...
 
+    def __rfloordiv__(self, other: __support_num) -> variable:
+        ...
+
     def __ifloordiv__(self, other: __support_num) -> typing.Self:
         ...
 
     def __truediv__(self, other: __support_num) -> variable:
+        ...
+
+    def __rtruediv__(self, other: __support_num) -> variable:
         ...
 
     def __itruediv__(self, other: __support_num) -> typing.Self:
@@ -214,5 +235,3 @@ class variable:
 
     def arccsch(self) -> variable:
         ...
-
-

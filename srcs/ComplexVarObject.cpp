@@ -75,12 +75,21 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
         target.imag = PyComplex_ImagAsDouble(value);
         return 0;
     }
-    PyErr_Format(PyExc_TypeError, "Unsupported type: %s", value->ob_type->tp_name);
     return -1;
 set_both_zero:
     target.real = 0;
 set_imag_zero:
     target.imag = 0;
+    return 0;
+}
+
+int assignComplexVar_withExc(PyObject *value, ComplexVar &target)
+{
+    if (assignComplexVar(value, target))
+    {
+        PyErr_Format(PyExc_TypeError, "Unsupported type: %s", value->ob_type->tp_name);
+        return -1;
+    }
     return 0;
 }
 
@@ -169,7 +178,7 @@ int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
         {
             return -1;
         }
-        if (assignComplexVar(tmp, self->num))
+        if (assignComplexVar_withExc(tmp, self->num))
         {
             return -1;
         }
@@ -760,12 +769,11 @@ PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
     ComplexVar tmp;
     if (assignComplexVar(base, tmp))
     {
-        return nullptr;
+        Py_RETURN_NOTIMPLEMENTED;
     }
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -778,7 +786,7 @@ PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
     ComplexVar tmp;
     if (assignComplexVar(neur, tmp))
     {
-        return nullptr;
+        Py_RETURN_NOTIMPLEMENTED;
     }
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)

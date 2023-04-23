@@ -26,7 +26,9 @@ struct PyMatrixObject
 
 #define Matrix_sameshape(x, y) ((x->rows == y->rows) && (x->cols == y->cols))
 PyMatrixObject *MatrixAdd(const PyMatrixObject *const, const PyMatrixObject *const);
-PyMatrixObject *MatrixAddConstant(const PyMatrixObject *const, const ComplexVar);
+PyMatrixObject *MatrixSub(const PyMatrixObject *const, const PyMatrixObject *const);
+PyMatrixObject *MatrixMulConstant(const PyMatrixObject *const, const ComplexVar &);
+PyMatrixObject *MatrixMatmul(const PyMatrixObject *const, const PyMatrixObject *const);
 
 int PyMatrixAlloc(PyMatrixObject *);
 void PyMatrixAssign(PyMatrixObject *, int, int, const ComplexVar &);
@@ -39,7 +41,10 @@ PyObject *PyMatrix_str(PyMatrixObject *);
 int PyMatrix_init(PyMatrixObject *, PyObject *, PyObject *);
 PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);
 
-PyObject *PyMatrix_add(PyMatrixObject *, PyObject *);
+PyObject *PyMatrix_add(PyObject *, PyObject *);
+PyObject *PyMatrix_subtract(PyObject *, PyObject *);
+PyObject *PyMatrix_multiply(PyObject *, PyObject *);
+PyObject *PyMatrix_matrix_multiply(PyObject *, PyObject *);
 
 Py_ssize_t PyMatrix_length(PyMatrixObject *);
 PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);
