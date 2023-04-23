@@ -262,6 +262,27 @@ class Test_mat(externed_Testcase):
         with self.assertRaises(TypeError):
             "abc"*x
 
+    def test_div(self):
+        x = matrix_analysis.matrix.matrix([[15, 18], [Unsure, 12+13j]])
+        self.assertMatrixAlmostEqual(
+            x/(1+1j), matrix_analysis.matrix.matrix([[7.5-7.5j, 9-9j], [Unsure, 12.5+0.5j]]))
+        self.assertMatrixAlmostEqual(
+            x//(1+1j), a := matrix_analysis.matrix.matrix([[7-8j, 9-9j], [Unsure, 12]]))
+        self.assertMatrixAlmostEqual(
+            x % (1+1j), b := matrix_analysis.matrix.matrix([[1j, 0], [Unsure, 1j]]))
+        y = divmod(x, 1+1j)
+        self.assertMatrixAlmostEqual(y[0], a)
+        self.assertMatrixAlmostEqual(y[1], b)
+        self.assertMatrixAlmostEqual((100+99j)/x, matrix_analysis.matrix.matrix(
+            [[6.6666666667+6.6j, 5.555555556+5.5j], [Unsure, 7.945686901-0.357827476j]]))
+        self.assertMatrixAlmostEqual((100+99j)//x, a := matrix_analysis.matrix.matrix(
+            [[6+6j, 5+5j], [Unsure, 7-1j]]))
+        self.assertMatrixAlmostEqual(
+            (100+99j) % x, b := matrix_analysis.matrix.matrix([[10+9j, 10+9j], [Unsure, 3+20j]]))
+        y = divmod(100+99j, x)
+        self.assertMatrixAlmostEqual(y[0], a)
+        self.assertMatrixAlmostEqual(y[1], b)
+
     def test_matmul(self):
         x = matrix_analysis.matrix.matrix([[1, 0], [3, 4]])
         y = matrix_analysis.matrix.matrix(

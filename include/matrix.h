@@ -25,10 +25,17 @@ struct PyMatrixObject
 };
 
 #define Matrix_sameshape(x, y) ((x->rows == y->rows) && (x->cols == y->cols))
-PyMatrixObject *MatrixAdd(const PyMatrixObject *const, const PyMatrixObject *const);
-PyMatrixObject *MatrixSub(const PyMatrixObject *const, const PyMatrixObject *const);
-PyMatrixObject *MatrixMulConstant(const PyMatrixObject *const, const ComplexVar &);
-PyMatrixObject *MatrixMatmul(const PyMatrixObject *const, const PyMatrixObject *const);
+PyMatrixObject *Matrix_add(const PyMatrixObject *const, const PyMatrixObject *const);
+PyMatrixObject *Matrix_sub(const PyMatrixObject *const, const PyMatrixObject *const);
+PyMatrixObject *Matrix_mul(const PyMatrixObject *const, const ComplexVar &);
+PyMatrixObject *Matrix_mul(const PyMatrixObject *const, const PyMatrixObject *const);
+PyMatrixObject *Matrix_div(const PyMatrixObject *const, const ComplexVar &);
+PyMatrixObject *Matrix_div(const ComplexVar &, const PyMatrixObject *const);
+PyMatrixObject *Matrix_fdv(const PyMatrixObject *const, const ComplexVar &);
+PyMatrixObject *Matrix_fdv(const ComplexVar &, const PyMatrixObject *const);
+PyMatrixObject *Matrix_mod(const PyMatrixObject *const, const ComplexVar &);
+PyMatrixObject *Matrix_mod(const ComplexVar &, const PyMatrixObject *const);
+PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 
 int PyMatrixAlloc(PyMatrixObject *);
 void PyMatrixAssign(PyMatrixObject *, int, int, const ComplexVar &);
@@ -44,6 +51,10 @@ PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);
 PyObject *PyMatrix_add(PyObject *, PyObject *);
 PyObject *PyMatrix_subtract(PyObject *, PyObject *);
 PyObject *PyMatrix_multiply(PyObject *, PyObject *);
+PyObject *PyMatrix_remainder(PyObject *, PyObject *);
+PyObject *PyMatrix_divmod(PyObject *, PyObject *);
+PyObject *PyMatrix_floor_divide(PyObject *, PyObject *);
+PyObject *PyMatrix_true_divide(PyObject *, PyObject *);
 PyObject *PyMatrix_matrix_multiply(PyObject *, PyObject *);
 
 Py_ssize_t PyMatrix_length(PyMatrixObject *);

@@ -83,10 +83,10 @@ class variable:
     def __imod__(self, other: __support_num) -> typing.Self:
         ...
 
-    def __divmod__(self, other: __support_num) -> typing.Union[variable, variable]:
+    def __divmod__(self, other: __support_num) -> tuple[variable, variable]:
         ...
 
-    def __rdivmod__(self, other: __support_num) -> typing.Union[variable, variable]:
+    def __rdivmod__(self, other: __support_num) -> tuple[variable, variable]:
         ...
 
     @typing.overload

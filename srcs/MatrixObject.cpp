@@ -689,7 +689,7 @@ PyObject *PyMatrix_add(PyObject *self, PyObject *other)
 {
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)MatrixAdd((PyMatrixObject *)self, (PyMatrixObject *)other);
+        return (PyObject *)Matrix_add((PyMatrixObject *)self, (PyMatrixObject *)other);
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -698,7 +698,7 @@ PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
 {
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)MatrixSub((PyMatrixObject *)self, (PyMatrixObject *)other);
+        return (PyObject *)Matrix_sub((PyMatrixObject *)self, (PyMatrixObject *)other);
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -709,12 +709,12 @@ PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
-        return (PyObject *)MatrixMulConstant((PyMatrixObject *)self, tmp);
+        return (PyObject *)Matrix_mul((PyMatrixObject *)self, tmp);
     }
     if (PyMatrix_Check(other) && CanBeComplexVar(self))
     {
         assignComplexVar(self, tmp);
-        return (PyObject *)MatrixMulConstant((PyMatrixObject *)other, tmp);
+        return (PyObject *)Matrix_mul((PyMatrixObject *)other, tmp);
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -723,7 +723,119 @@ PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 {
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)MatrixMatmul((PyMatrixObject *)self, (PyMatrixObject *)other);
+        return (PyObject *)Matrix_mul((PyMatrixObject *)self, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (PyMatrix_Check(self) && CanBeComplexVar(other))
+    {
+        assignComplexVar(other, tmp);
+        return (PyObject *)Matrix_mod((PyMatrixObject *)self, tmp);
+    }
+    if (PyMatrix_Check(other) && CanBeComplexVar(self))
+    {
+        assignComplexVar(self, tmp);
+        return (PyObject *)Matrix_mod(tmp, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
+{
+    PyMatrixObject *D = nullptr;
+    PyMatrixObject *M = nullptr;
+    ComplexVar tmp;
+    if (PyMatrix_Check(self) && CanBeComplexVar(other))
+    {
+        assignComplexVar(other, tmp);
+        D = Matrix_fdv((PyMatrixObject *)self, tmp);
+        if (!D)
+        {
+            PyErr_SetNone(PyExc_MemoryError);
+            return nullptr;
+        }
+        M = Matrix_mul(D, tmp);
+        if (!M)
+        {
+            Py_DECREF(D);
+            PyErr_SetNone(PyExc_MemoryError);
+            return nullptr;
+        }
+        for (Py_ssize_t i = 0; i < M->rows; i++)
+        {
+            for (Py_ssize_t j = 0; j < M->cols; j++)
+            {
+                PyMatrixAssign(M, i, j, ComplexVar_sub(PyMatrixGetitem((PyMatrixObject *)self, i, j), PyMatrixGetitem(M, i, j)));
+            }
+        }
+        PyObject *returnvalue = Py_BuildValue("OO", D, M);
+        Py_DECREF(D);
+        Py_DECREF(M);
+        return returnvalue;
+    }
+    if (PyMatrix_Check(other) && CanBeComplexVar(self))
+    {
+        assignComplexVar(self, tmp);
+        D = Matrix_fdv(tmp, (PyMatrixObject *)other);
+        if (!D)
+        {
+            PyErr_SetNone(PyExc_MemoryError);
+            return nullptr;
+        }
+        M = Matrix_hadamard(D, (PyMatrixObject *)other);
+        if (!M)
+        {
+            Py_DECREF(D);
+            PyErr_SetNone(PyExc_MemoryError);
+            return nullptr;
+        }
+        for (Py_ssize_t i = 0; i < M->rows; i++)
+        {
+            for (Py_ssize_t j = 0; j < M->cols; j++)
+            {
+                PyMatrixAssign(M, i, j, ComplexVar_sub(tmp, PyMatrixGetitem(M, i, j)));
+            }
+        }
+        PyObject *returnvalue = Py_BuildValue("OO", D, M);
+        Py_DECREF(D);
+        Py_DECREF(M);
+        return returnvalue;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (PyMatrix_Check(self) && CanBeComplexVar(other))
+    {
+        assignComplexVar(other, tmp);
+        return (PyObject *)Matrix_fdv((PyMatrixObject *)self, tmp);
+    }
+    if (PyMatrix_Check(other) && CanBeComplexVar(self))
+    {
+        assignComplexVar(self, tmp);
+        return (PyObject *)Matrix_fdv(tmp, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (PyMatrix_Check(self) && CanBeComplexVar(other))
+    {
+        assignComplexVar(other, tmp);
+        return (PyObject *)Matrix_div((PyMatrixObject *)self, tmp);
+    }
+    if (PyMatrix_Check(other) && CanBeComplexVar(self))
+    {
+        assignComplexVar(self, tmp);
+        return (PyObject *)Matrix_div(tmp, (PyMatrixObject *)other);
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -1537,6 +1649,10 @@ static PyNumberMethods PyMatrixNumber = {
     .nb_add = (binaryfunc)PyMatrix_add,
     .nb_subtract = (binaryfunc)PyMatrix_subtract,
     .nb_multiply = (binaryfunc)PyMatrix_multiply,
+    .nb_remainder = (binaryfunc)PyMatrix_remainder,
+    .nb_divmod = (binaryfunc)PyMatrix_divmod,
+    .nb_floor_divide = (binaryfunc)PyMatrix_floor_divide,
+    .nb_true_divide = (binaryfunc)PyMatrix_true_divide,
     .nb_matrix_multiply = (binaryfunc)PyMatrix_matrix_multiply,
 };
 
