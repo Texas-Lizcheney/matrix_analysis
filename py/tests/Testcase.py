@@ -1,4 +1,5 @@
 import unittest
+from matrix_analysis import Unsure
 
 
 class externed_Testcase(unittest.TestCase):
@@ -6,6 +7,10 @@ class externed_Testcase(unittest.TestCase):
         self.assertEqual(len(first), len(second))
         for _ in range(len(first)):
             self.assertAlmostEqual(first[_], second[_], places, msg, delta)
+
+    def assertUnsure(self, x):
+        if (x is not Unsure):
+            raise AssertionError(f"{x} is not unsure")
 
 
 class seqTestLoader(unittest.TestLoader):

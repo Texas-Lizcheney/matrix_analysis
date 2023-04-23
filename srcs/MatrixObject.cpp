@@ -6,7 +6,7 @@ int escape_rows_from = 3;
 int escape_rows_to = 3;
 int escape_cols_from = 3;
 int escape_cols_to = 3;
-PyObject *PyExc_ShapeError = nullptr;
+extern PyObject *PyExc_ShapeError;
 
 template <typename T>
 concept npy_real = std::is_integral<T>::value || std::is_floating_point<T>::value;
@@ -1526,6 +1526,7 @@ PyTypeObject PyMatrixType = {
     .tp_as_number = &PyMatrixNumber,
     .tp_as_mapping = &PyMatrixMap,
     .tp_str = (reprfunc)PyMatrix_str,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_members = PyMatrixMember,
     .tp_getset = PyMatrixGetSet,
     .tp_init = (initproc)PyMatrix_init,

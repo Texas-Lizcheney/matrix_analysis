@@ -18,7 +18,7 @@ std::stringstream ComplexVar_repr(const ComplexVar &x)
     std::stringstream tmp;
     if (x.isArbitrary)
     {
-        tmp << "None";
+        tmp << "Unsure";
     }
     else
     {

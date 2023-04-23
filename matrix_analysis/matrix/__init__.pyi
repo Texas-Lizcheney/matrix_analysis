@@ -69,5 +69,4 @@ class matrix:
         ...
 
 
-class ShapeError(Exception):
-    ...
+

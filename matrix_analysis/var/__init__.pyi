@@ -1,6 +1,7 @@
 import typing
+from ..__init__ import Unsure
 
-__support_num = typing.Union[None, int, float, complex, variable]
+__support_num = typing.Union[Unsure, int, float, complex, variable]
 __support_component = typing.Union[int, float]
 
 
@@ -15,10 +16,10 @@ def set_arg_format(format: str) -> None:
 class variable:
     real: float
     imag: float
-    rec: typing.Union[typing.Tuple[float, float], None]
+    rec: typing.Union[typing.Tuple[float, float], Unsure]
     length: float
     arg: float
-    pol: typing.Union[typing.Tuple[float, float], None]
+    pol: typing.Union[typing.Tuple[float, float], Unsure]
     is_arbitrary: bool
 
     @typing.overload
@@ -40,13 +41,19 @@ class variable:
     def __str__(self) -> str:
         ...
 
+    def __eq__(self,other:__support_component)->bool|Unsure:
+        ...
+
+    def __ne__(self,other:__support_component)->bool|Unsure:
+        ...
+
     def __add__(self, other: __support_num) -> variable:
         ...
 
     def __radd__(self, other: __support_num) -> variable:
         ...
 
-    def __iadd__(self, other: __support_num) -> variable:
+    def __iadd__(self, other: __support_num) -> typing.Self:
         ...
 
     def __sub__(self, other: __support_num) -> variable:
@@ -55,7 +62,7 @@ class variable:
     def __rsub__(self, other: __support_num) -> variable:
         ...
 
-    def __isub__(self, other: __support_num) -> variable:
+    def __isub__(self, other: __support_num) -> typing.Self:
         ...
 
     def __mul__(self, other: __support_num) -> variable:
@@ -64,7 +71,7 @@ class variable:
     def __rmul__(self, other: __support_num) -> variable:
         ...
 
-    def __imul__(self, other: __support_num) -> variable:
+    def __imul__(self, other: __support_num) -> typing.Self:
         ...
 
     def __mod__(self, other: __support_num) -> variable:
@@ -73,7 +80,7 @@ class variable:
     def __rmod__(self, other: __support_num) -> variable:
         ...
 
-    def __imod__(self, other: __support_num) -> variable:
+    def __imod__(self, other: __support_num) -> typing.Self:
         ...
 
     def __divmod__(self, other: __support_num) -> typing.Union[variable, variable]:
@@ -88,7 +95,7 @@ class variable:
     def __rpow__(self, other: __support_num, mod: __support_num) -> variable:
         ...
 
-    def __ipow__(self, other: __support_num, mod: __support_num) -> variable:
+    def __ipow__(self, other: __support_num, mod: __support_num) -> typing.Self:
         ...
 
     def __neg__(self) -> variable:
@@ -109,13 +116,13 @@ class variable:
     def __floordiv__(self, other: __support_num) -> variable:
         ...
 
-    def __ifloordiv__(self, other: __support_num) -> variable:
+    def __ifloordiv__(self, other: __support_num) -> typing.Self:
         ...
 
     def __truediv__(self, other: __support_num) -> variable:
         ...
 
-    def __itruediv__(self, other: __support_num) -> variable:
+    def __itruediv__(self, other: __support_num) -> typing.Self:
         ...
 
     def conj(self) -> variable:
@@ -209,5 +216,3 @@ class variable:
         ...
 
 
-class Undefined(Exception):
-    ...

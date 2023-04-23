@@ -18,4 +18,6 @@ add_library("var" STATIC
     srcs/ComplexVarObject.cpp
 )
 add_library("utility" STATIC
-    srcs/utilities.cpp)
+    srcs/utilities.cpp
+    srcs/unsure.cpp
+    srcs/custom_exceptions.cpp)

@@ -2,7 +2,7 @@
 
 int doubleprecision = 7;
 bool isdeg = false;
-PyObject *PyExc_Undefined = nullptr;
+extern PyObject *PyExc_Undefined;
 
 PyObject *SetDoublePrecision(PyObject *self, PyObject *value)
 {
@@ -53,7 +53,7 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
         target = ((PyComplexVarObject *)value)->num;
         return 0;
     }
-    if (Py_IsNone(value))
+    if (Py_IsUnsure(value))
     {
         target.isArbitrary = true;
         goto set_both_zero;
@@ -112,7 +112,7 @@ PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, in
     {
         if (self->num.isArbitrary || tmp.isArbitrary)
         {
-            Py_RETURN_FALSE;
+            Py_RETURN_UNSURE;
         }
         if (self->num.real == tmp.real && self->num.imag == tmp.imag)
         {
@@ -124,7 +124,7 @@ PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, in
     {
         if (self->num.isArbitrary || tmp.isArbitrary)
         {
-            Py_RETURN_FALSE;
+            Py_RETURN_UNSURE;
         }
         if (self->num.real != tmp.real || self->num.imag != tmp.imag)
         {
@@ -202,7 +202,8 @@ PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     PyObject *self = type->tp_alloc(type, 0);
     if (!self)
     {
-        Py_RETURN_NONE;
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
     }
     return self;
 }
@@ -1316,6 +1317,7 @@ PyTypeObject PyComplexVarType = {
     .tp_repr = (reprfunc)PyComplexVar_repr,
     .tp_as_number = &PyComplexVarNumber,
     .tp_str = (reprfunc)PyComplexVar_str,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_richcompare = (richcmpfunc)PyComplexVar_richcompare,
     .tp_methods = PyComplexVarMethod,
     .tp_members = PyComplexVarMember,
