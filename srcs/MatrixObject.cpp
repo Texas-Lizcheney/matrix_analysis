@@ -131,6 +131,32 @@ int PyMatrixGet_withcheck(const PyMatrixObject *const self, int r, int c, Comple
     return 0;
 }
 
+PyObject *PyMatrix_copy(const PyMatrixObject *const self)
+{
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = self->rows;
+    result->cols = self->cols;
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    for (Py_ssize_t i = 0; i < result->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            PyMatrixAssign(result, i, j, PyMatrixGetitem(self, i, j));
+        }
+    }
+    return (PyObject *)result;
+}
+
 void PyMatrix_dealloc(PyMatrixObject *self)
 {
     if (self->elements)
@@ -719,15 +745,6 @@ PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
-{
-    if (PyMatrix_Check(self) && PyMatrix_Check(other))
-    {
-        return (PyObject *)Matrix_mul((PyMatrixObject *)self, (PyMatrixObject *)other);
-    }
-    Py_RETURN_NOTIMPLEMENTED;
-}
-
 PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
@@ -808,6 +825,59 @@ PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
+PyObject *PyMatrix_negative(PyObject *self)
+{
+    return (PyObject *)Matrix_neg((PyMatrixObject *)self);
+}
+
+PyObject *PyMatrix_positive(PyObject *self)
+{
+    return PyMatrix_copy((PyMatrixObject *)self);
+}
+
+PyObject *PyMatrix_inplace_add(PyMatrixObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(other))
+    {
+        if (Matrix_iadd(self, (PyMatrixObject *)other))
+        {
+            return nullptr;
+        }
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_inplace_subtract(PyMatrixObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(other))
+    {
+        if (Matrix_isub(self, (PyMatrixObject *)other))
+        {
+            return nullptr;
+        }
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_inplace_multiply(PyMatrixObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (!assignComplexVar(other, tmp))
+    {
+        if (Matrix_imul(self, tmp))
+        {
+            return nullptr;
+        }
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
 PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
@@ -836,6 +906,15 @@ PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
     {
         assignComplexVar(self, tmp);
         return (PyObject *)Matrix_div(tmp, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(self) && PyMatrix_Check(other))
+    {
+        return (PyObject *)Matrix_mul((PyMatrixObject *)self, (PyMatrixObject *)other);
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -991,32 +1070,6 @@ static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObje
         }
         c = b_start;
         r += a_step;
-    }
-    return (PyObject *)result;
-}
-
-PyObject *PyMatrix_copy(PyMatrixObject *self)
-{
-    PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
-    result->rows = self->rows;
-    result->cols = self->cols;
-    if (PyMatrixAlloc(result))
-    {
-        Py_DECREF(result);
-        return nullptr;
-    }
-    for (Py_ssize_t i = 0; i < result->rows; i++)
-    {
-        for (Py_ssize_t j = 0; j < result->cols; j++)
-        {
-            PyMatrixAssign(result, i, j, PyMatrixGetitem(self, i, j));
-        }
     }
     return (PyObject *)result;
 }
@@ -1651,6 +1704,11 @@ static PyNumberMethods PyMatrixNumber = {
     .nb_multiply = (binaryfunc)PyMatrix_multiply,
     .nb_remainder = (binaryfunc)PyMatrix_remainder,
     .nb_divmod = (binaryfunc)PyMatrix_divmod,
+    .nb_negative = (unaryfunc)PyMatrix_negative,
+    .nb_positive = (unaryfunc)PyMatrix_positive,
+    .nb_inplace_add = (binaryfunc)PyMatrix_inplace_add,
+    .nb_inplace_subtract = (binaryfunc)PyMatrix_inplace_subtract,
+    .nb_inplace_multiply = (binaryfunc)PyMatrix_inplace_multiply,
     .nb_floor_divide = (binaryfunc)PyMatrix_floor_divide,
     .nb_true_divide = (binaryfunc)PyMatrix_true_divide,
     .nb_matrix_multiply = (binaryfunc)PyMatrix_matrix_multiply,

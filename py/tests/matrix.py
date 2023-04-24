@@ -1,6 +1,7 @@
 from .Testcase import externed_Testcase
 import matrix_analysis
 import numpy
+import sys
 
 d = numpy.__dict__
 numpy_dtypes = [d[i] for i in d .keys() if isinstance(
@@ -230,37 +231,58 @@ class Test_mat(externed_Testcase):
         y = matrix_analysis.matrix.matrix(
             [[1, -1.0], [Unsure, 1j]])
         self.assertMatrixAlmostEqual(
-            x+y, matrix_analysis.matrix.matrix([[2, 1], [Unsure, 4+1j]]))
+            x+y, z := matrix_analysis.matrix.matrix([[2, 1], [Unsure, 4+1j]]))
         with self.assertRaises(matrix_analysis.ShapeError):
             x+matrix_analysis.matrix.matrix(1, 2)
         with self.assertRaises(TypeError):
             x+1
         with self.assertRaises(TypeError):
             1+x
+        a = id(x)
+        x += y
+        self.assertMatrixAlmostEqual(x, z)
+        self.assertEqual(a, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
+        with self.assertRaises(matrix_analysis.ShapeError):
+            x += matrix_analysis.matrix.matrix([[Unsure]])
 
     def test_sub(self):
         x = matrix_analysis.matrix.matrix([[1, 2], [3, 4]])
         y = matrix_analysis.matrix.matrix(
             [[1, -1.0], [Unsure, 1j]])
         self.assertMatrixAlmostEqual(
-            x-y, matrix_analysis.matrix.matrix([[0, 3], [Unsure, 4-1j]]))
+            x-y, z := matrix_analysis.matrix.matrix([[0, 3], [Unsure, 4-1j]]))
         with self.assertRaises(matrix_analysis.ShapeError):
             x-matrix_analysis.matrix.matrix(1, 2)
         with self.assertRaises(TypeError):
             x-1
         with self.assertRaises(TypeError):
             1-x
+        a = id(x)
+        x -= y
+        self.assertMatrixAlmostEqual(x, z)
+        self.assertEqual(a, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
+        with self.assertRaises(matrix_analysis.ShapeError):
+            x -= matrix_analysis.matrix.matrix([[Unsure]])
 
     def test_mul(self):
         x = matrix_analysis.matrix.matrix([[1, 2], [3, 4]])
         self.assertMatrixAlmostEqual(
-            x*2, matrix_analysis.matrix.matrix([[2, 4], [6, 8]]))
+            x*2, z := matrix_analysis.matrix.matrix([[2, 4], [6, 8]]))
         self.assertMatrixAlmostEqual(
             Unsure*x, matrix_analysis.matrix.matrix([[Unsure, Unsure], [Unsure, Unsure]]))
         with self.assertRaises(TypeError):
             x*"abc"
         with self.assertRaises(TypeError):
             "abc"*x
+        a = id(x)
+        x *= 2
+        self.assertMatrixAlmostEqual(x, z)
+        self.assertEqual(a, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
+        with self.assertRaises(matrix_analysis.ShapeError):
+            x += matrix_analysis.matrix.matrix([[Unsure]])
 
     def test_div(self):
         x = matrix_analysis.matrix.matrix([[15, 18], [Unsure, 12+13j]])
@@ -298,3 +320,11 @@ class Test_mat(externed_Testcase):
             "abc"@x
         with self.assertRaises(TypeError):
             x@"abc"
+
+    def test_unary(self):
+        x = matrix_analysis.matrix.matrix([[1, 0], [3+1j, Unsure]])
+        y = +x
+        self.assertMatrixAlmostEqual(y, x)
+        z = -x
+        self.assertMatrixAlmostEqual(
+            z, matrix_analysis.matrix.matrix([[-1, 0], [-3-1j, Unsure]]))
