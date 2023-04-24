@@ -47,9 +47,16 @@ PyMatrixObject *Matrix_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 
+void Matrix_row_switch(PyMatrixObject *, int, int);
+void Matrix_row_multiply(PyMatrixObject *, int, int, const ComplexVar &);
+void Matrix_row_add(PyMatrixObject *, int, const ComplexVar &);
+void Matrix_row_switch(PyMatrixObject *, int, int);
+void Matrix_row_multiply(PyMatrixObject *, int, int, const ComplexVar &);
+void Matrix_row_add(PyMatrixObject *, int, const ComplexVar &);
+
 int PyMatrixAlloc(PyMatrixObject *);
-void PyMatrixAssign(PyMatrixObject *, int, int, const ComplexVar &);
-ComplexVar PyMatrixGetitem(const PyMatrixObject *const, int, int);
+#define PyMatrixAssign(self, r, c, value) (self)->elements[r * (self)->cols + c] = value
+#define PyMatrixGetitem(self, r, c) (self)->elements[r * (self)->cols + c]
 int PyMatrixAssign_withcheck(PyMatrixObject *, int, int, const ComplexVar &);
 int PyMatrixGet_withcheck(const PyMatrixObject *const, int, int, ComplexVar &);
 PyObject *PyMatrix_copy(const PyMatrixObject *const);

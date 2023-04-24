@@ -79,16 +79,6 @@ int PyMatrixAlloc(PyMatrixObject *self)
     return 0;
 }
 
-void PyMatrixAssign(PyMatrixObject *self, int r, int c, const ComplexVar &value)
-{
-    self->elements[r * self->cols + c] = value;
-}
-
-ComplexVar PyMatrixGetitem(const PyMatrixObject *const self, int r, int c)
-{
-    return self->elements[r * self->cols + c];
-}
-
 int PyMatrixAssign_withcheck(PyMatrixObject *self, int r, int c, const ComplexVar &value)
 {
     int R = r;

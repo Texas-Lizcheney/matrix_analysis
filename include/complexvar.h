@@ -17,6 +17,8 @@ struct ComplexVar
     double real;
     double imag;
     bool isArbitrary;
+    ComplexVar(double = 0, double = 0, bool = false);
+    ComplexVar(const ComplexVar &) noexcept;
 };
 
 #define ComplexVar_L2(x) (x.real * x.real + x.imag * x.imag)

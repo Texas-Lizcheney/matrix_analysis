@@ -10,4 +10,5 @@ tempCodeRunnerFile.sh
 *.png
 tempCodeRunnerFile.sh
 .VSCodeCounter/*
-debug.py
+debug*
+.vscode/*

@@ -5,6 +5,14 @@ ComplexVar I = {0, 1, false};
 ComplexVar negI = {0, -1, false};
 extern int doubleprecision;
 
+ComplexVar::ComplexVar(double x, double y, bool z) : real(x), imag(y), isArbitrary(z)
+{
+}
+
+ComplexVar::ComplexVar(const ComplexVar &n) noexcept : real(n.real), imag(n.imag), isArbitrary(n.isArbitrary)
+{
+}
+
 void setvalue_frompolar(double r, double a, ComplexVar &x)
 {
     x.real = cos(a) * r;
