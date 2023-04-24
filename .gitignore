@@ -5,10 +5,9 @@ cpptest.cpp
 Makefile
 cmake_install.cmake
 CMakeCache.txt
-tempCodeRunnerFile.sh
+tempCodeRunnerFile.*
 /__pycache__/
 *.png
-tempCodeRunnerFile.sh
 .VSCodeCounter/*
 debug*
 .vscode/*
