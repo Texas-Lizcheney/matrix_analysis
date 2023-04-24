@@ -394,11 +394,109 @@ PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
         Py_DECREF(result);
         return nullptr;
     }
+    int64_t pos;
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_neg(PyMatrixGetitem(self, i, j)));
+            pos = i * self->cols + j;
+            result->elements[pos].real = -self->elements[pos].real;
+            result->elements[pos].imag = -self->elements[pos].imag;
+            result->elements[pos].isArbitrary = self->elements[pos].isArbitrary;
+        }
+    }
+    return result;
+}
+
+PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
+{
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = self->rows;
+    result->cols = self->cols;
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    int64_t pos;
+    for (Py_ssize_t i = 0; i < result->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            pos = i * self->cols + j;
+            result->elements[pos].real = self->elements[pos].real;
+            result->elements[pos].imag = -self->elements[pos].imag;
+            result->elements[pos].isArbitrary = self->elements[pos].isArbitrary;
+        }
+    }
+    return result;
+}
+
+PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
+{
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = self->cols;
+    result->cols = self->rows;
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    int64_t rpos;
+    int64_t spos;
+    for (Py_ssize_t i = 0; i < self->cols; i++)
+    {
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            rpos = i * result->cols + j;
+            spos = j * self->cols + i;
+            result->elements[rpos].real = self->elements[spos].real;
+            result->elements[rpos].imag = self->elements[spos].imag;
+            result->elements[rpos].isArbitrary = self->elements[spos].isArbitrary;
+        }
+    }
+    return result;
+}
+
+PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
+{
+    PyMatrixObject *result = nullptr;
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = self->cols;
+    result->cols = self->rows;
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    int64_t rpos;
+    int64_t spos;
+    for (Py_ssize_t i = 0; i < self->cols; i++)
+    {
+        for (Py_ssize_t j = 0; j < result->cols; j++)
+        {
+            rpos = i * result->cols + j;
+            spos = j * self->cols + i;
+            result->elements[rpos].real = self->elements[spos].real;
+            result->elements[rpos].imag = -self->elements[spos].imag;
+            result->elements[rpos].isArbitrary = self->elements[spos].isArbitrary;
         }
     }
     return result;

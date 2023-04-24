@@ -42,6 +42,9 @@ PyMatrixObject *Matrix_mod(const PyMatrixObject *const, const ComplexVar &);
 void Matrix_imod(PyMatrixObject *, const ComplexVar &);
 PyMatrixObject *Matrix_mod(const ComplexVar &, const PyMatrixObject *const);
 PyMatrixObject *Matrix_neg(const PyMatrixObject *const);
+PyMatrixObject *Matrix_conj(const PyMatrixObject *const);
+PyMatrixObject *Matrix_transpose(const PyMatrixObject *const);
+PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 
 int PyMatrixAlloc(PyMatrixObject *);
@@ -72,6 +75,10 @@ PyObject *PyMatrix_true_divide(PyObject *, PyObject *);
 PyObject *PyMatrix_inplace_floor_divide(PyMatrixObject *, PyObject *);
 PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *, PyObject *);
 PyObject *PyMatrix_matrix_multiply(PyObject *, PyObject *);
+
+PyObject *PyMatrix_conj(PyMatrixObject *, PyObject *);
+PyObject *PyMatrix_T(PyMatrixObject *, PyObject *);
+PyObject *PyMatrix_H(PyMatrixObject *, PyObject *);
 
 Py_ssize_t PyMatrix_length(PyMatrixObject *);
 PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);

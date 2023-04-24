@@ -343,3 +343,12 @@ class Test_mat(externed_Testcase):
         z = -x
         self.assertMatrixAlmostEqual(
             z, matrix_analysis.matrix.matrix([[-1, 0], [-3-1j, Unsure]]))
+
+    def test_transposes_and_conj(self):
+        x = matrix_analysis.matrix.matrix([[1, 2], [Unsure, 1j], [2j, Unsure]])
+        self.assertMatrixAlmostEqual(x.conj(), matrix_analysis.matrix.matrix([
+                                     [1, 2], [Unsure, -1j], [-2j, Unsure]]))
+        self.assertMatrixAlmostEqual(x.T(), matrix_analysis.matrix.matrix([
+                                     [1, Unsure, 2j], [2, 1j, Unsure]]))
+        self.assertMatrixAlmostEqual(x.H(), matrix_analysis.matrix.matrix([
+                                     [1, Unsure, -2j], [2, -1j, Unsure]]))

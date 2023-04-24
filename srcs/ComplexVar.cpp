@@ -23,7 +23,7 @@ std::stringstream ComplexVar_repr(const ComplexVar &x)
     else
     {
         tmp << std::setprecision(doubleprecision) << x.real;
-        if (x.imag >= 0 || (std::isnan(x.imag) && !(((uint64_t &)x.imag) & (uint64_t(1) << 63))))
+        if (!std::signbit(x.imag) || std::isnan(x.imag))
         {
             tmp << '+';
         }
@@ -42,7 +42,7 @@ std::stringstream ComplexVar_str(const ComplexVar &x)
     else
     {
         tmp << std::setprecision(doubleprecision) << x.real;
-        if (x.imag >= 0 || (std::isnan(x.imag) && !(((uint64_t &)x.imag) & (uint64_t(1) << 63))))
+        if (!std::signbit(x.imag) || std::isnan(x.imag))
         {
             tmp << '+';
         }

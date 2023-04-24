@@ -952,6 +952,23 @@ PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
+// method
+
+PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
+{
+    return (PyObject *)Matrix_conj(self);
+}
+
+PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
+{
+    return (PyObject *)Matrix_transpose(self);
+}
+
+PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
+{
+    return (PyObject *)Matrix_hermite_transpose(self);
+}
+
 // as map
 
 Py_ssize_t PyMatrix_length(PyMatrixObject *self)
@@ -1756,6 +1773,13 @@ static PyMappingMethods PyMatrixMap = {
     .mp_ass_subscript = (objobjargproc)PyMatrix_ass_subscript,
 };
 
+static PyMethodDef PyMatrixMethod[] = {
+    {"conj", (PyCFunction)PyMatrix_conj, METH_NOARGS, nullptr},
+    {"T", (PyCFunction)PyMatrix_T, METH_NOARGS, nullptr},
+    {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
+    nullptr,
+};
+
 static PyMemberDef PyMatrixMember[] = {
     {"rows", T_INT, offsetof(PyMatrixObject, rows), READONLY, nullptr},
     {"cols", T_INT, offsetof(PyMatrixObject, cols), READONLY, nullptr},
@@ -1777,6 +1801,7 @@ PyTypeObject PyMatrixType = {
     .tp_as_mapping = &PyMatrixMap,
     .tp_str = (reprfunc)PyMatrix_str,
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_methods = PyMatrixMethod,
     .tp_members = PyMatrixMember,
     .tp_getset = PyMatrixGetSet,
     .tp_init = (initproc)PyMatrix_init,
