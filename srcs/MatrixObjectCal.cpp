@@ -128,7 +128,7 @@ PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const ComplexVar &y)
     return result;
 }
 
-int Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
+void Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
 {
     ComplexVar tmp;
     for (Py_ssize_t i = 0; i < x->rows; i++)
@@ -139,7 +139,7 @@ int Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
             PyMatrixAssign(x, i, j, tmp);
         }
     }
-    return 0;
+    return;
 }
 
 PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *const y)
@@ -206,6 +206,20 @@ PyMatrixObject *Matrix_div(const PyMatrixObject *const x, const ComplexVar &y)
     return result;
 }
 
+void Matrix_idiv(PyMatrixObject *x, const ComplexVar &y)
+{
+    ComplexVar tmp;
+    for (Py_ssize_t i = 0; i < x->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < x->cols; j++)
+        {
+            tmp = ComplexVar_div(PyMatrixGetitem(x, i, j), y);
+            PyMatrixAssign(x, i, j, tmp);
+        }
+    }
+    return;
+}
+
 PyMatrixObject *Matrix_div(const ComplexVar &x, const PyMatrixObject *const y)
 {
     PyMatrixObject *result = nullptr;
@@ -258,6 +272,20 @@ PyMatrixObject *Matrix_fdv(const PyMatrixObject *const x, const ComplexVar &y)
     return result;
 }
 
+void Matrix_ifdv(PyMatrixObject *x, const ComplexVar &y)
+{
+    ComplexVar tmp;
+    for (Py_ssize_t i = 0; i < x->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < x->cols; j++)
+        {
+            tmp = ComplexVar_fdv(PyMatrixGetitem(x, i, j), y);
+            PyMatrixAssign(x, i, j, tmp);
+        }
+    }
+    return;
+}
+
 PyMatrixObject *Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y)
 {
     PyMatrixObject *result = nullptr;
@@ -308,6 +336,20 @@ PyMatrixObject *Matrix_mod(const PyMatrixObject *const x, const ComplexVar &y)
         }
     }
     return result;
+}
+
+void Matrix_imod(PyMatrixObject *x, const ComplexVar &y)
+{
+    ComplexVar tmp;
+    for (Py_ssize_t i = 0; i < x->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < x->cols; j++)
+        {
+            tmp = ComplexVar_mod(PyMatrixGetitem(x, i, j), y);
+            PyMatrixAssign(x, i, j, tmp);
+        }
+    }
+    return;
 }
 
 PyMatrixObject *Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y)

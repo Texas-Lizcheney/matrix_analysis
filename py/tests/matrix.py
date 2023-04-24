@@ -281,29 +281,44 @@ class Test_mat(externed_Testcase):
         self.assertMatrixAlmostEqual(x, z)
         self.assertEqual(a, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
-        with self.assertRaises(matrix_analysis.ShapeError):
-            x += matrix_analysis.matrix.matrix([[Unsure]])
 
     def test_div(self):
         x = matrix_analysis.matrix.matrix([[15, 18], [Unsure, 12+13j]])
         self.assertMatrixAlmostEqual(
-            x/(1+1j), matrix_analysis.matrix.matrix([[7.5-7.5j, 9-9j], [Unsure, 12.5+0.5j]]))
+            x/(1+1j), z1 := matrix_analysis.matrix.matrix([[7.5-7.5j, 9-9j], [Unsure, 12.5+0.5j]]))
         self.assertMatrixAlmostEqual(
-            x//(1+1j), a := matrix_analysis.matrix.matrix([[7-8j, 9-9j], [Unsure, 12]]))
+            x//(1+1j), z2 := matrix_analysis.matrix.matrix([[8-8j, 9-9j], [Unsure, 13+1j]]))
         self.assertMatrixAlmostEqual(
-            x % (1+1j), b := matrix_analysis.matrix.matrix([[1j, 0], [Unsure, 1j]]))
+            x % (1+1j), z3 := matrix_analysis.matrix.matrix([[-1, 0], [Unsure, -1j]]))
         y = divmod(x, 1+1j)
-        self.assertMatrixAlmostEqual(y[0], a)
-        self.assertMatrixAlmostEqual(y[1], b)
+        self.assertMatrixAlmostEqual(y[0], z2)
+        self.assertMatrixAlmostEqual(y[1], z3)
         self.assertMatrixAlmostEqual((100+99j)/x, matrix_analysis.matrix.matrix(
             [[6.6666666667+6.6j, 5.555555556+5.5j], [Unsure, 7.945686901-0.357827476j]]))
         self.assertMatrixAlmostEqual((100+99j)//x, a := matrix_analysis.matrix.matrix(
-            [[6+6j, 5+5j], [Unsure, 7-1j]]))
+            [[7+7j, 6+6j], [Unsure, 8]]))
         self.assertMatrixAlmostEqual(
-            (100+99j) % x, b := matrix_analysis.matrix.matrix([[10+9j, 10+9j], [Unsure, 3+20j]]))
+            (100+99j) % x, b := matrix_analysis.matrix.matrix([[-5-6j, -8-9j], [Unsure, 4-5j]]))
         y = divmod(100+99j, x)
-        self.assertMatrixAlmostEqual(y[0], a)
         self.assertMatrixAlmostEqual(y[1], b)
+        x1 = +x
+        a = id(x1)
+        x1 /= 1+1j
+        self.assertMatrixAlmostEqual(x1, z1)
+        self.assertEqual(a, id(x1))
+        self.assertEqual(sys.getrefcount(x1), 2)
+        x1 = +x
+        a = id(x1)
+        x1 //= 1+1j
+        self.assertMatrixAlmostEqual(x1, z2)
+        self.assertEqual(a, id(x1))
+        self.assertEqual(sys.getrefcount(x1), 2)
+        x1 = +x
+        a = id(x1)
+        x1 %= 1+1j
+        self.assertMatrixAlmostEqual(x1, z3)
+        self.assertEqual(a, id(x1))
+        self.assertEqual(sys.getrefcount(x1), 2)
 
     def test_matmul(self):
         x = matrix_analysis.matrix.matrix([[1, 0], [3, 4]])

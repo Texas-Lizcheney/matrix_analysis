@@ -22,29 +22,7 @@ class variable:
     pol: typing.Union[typing.Tuple[float, float], Unsure]
     is_arbitrary: bool
 
-    @typing.overload
-    def __init__(self) -> variable:
-        ...
-
-    @typing.overload
-    def __init__(self, num: __support_num) -> variable:
-        ...
-
-    @typing.overload
-    def __init__(self, real: __support_component,
-                 imag: __support_component) -> variable:
-        ...
-
     def __repr__(self) -> str:
-        ...
-
-    def __str__(self) -> str:
-        ...
-
-    def __eq__(self, other: __support_component) -> bool | Unsure:
-        ...
-
-    def __ne__(self, other: __support_component) -> bool | Unsure:
         ...
 
     def __add__(self, other: __support_num) -> variable:
@@ -134,16 +112,25 @@ class variable:
     def __rfloordiv__(self, other: __support_num) -> variable:
         ...
 
-    def __ifloordiv__(self, other: __support_num) -> typing.Self:
-        ...
-
     def __truediv__(self, other: __support_num) -> variable:
         ...
 
     def __rtruediv__(self, other: __support_num) -> variable:
         ...
 
+    def __ifloordiv__(self, other: __support_num) -> typing.Self:
+        ...
+
     def __itruediv__(self, other: __support_num) -> typing.Self:
+        ...
+
+    def __str__(self) -> str:
+        ...
+
+    def __eq__(self, other: __support_component) -> bool | Unsure:
+        ...
+
+    def __ne__(self, other: __support_component) -> bool | Unsure:
         ...
 
     def conj(self) -> variable:
@@ -234,4 +221,17 @@ class variable:
         ...
 
     def arccsch(self) -> variable:
+        ...
+
+    @typing.overload
+    def __init__(self) -> variable:
+        ...
+
+    @typing.overload
+    def __init__(self, num: __support_num) -> variable:
+        ...
+
+    @typing.overload
+    def __init__(self, real: __support_component,
+                 imag: __support_component) -> variable:
         ...

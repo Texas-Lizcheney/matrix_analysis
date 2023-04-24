@@ -152,8 +152,8 @@ ComplexVar ComplexVar_fdv(const ComplexVar &x, const ComplexVar &y)
     else
     {
         result = ComplexVar_div(x, y);
-        result.real = std::floor(result.real);
-        result.imag = std::floor(result.imag);
+        result.real = std::round(result.real);
+        result.imag = std::round(result.imag);
     }
     return result;
 }

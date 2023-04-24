@@ -868,10 +868,19 @@ PyObject *PyMatrix_inplace_multiply(PyMatrixObject *self, PyObject *other)
     ComplexVar tmp;
     if (!assignComplexVar(other, tmp))
     {
-        if (Matrix_imul(self, tmp))
-        {
-            return nullptr;
-        }
+        Matrix_imul(self, tmp);
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_inplace_remainder(PyMatrixObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (!assignComplexVar(other, tmp))
+    {
+        Matrix_imod(self, tmp);
         Py_INCREF(self);
         return (PyObject *)self;
     }
@@ -906,6 +915,30 @@ PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
     {
         assignComplexVar(self, tmp);
         return (PyObject *)Matrix_div(tmp, (PyMatrixObject *)other);
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_inplace_floor_divide(PyMatrixObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (!assignComplexVar(other, tmp))
+    {
+        Matrix_ifdv(self, tmp);
+        Py_INCREF(self);
+        return (PyObject *)self;
+    }
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *self, PyObject *other)
+{
+    ComplexVar tmp;
+    if (!assignComplexVar(other, tmp))
+    {
+        Matrix_idiv(self, tmp);
+        Py_INCREF(self);
+        return (PyObject *)self;
     }
     Py_RETURN_NOTIMPLEMENTED;
 }
@@ -1709,8 +1742,11 @@ static PyNumberMethods PyMatrixNumber = {
     .nb_inplace_add = (binaryfunc)PyMatrix_inplace_add,
     .nb_inplace_subtract = (binaryfunc)PyMatrix_inplace_subtract,
     .nb_inplace_multiply = (binaryfunc)PyMatrix_inplace_multiply,
+    .nb_inplace_remainder = (binaryfunc)PyMatrix_inplace_remainder,
     .nb_floor_divide = (binaryfunc)PyMatrix_floor_divide,
     .nb_true_divide = (binaryfunc)PyMatrix_true_divide,
+    .nb_inplace_floor_divide = (binaryfunc)PyMatrix_inplace_floor_divide,
+    .nb_inplace_true_divide = (binaryfunc)PyMatrix_inplace_true_divide,
     .nb_matrix_multiply = (binaryfunc)PyMatrix_matrix_multiply,
 };
 

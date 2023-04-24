@@ -165,14 +165,14 @@ class Test_var(externed_Testcase):
         self.assertFalse(z1.is_arbitrary)
         self.assertTupleAlmostEqual(z1.rec, (0.6153846154, 0.07692307692))
         z2 = y//x
-        self.assertTupleAlmostEqual(z2.rec, (1, -1))
+        self.assertTupleAlmostEqual(z2.rec, (2, 0))
         z3 = y % x
-        self.assertTupleAlmostEqual(z3.rec, (-1, 2))
+        self.assertTupleAlmostEqual(z3.rec, (0, -1))
         z4 = divmod(y, x)
         self.assertEqual(sys.getrefcount(z4[0]), 2)
         self.assertEqual(sys.getrefcount(z4[1]), 2)
-        self.assertTupleAlmostEqual(z4[0].rec, (1, -1))
-        self.assertTupleAlmostEqual(z4[1].rec, (-1, 2))
+        self.assertTupleAlmostEqual(z4[0].rec, (2, 0))
+        self.assertTupleAlmostEqual(z4[1].rec, (0, -1))
         x1 = matrix_analysis.var.variable(1+2j)
         k1 = id(x1)
         x1 /= y
@@ -205,8 +205,8 @@ class Test_var(externed_Testcase):
         with self.assertRaises(TypeError):
             x % "abc"
         self.assertVarAlmostEqual(x/1, ~(1/x))
-        self.assertTupleAlmostEqual((1//x).rec, (0, -1))
-        self.assertTupleAlmostEqual((1 % x).rec, (-1, 1))
+        self.assertTupleAlmostEqual((1//x).rec, (0, 0))
+        self.assertTupleAlmostEqual((1 % x).rec, (1, 0))
 
     def test_pow(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -218,7 +218,7 @@ class Test_var(externed_Testcase):
         b = matrix_analysis.var.variable(5, 3)
         c = matrix_analysis.var.variable(2, 3)
         d = pow(a, b, c)
-        self.assertTupleAlmostEqual(d.rec, (-0.40462543, 3.33048064))
+        self.assertTupleAlmostEqual(d.rec, (0.59537457, -1.66951936))
         k = id(x)
         x **= y
         self.assertEqual(k, id(x))

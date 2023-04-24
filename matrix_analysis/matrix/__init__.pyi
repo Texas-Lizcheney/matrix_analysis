@@ -21,26 +21,73 @@ class matrix:
     total: int
     shape: tuple[int, int]
 
-    @typing.overload
-    def __init__(self, rows: int, cols: int, *, fill: __support_num) -> None:
-        ...
-
-    @typing.overload
-    def __init__(self, matrix: list[list[__support_num]], *, fill: __support_num) -> None:
-        ...
-
-    @typing.overload
-    def __init__(self, matrix: list[tuple[int, int, __support_num]], *, fill: __support_num) -> None:
-        ...
-
-    @typing.overload
-    def __init__(self, matrix: numpy.ndarray) -> None:
-        ...
-
     def __repr__(self) -> str:
         ...
 
-    def __str__(self) -> str:
+    def __add__(self, other: matrix) -> matrix:
+        ...
+
+    def __radd__(self, other: matrix) -> matrix:
+        ...
+
+    def __iadd__(self, other: matrix) -> matrix:
+        ...
+
+    def __sub__(self, other: matrix) -> matrix:
+        ...
+
+    def __rsub__(self, other: matrix) -> matrix:
+        ...
+
+    def __isub__(self, other: matrix) -> matrix:
+        ...
+
+    def __mul__(self, other: __support_num) -> matrix:
+        ...
+
+    def __rmul__(self, other: __support_num) -> matrix:
+        ...
+
+    def __imul__(self, other: __support_num) -> matrix:
+        ...
+
+    def __mod__(self, other: __support_num) -> matrix:
+        ...
+
+    def __rmod__(self, other: __support_num) -> matrix:
+        ...
+
+    def __imod__(self, other: __support_num) -> matrix:
+        ...
+
+    def __divmod__(self, other: __support_num) -> tuple[matrix, matrix]:
+        ...
+
+    def __rdivmod__(self, other: __support_num) -> tuple[matrix, matrix]:
+        ...
+
+    def __floordiv__(self, other: __support_num) -> matrix:
+        ...
+
+    def __rfloordiv__(self, other: __support_num) -> matrix:
+        ...
+
+    def __truediv__(self, other: __support_num) -> matrix:
+        ...
+
+    def __rtruediv__(self, other: __support_num) -> matrix:
+        ...
+
+    def __ifloordiv__(self, other: __support_num) -> matrix:
+        ...
+
+    def __itruediv__(self, other: __support_num) -> matrix:
+        ...
+
+    def __matmul__(self, other: matrix) -> matrix:
+        ...
+
+    def __rmatmul__(self, other: matrix) -> matrix:
         ...
 
     def __len__(self) -> int:
@@ -70,50 +117,21 @@ class matrix:
     def __setitem__(self, index: tuple[int | slice, int | slice], value: numpy.ndarray) -> matrix:
         ...
 
-    def __add__(self, other: matrix) -> matrix:
+    def __str__(self) -> str:
         ...
 
-    def __radd__(self, other: matrix) -> matrix:
+    @typing.overload
+    def __init__(self, rows: int, cols: int, *, fill: __support_num) -> None:
         ...
 
-    def __sub__(self, other: matrix) -> matrix:
+    @typing.overload
+    def __init__(self, matrix: list[list[__support_num]], *, fill: __support_num) -> None:
         ...
 
-    def __rsub__(self, other: matrix) -> matrix:
+    @typing.overload
+    def __init__(self, matrix: list[tuple[int, int, __support_num]], *, fill: __support_num) -> None:
         ...
 
-    def __mul__(self, other: __support_num) -> matrix:
-        ...
-
-    def __rmul__(self, other: __support_num) -> matrix:
-        ...
-
-    def __mod__(self, other: __support_num) -> matrix:
-        ...
-
-    def __rmod__(self, other: __support_num) -> matrix:
-        ...
-
-    def __divmod__(self, other: __support_num) -> tuple[matrix, matrix]:
-        ...
-
-    def __rdivmod__(self, other: __support_num) -> tuple[matrix, matrix]:
-        ...
-
-    def __floordiv__(self, other: __support_num) -> matrix:
-        ...
-
-    def __rfloordiv__(self, other: __support_num) -> matrix:
-        ...
-
-    def __truediv__(self, other: __support_num) -> matrix:
-        ...
-
-    def __rtruediv__(self, other: __support_num) -> matrix:
-        ...
-
-    def __matmul__(self, other: matrix) -> matrix:
-        ...
-
-    def __rmatmul__(self, other: matrix) -> matrix:
+    @typing.overload
+    def __init__(self, matrix: numpy.ndarray) -> None:
         ...
