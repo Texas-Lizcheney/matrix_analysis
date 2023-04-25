@@ -1738,6 +1738,20 @@ PyObject *PyMatrix_get_shape(PyMatrixObject *self, void *closure)
     return Py_BuildValue("ii", self->rows, self->cols);
 }
 
+PyObject *PyMatrix_get_rank(PyMatrixObject *self, void *closure)
+{
+    int r = Matrix_rank(self);
+    if (r == -1)
+    {
+        Py_RETURN_UNSURE;
+    }
+    else if (r == -2)
+    {
+        return nullptr;
+    }
+    return PyLong_FromLong(r);
+}
+
 static PyNumberMethods PyMatrixNumber = {
     .nb_add = (binaryfunc)PyMatrix_add,
     .nb_subtract = (binaryfunc)PyMatrix_subtract,
@@ -1779,6 +1793,7 @@ static PyMemberDef PyMatrixMember[] = {
 
 static PyGetSetDef PyMatrixGetSet[] = {
     {"shape", (getter)PyMatrix_get_shape, nullptr, nullptr, nullptr},
+    {"rank", (getter)PyMatrix_get_rank, nullptr, nullptr, nullptr},
     nullptr,
 };
 

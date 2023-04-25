@@ -25,3 +25,15 @@ double casthalf_to_double(const uint16_t &x)
     }
     return (double &)result;
 }
+
+double cal_original_error(const double &x)
+{
+    int64_t exp = ((uint64_t &)x >> 52) & 0x7ff;
+    exp -= 54;
+    if (std::signbit(exp))
+    {
+        return 0.0;
+    }
+    exp <<= 52;
+    return (double &)(exp);
+}

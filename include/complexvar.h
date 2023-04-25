@@ -2,30 +2,33 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
-#include <math.h>
 #include <numbers>
 #include <Python.h>
 #include <structmember.h>
 #include <utilities.h>
 #include <sstream>
+#include <errordouble.h>
 
 PyObject *SetDoublePrecision(PyObject *, PyObject *);
 PyObject *SetArgFormat(PyObject *, PyObject *);
 
 struct ComplexVar
 {
-    double real;
-    double imag;
+    error_double real;
+    error_double imag;
     bool isArbitrary;
-    ComplexVar(double = 0, double = 0, bool = false);
+    ComplexVar(const double & = 0, const double & = 0, bool = false);
+    ComplexVar(const error_double &, const error_double &, bool);
     ComplexVar(const ComplexVar &) noexcept;
+    void operator=(const ComplexVar &);
 };
 
-#define ComplexVar_L2(x) (x.real * x.real + x.imag * x.imag)
-#define ComplexVar_length(x) sqrt(ComplexVar_L2(x))
-#define ComplexVar_arg(x) atan2(x.imag, x.real)
+error_double ComplexVar_L1(const ComplexVar &);
+error_double ComplexVar_squaredL2(const ComplexVar &);
+error_double ComplexVar_L2(const ComplexVar &);
+error_double ComplexVar_arg(const ComplexVar &);
 #define ComplexVar_iszero(x) (x.real == 0 && x.imag == 0 && !x.isArbitrary)
-void setvalue_frompolar(double r, double a, ComplexVar &);
+void setvalue_frompolar(error_double r, error_double a, ComplexVar &);
 std::stringstream ComplexVar_repr(const ComplexVar &);
 std::stringstream ComplexVar_str(const ComplexVar &);
 ComplexVar ComplexVar_conj(const ComplexVar &);

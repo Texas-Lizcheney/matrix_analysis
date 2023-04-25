@@ -48,11 +48,12 @@ PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 
 void Matrix_row_switch(PyMatrixObject *, int, int);
-void Matrix_row_multiply(PyMatrixObject *, int, int, const ComplexVar &);
-void Matrix_row_add(PyMatrixObject *, int, const ComplexVar &);
-void Matrix_row_switch(PyMatrixObject *, int, int);
-void Matrix_row_multiply(PyMatrixObject *, int, int, const ComplexVar &);
-void Matrix_row_add(PyMatrixObject *, int, const ComplexVar &);
+void Matrix_row_multiply(PyMatrixObject *, int, const ComplexVar &);
+void Matrix_row_add(PyMatrixObject *, int, int, const ComplexVar &);
+void Matrix_col_switch(PyMatrixObject *, int, int);
+void Matrix_col_multiply(PyMatrixObject *, int, const ComplexVar &);
+void Matrix_col_add(PyMatrixObject *, int, int, const ComplexVar &);
+int Matrix_rank(const PyMatrixObject *const);
 
 int PyMatrixAlloc(PyMatrixObject *);
 #define PyMatrixAssign(self, r, c, value) (self)->elements[r * (self)->cols + c] = value
@@ -92,6 +93,7 @@ PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);
 int PyMatrix_ass_subscript(PyMatrixObject *, PyObject *, PyObject *);
 
 PyObject *PyMatrix_get_shape(PyMatrixObject *, void *);
+PyObject *PyMatrix_get_rank(PyMatrixObject *, void *);
 
 extern PyTypeObject PyMatrixType;
 #define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrixType)

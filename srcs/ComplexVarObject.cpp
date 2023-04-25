@@ -524,7 +524,7 @@ PyObject *PyComplexVar_absolute(PyObject *self)
     {
         return PyFloat_FromDouble(std::nan(""));
     }
-    return PyFloat_FromDouble(ComplexVar_length(((PyComplexVarObject *)self)->num));
+    return PyFloat_FromDouble(ComplexVar_L2(((PyComplexVarObject *)self)->num).value);
 }
 
 int PyComplexVar_bool(PyObject *self)
@@ -817,7 +817,6 @@ PyObject *PyComplexVar_sin(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -830,7 +829,6 @@ PyObject *PyComplexVar_cos(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -843,7 +841,6 @@ PyObject *PyComplexVar_tan(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -856,7 +853,6 @@ PyObject *PyComplexVar_cot(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -869,7 +865,6 @@ PyObject *PyComplexVar_sec(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -882,7 +877,6 @@ PyObject *PyComplexVar_csc(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -895,7 +889,6 @@ PyObject *PyComplexVar_arcsin(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -908,7 +901,6 @@ PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
     PyComplexVarObject *result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -1117,7 +1109,7 @@ PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         return PyFloat_FromDouble(nan(""));
     }
-    return PyFloat_FromDouble(ComplexVar_length(self->num));
+    return PyFloat_FromDouble(ComplexVar_L2(self->num).value);
 }
 
 int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closure)
@@ -1144,7 +1136,7 @@ PyObject *PyComplexVar_get_arg(PyComplexVarObject *self, void *closure)
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         return PyFloat_FromDouble(nan(""));
     }
-    double result = ComplexVar_arg(self->num);
+    double result = ComplexVar_arg(self->num).value;
     if (*((bool *)closure))
     {
         result *= 180;
@@ -1165,13 +1157,13 @@ int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closur
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         return -1;
     }
-    double arg = getdouble_fromPyObject(value);
+    error_double arg = {getdouble_fromPyObject(value)};
     if (*((bool *)closure))
     {
         arg *= std::numbers::pi;
         arg /= 180;
     }
-    setvalue_frompolar(ComplexVar_length(self->num), arg, self->num);
+    setvalue_frompolar(ComplexVar_L2(self->num), arg, self->num);
     return 0;
 }
 
@@ -1182,7 +1174,7 @@ PyObject *PyComplexVar_get_recpair(PyComplexVarObject *self, void *closure)
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         Py_RETURN_NONE;
     }
-    return Py_BuildValue("dd", self->num.real, self->num.imag);
+    return Py_BuildValue("dd", self->num.real.value, self->num.imag.value);
 }
 
 int PyComplexVar_set_recpair(PyComplexVarObject *self, PyObject *value, void *closure)
@@ -1211,13 +1203,13 @@ PyObject *PyComplexVar_get_polarpair(PyComplexVarObject *self, void *closure)
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         Py_RETURN_NONE;
     }
-    double arg = ComplexVar_arg(self->num);
+    double arg = ComplexVar_arg(self->num).value;
     if (*((bool *)closure))
     {
         arg *= 180;
         arg /= std::numbers::pi;
     }
-    return Py_BuildValue("dd", ComplexVar_length(self->num), arg);
+    return Py_BuildValue("dd", ComplexVar_L2(self->num).value, arg);
 }
 
 int PyComplexVar_set_polarpair(PyComplexVarObject *self, PyObject *value, void *closure)

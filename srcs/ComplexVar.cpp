@@ -5,15 +5,52 @@ ComplexVar I = {0, 1, false};
 ComplexVar negI = {0, -1, false};
 extern int doubleprecision;
 
-ComplexVar::ComplexVar(double x, double y, bool z) : real(x), imag(y), isArbitrary(z)
+ComplexVar::ComplexVar(const double &x, const double &y, bool z) : real(x),
+                                                                   imag(y),
+                                                                   isArbitrary(z)
 {
 }
 
-ComplexVar::ComplexVar(const ComplexVar &n) noexcept : real(n.real), imag(n.imag), isArbitrary(n.isArbitrary)
+ComplexVar::ComplexVar(const error_double &x, const error_double &y, bool z) : real(x),
+                                                                               imag(y),
+                                                                               isArbitrary(z)
 {
 }
 
-void setvalue_frompolar(double r, double a, ComplexVar &x)
+ComplexVar::ComplexVar(const ComplexVar &n) noexcept : real(n.real),
+                                                       imag(n.imag),
+                                                       isArbitrary(n.isArbitrary)
+{
+}
+
+void ComplexVar::operator=(const ComplexVar &x)
+{
+    real = x.real;
+    imag = x.imag;
+    isArbitrary = x.isArbitrary;
+}
+
+error_double ComplexVar_L1(const ComplexVar &x)
+{
+    return abs(x.real) + abs(x.imag);
+}
+
+error_double ComplexVar_squaredL2(const ComplexVar &x)
+{
+    return x.real * x.real + x.imag * x.imag;
+}
+
+error_double ComplexVar_L2(const ComplexVar &x)
+{
+    return sqrt(ComplexVar_squaredL2(x));
+}
+
+error_double ComplexVar_arg(const ComplexVar &x)
+{
+    return atan2(x.imag, x.real);
+}
+
+void setvalue_frompolar(error_double r, error_double a, ComplexVar &x)
 {
     x.real = cos(a) * r;
     x.imag = sin(a) * r;
@@ -31,7 +68,7 @@ std::stringstream ComplexVar_repr(const ComplexVar &x)
     else
     {
         tmp << std::setprecision(doubleprecision) << x.real;
-        if (!std::signbit(x.imag) || std::isnan(x.imag))
+        if (!std::signbit(x.imag.value) || std::isnan(x.imag.value))
         {
             tmp << '+';
         }
@@ -50,7 +87,7 @@ std::stringstream ComplexVar_str(const ComplexVar &x)
     else
     {
         tmp << std::setprecision(doubleprecision) << x.real;
-        if (!std::signbit(x.imag) || std::isnan(x.imag))
+        if (!std::signbit(x.imag.value) || std::isnan(x.imag.value))
         {
             tmp << '+';
         }
@@ -71,7 +108,7 @@ ComplexVar ComplexVar_add(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
@@ -87,7 +124,7 @@ ComplexVar ComplexVar_sub(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
@@ -103,13 +140,11 @@ ComplexVar ComplexVar_mul(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (ComplexVar_iszero(x) || ComplexVar_iszero(y))
     {
-        result.real = 0;
-        result.imag = 0;
-        result.isArbitrary = false;
+        result = {0, 0, false};
     }
     else if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
@@ -125,24 +160,20 @@ ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (ComplexVar_iszero(x))
     {
-        result.real = 0;
-        result.imag = 0;
-        result.isArbitrary = false;
+        result = {0, 0, false};
     }
     else if (ComplexVar_iszero(y))
     {
-        result.real = std::nan("");
-        result.imag = std::nan("");
-        result.isArbitrary = false;
+        result = {std::nan(""), std::nan(""), false};
         PyErr_WarnEx(PyExc_RuntimeWarning, "Divide by 0.", 2);
     }
     else if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
-        double l = ComplexVar_L2(y);
+        error_double l = ComplexVar_squaredL2(y);
         result.real = (x.real * y.real + x.imag * y.imag) / l;
         result.imag = (x.imag * y.real - x.real * y.imag) / l;
         result.isArbitrary = false;
@@ -155,13 +186,13 @@ ComplexVar ComplexVar_fdv(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
         result = ComplexVar_div(x, y);
-        result.real = std::round(result.real);
-        result.imag = std::round(result.imag);
+        result.real = round(result.real);
+        result.imag = round(result.imag);
     }
     return result;
 }
@@ -171,7 +202,7 @@ ComplexVar ComplexVar_mod(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
@@ -186,11 +217,11 @@ ComplexVar ComplexVar_exp(const ComplexVar &x)
     ComplexVar result;
     if (x.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
-        setvalue_frompolar(std::exp(x.real), x.imag, result);
+        setvalue_frompolar(exp(x.real), x.imag, result);
     }
     return result;
 }
@@ -200,19 +231,20 @@ ComplexVar ComplexVar_ln(const ComplexVar &x)
     ComplexVar result;
     if (x.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
-        result.isArbitrary = false;
         if (ComplexVar_iszero(x))
         {
-            result.real = std::nan("");
-            result.imag = std::nan("");
+            result = {std::nan(""), std::nan(""), false};
+            PyErr_WarnEx(PyExc_RuntimeWarning, "Calculating log(0).", 2);
         }
         else
         {
-            result.real = std::log(ComplexVar_length(x));
+            result.isArbitrary = false;
+            error_double l = ComplexVar_L2(x);
+            result.real = log(l);
             result.imag = ComplexVar_arg(x);
         }
     }
@@ -229,18 +261,17 @@ ComplexVar ComplexVar_pow(const ComplexVar &x, const ComplexVar &y)
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
         if (ComplexVar_iszero(x))
         {
-            result = {1, 0, false};
+            result = One;
         }
         else
         {
             result = ComplexVar_exp(ComplexVar_mul(y, ComplexVar_ln(x)));
-            result.isArbitrary = false;
         }
     }
     return result;
@@ -251,7 +282,7 @@ ComplexVar ComplexVar_neg(const ComplexVar &x)
     ComplexVar result;
     if (x.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
@@ -267,17 +298,15 @@ ComplexVar ComplexVar_ivt(const ComplexVar &x)
     ComplexVar result;
     if (x.isArbitrary)
     {
-        result.isArbitrary = true;
+        result = {0, 0, true};
     }
     else
     {
-        double l = ComplexVar_L2(x);
+        error_double l = ComplexVar_squaredL2(x);
         if (l == 0)
         {
-            result.real = std::nan("");
-            result.imag = std::nan("");
-            result.isArbitrary = false;
-            return result;
+            result = {std::nan(""), std::nan(""), false};
+            PyErr_WarnEx(PyExc_RuntimeWarning, "Divide by 0.", 2);
         }
         result.real = x.real / l;
         result.imag = -x.imag / l;
@@ -295,7 +324,7 @@ ComplexVar ComplexVar_sqrt(const ComplexVar &x)
     }
     else
     {
-        setvalue_frompolar(sqrt(ComplexVar_length(x)), ComplexVar_arg(x) / 2, result);
+        setvalue_frompolar(sqrt(ComplexVar_L2(x)), ComplexVar_arg(x) / 2, result);
     }
     return result;
 }
@@ -414,7 +443,7 @@ ComplexVar ComplexVar_arccos(const ComplexVar &x)
     else
     {
         result = ComplexVar_mul(negI, ComplexVar_ln(ComplexVar_sub(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One)))));
-        if ((x.real >= 0 && x.imag >= 0) || (x.real < 0 && x.imag < 0))
+        if ((x.real.value >= 0 && x.imag.value >= 0) || (x.real.value < 0 && x.imag.value < 0))
         {
             result.real = -result.real;
             result.imag = -result.imag;
@@ -623,7 +652,7 @@ ComplexVar ComplexVar_arccosh(const ComplexVar &x)
     {
         result = ComplexVar_ln(ComplexVar_sub(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One))));
     }
-    if (x.real >= 0)
+    if (x.real.value >= 0)
     {
         result.real = -result.real;
         result.imag = -result.imag;
