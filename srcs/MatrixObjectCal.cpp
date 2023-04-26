@@ -10,7 +10,7 @@ PyMatrixObject *Matrix_add(const PyMatrixObject *const x, const PyMatrixObject *
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -60,7 +60,7 @@ PyMatrixObject *Matrix_sub(const PyMatrixObject *const x, const PyMatrixObject *
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -105,7 +105,7 @@ int Matrix_isub(PyMatrixObject *x, const PyMatrixObject *const y)
 PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const ComplexVar &y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -151,7 +151,7 @@ PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *
     }
     Py_ssize_t L = x->cols;
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -183,7 +183,7 @@ PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *
 PyMatrixObject *Matrix_div(const PyMatrixObject *const x, const ComplexVar &y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -223,7 +223,7 @@ void Matrix_idiv(PyMatrixObject *x, const ComplexVar &y)
 PyMatrixObject *Matrix_div(const ComplexVar &x, const PyMatrixObject *const y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -249,7 +249,7 @@ PyMatrixObject *Matrix_div(const ComplexVar &x, const PyMatrixObject *const y)
 PyMatrixObject *Matrix_fdv(const PyMatrixObject *const x, const ComplexVar &y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -289,7 +289,7 @@ void Matrix_ifdv(PyMatrixObject *x, const ComplexVar &y)
 PyMatrixObject *Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -315,7 +315,7 @@ PyMatrixObject *Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y)
 PyMatrixObject *Matrix_mod(const PyMatrixObject *const x, const ComplexVar &y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -355,7 +355,7 @@ void Matrix_imod(PyMatrixObject *x, const ComplexVar &y)
 PyMatrixObject *Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y)
 {
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -381,7 +381,7 @@ PyMatrixObject *Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y)
 PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -411,7 +411,7 @@ PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
 PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -441,7 +441,7 @@ PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
 PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -473,7 +473,7 @@ PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -510,7 +510,7 @@ PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const x, const PyMatrixObj
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrixType);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);

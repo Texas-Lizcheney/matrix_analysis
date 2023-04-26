@@ -20,7 +20,7 @@ PyObject *PyUnsure_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     Py_RETURN_UNSURE;
 }
 
-PyTypeObject PyUnsureType = {
+PyTypeObject PyUnsure_Type = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "varcore.unsure",
     .tp_basicsize = 0,
     .tp_dealloc = (destructor)PyUnsure_dealloc,
@@ -31,5 +31,5 @@ PyTypeObject PyUnsureType = {
 
 PyObject PyUnsure = {
     _PyObject_HEAD_EXTRA.ob_refcnt = 1,
-    .ob_type = &PyUnsureType,
+    .ob_type = &PyUnsure_Type,
 };

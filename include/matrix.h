@@ -12,9 +12,6 @@
 #include <arrayobject.h>
 #include <ndarraytypes.h>
 
-PyObject *SetFastPrint(PyObject *, PyObject *);
-PyObject *SetPrintArea(PyObject *, PyObject *, PyObject *);
-
 struct PyMatrixObject
 {
     PyObject_HEAD;
@@ -95,6 +92,6 @@ int PyMatrix_ass_subscript(PyMatrixObject *, PyObject *, PyObject *);
 PyObject *PyMatrix_get_shape(PyMatrixObject *, void *);
 PyObject *PyMatrix_get_rank(PyMatrixObject *, void *);
 
-extern PyTypeObject PyMatrixType;
-#define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrixType)
-#define PyMatrix_CheckExact(op) Py_IS_TYPE(((PyObject *)((a))), &PyMatrixType)
+extern PyTypeObject PyMatrix_Type;
+#define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrix_Type)
+#define PyMatrix_CheckExact(op) Py_IS_TYPE(((PyObject *)((a))), &PyMatrix_Type)

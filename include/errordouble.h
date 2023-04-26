@@ -3,6 +3,8 @@
 #include <utilities.h>
 #include <math.h>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 class error_double
 {
@@ -38,10 +40,15 @@ error_double sqrt(const error_double &);
 error_double atan2(const error_double &, const error_double &);
 error_double round(const error_double &);
 
-struct PyerrordoubleObject
+struct PyErrordoubleObject
 {
     PyObject_HEAD;
     error_double num;
 };
 
-void PyerrordoubleObject_dealloc(PyerrordoubleObject *);
+extern PyTypeObject PyErrordouble_Type;
+#define PyErrordouble_CheckExact(op) Py_IS_TYPE(op, &PyErrordouble_Type)
+
+void PyErrordoubleObject_dealloc(PyErrordoubleObject *);
+PyObject *PyErrordoubleObject_repr(PyErrordoubleObject *);
+int PyErrordoubleObject_init(PyErrordoubleObject *, PyObject *, PyObject *);

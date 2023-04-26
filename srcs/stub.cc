@@ -7,9 +7,9 @@
 #include <matrix.h>
 #include <utilities.h>
 
-extern PyTypeObject PyMatrixType;
-extern PyTypeObject PyComplexVarType;
-extern PyTypeObject PyUnsureType;
+extern PyTypeObject PyMatrix_Type;
+extern PyTypeObject PyComplexVar_Type;
+extern PyTypeObject PyUnsure_Type;
 extern PyObject *PyExc_Undefined;
 extern PyObject *PyExc_ShapeError;
 extern PyObject PyUnsure;
@@ -17,6 +17,7 @@ extern PyObject PyUnsure;
 static PyMethodDef varModule_method[] = {
     {"set_print_precision", (PyCFunction)SetDoublePrecision, METH_O, nullptr},
     {"set_arg_format", (PyCFunction)SetArgFormat, METH_O, nullptr},
+    {"set_print_error", (PyCFunction)SetPrintError, METH_O, nullptr},
     nullptr,
 };
 
@@ -29,7 +30,7 @@ static PyModuleDef varModule = {
 
 PyObject *Init_varModule()
 {
-    if (PyType_Ready(&PyComplexVarType) < 0)
+    if (PyType_Ready(&PyComplexVar_Type) < 0)
     {
         return nullptr;
     }
@@ -39,10 +40,9 @@ PyObject *Init_varModule()
         Py_DECREF(PyExc_Undefined);
         return nullptr;
     }
-    Py_INCREF(&PyComplexVarType);
-    if ((PyModule_AddType(m, &PyComplexVarType) < 0))
+    if ((PyModule_AddType(m, &PyComplexVar_Type) < 0))
     {
-        Py_DECREF(&PyComplexVarType);
+        Py_DECREF(&PyComplexVar_Type);
         Py_DECREF(PyExc_Undefined);
         Py_DECREF(m);
         return nullptr;
@@ -65,7 +65,7 @@ static PyModuleDef matrixModule = {
 
 PyObject *Init_matrixModule()
 {
-    if (PyType_Ready(&PyMatrixType) < 0)
+    if (PyType_Ready(&PyMatrix_Type) < 0)
     {
         return nullptr;
     }
@@ -74,10 +74,9 @@ PyObject *Init_matrixModule()
     {
         return nullptr;
     }
-    Py_INCREF(&PyMatrixType);
-    if ((PyModule_AddType(m, &PyMatrixType) < 0))
+    if ((PyModule_AddType(m, &PyMatrix_Type) < 0))
     {
-        Py_DECREF(&PyMatrixType);
+        Py_DECREF(&PyMatrix_Type);
         Py_DECREF(m);
         return nullptr;
     }
@@ -92,7 +91,7 @@ static PyModuleDef coreMoulde = {
 
 PyMODINIT_FUNC PyInit_core()
 {
-    if (PyType_Ready(&PyUnsureType) < 0)
+    if (PyType_Ready(&PyUnsure_Type) < 0)
     {
         return nullptr;
     }

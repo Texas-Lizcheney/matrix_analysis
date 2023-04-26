@@ -9,7 +9,7 @@ def set_print_precision(precision: int) -> None:
     ...
 
 
-def set_arg_format(format: str) -> None:
+def set_arg_format(format: typing.Literal["deg", "rad"]) -> None:
     ...
 
 
@@ -17,7 +17,7 @@ class variable:
     real: float
     imag: float
     rec: typing.Union[typing.Tuple[float, float], Unsure]
-    length: float
+    r: float
     arg: float
     pol: typing.Union[typing.Tuple[float, float], Unsure]
     is_arbitrary: bool
@@ -234,4 +234,9 @@ class variable:
     @typing.overload
     def __init__(self, real: __support_component,
                  imag: __support_component) -> variable:
+        ...
+
+    @typing.overload
+    def __init__(self, r: __support_component,
+                 arg: __support_component) -> variable:
         ...

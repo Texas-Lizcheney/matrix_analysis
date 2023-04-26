@@ -9,9 +9,6 @@
 #include <sstream>
 #include <errordouble.h>
 
-PyObject *SetDoublePrecision(PyObject *, PyObject *);
-PyObject *SetArgFormat(PyObject *, PyObject *);
-
 struct ComplexVar
 {
     error_double real;
@@ -78,9 +75,9 @@ struct PyComplexVarObject
 
 int assignComplexVar(PyObject *, ComplexVar &);
 int assignComplexVar_withExc(PyObject *, ComplexVar &);
-extern PyTypeObject PyComplexVarType;
-#define PyComplexVar_Check(op) PyObject_TypeCheck(op, &PyComplexVarType)
-#define PyComplexVar_CheckExact(op) Py_IS_TYPE(op, &PyComplexVarType)
+extern PyTypeObject PyComplexVar_Type;
+#define PyComplexVar_Check(op) PyObject_TypeCheck(op, &PyComplexVar_Type)
+#define PyComplexVar_CheckExact(op) Py_IS_TYPE(op, &PyComplexVar_Type)
 #define CanBeComplexVar(op) (PyComplexVar_CheckExact(op) || Py_IsUnsure(op) || PyLong_CheckExact(op) || PyFloat_CheckExact(op) || PyComplex_CheckExact(op))
 
 void PyComplexVar_dealloc(PyComplexVarObject *);

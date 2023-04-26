@@ -1,56 +1,19 @@
 #include <matrix.h>
 
 extern int doubleprecision;
-bool fastprint = false;
-int escape_rows_from = 3;
-int escape_rows_to = 3;
-int escape_cols_from = 3;
-int escape_cols_to = 3;
+extern bool fastprint;
+extern int escape_rows_from;
+extern int escape_rows_to;
+extern int escape_cols_from;
+extern int escape_cols_to;
 extern PyObject *PyExc_ShapeError;
 template <typename T>
-concept npy_real = std::is_integral<T>::value || std::is_floating_point<T>::value;
-
+concept npy_real = std::is_integral_v<T> || std::is_floating_point_v<T>;
 template <typename T>
 concept npy_complex = requires(T a) {
                           a.real;
                           a.imag;
                       };
-
-PyObject *SetFastPrint(PyObject *self, PyObject *value)
-{
-    if (!PyBool_Check(value))
-    {
-        PyErr_SetString(PyExc_ValueError, "Fail to set value! Only accept bool.");
-    }
-    else
-    {
-        if (Py_IsTrue(value))
-        {
-            fastprint = true;
-        }
-        else
-        {
-            fastprint = false;
-        }
-    }
-    Py_RETURN_NONE;
-}
-
-PyObject *SetPrintArea(PyObject *self, PyObject *args, PyObject *kwds)
-{
-    static char *kwlist[] = {
-        (char *)"left",
-        (char *)"right",
-        (char *)"up",
-        (char *)"down",
-        nullptr,
-    };
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|$iiii", kwlist, &escape_cols_from, &escape_cols_to, &escape_rows_from, &escape_rows_to))
-    {
-        PyErr_SetString(PyExc_ValueError, "Fail to set value! Only accept ints.");
-    }
-    Py_RETURN_NONE;
-}
 
 int PyMatrixAlloc(PyMatrixObject *self)
 {
@@ -124,7 +87,7 @@ int PyMatrixGet_withcheck(const PyMatrixObject *const self, int r, int c, Comple
 PyObject *PyMatrix_copy(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -681,7 +644,7 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
             goto PyMatrix_init_done;
         }
     }
-    PyErr_SetString(PyExc_ValueError, "Fail to match init arguments.");
+    PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
     return -1;
 PyMatrix_init_done:
     PyErr_Clear();
@@ -972,7 +935,7 @@ static PyObject *PyMatrix_subscript_LL(PyMatrixObject *self, PyObject *a, PyObje
     int r = PyLong_AS_LONG(a);
     int c = PyLong_AS_LONG(b);
     PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVarType);
+    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -999,7 +962,7 @@ static PyObject *PyMatrix_subscript_LS(PyMatrixObject *self, PyObject *a, PyObje
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -1042,7 +1005,7 @@ static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObje
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -1075,7 +1038,7 @@ static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObje
 static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObject *b)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrixType, nullptr, nullptr);
+    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -1753,7 +1716,7 @@ PyObject *PyMatrix_get_rank(PyMatrixObject *self, void *closure)
     return PyLong_FromLong(r);
 }
 
-static PyNumberMethods PyMatrixNumber = {
+static PyNumberMethods PyMatrix_as_number = {
     .nb_add = (binaryfunc)PyMatrix_add,
     .nb_subtract = (binaryfunc)PyMatrix_subtract,
     .nb_multiply = (binaryfunc)PyMatrix_multiply,
@@ -1772,44 +1735,44 @@ static PyNumberMethods PyMatrixNumber = {
     .nb_matrix_multiply = (binaryfunc)PyMatrix_matrix_multiply,
 };
 
-static PyMappingMethods PyMatrixMap = {
+static PyMappingMethods PyMatrix_as_mapping = {
     .mp_length = (lenfunc)PyMatrix_length,
     .mp_subscript = (binaryfunc)PyMatrix_subscript,
     .mp_ass_subscript = (objobjargproc)PyMatrix_ass_subscript,
 };
 
-static PyMethodDef PyMatrixMethod[] = {
+static PyMethodDef PyMatrix_methods[] = {
     {"conj", (PyCFunction)PyMatrix_conj, METH_NOARGS, nullptr},
     {"T", (PyCFunction)PyMatrix_T, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
     nullptr,
 };
 
-static PyMemberDef PyMatrixMember[] = {
+static PyMemberDef PyMatrix_members[] = {
     {"rows", T_INT, offsetof(PyMatrixObject, rows), READONLY, nullptr},
     {"cols", T_INT, offsetof(PyMatrixObject, cols), READONLY, nullptr},
     {"total", T_LONGLONG, offsetof(PyMatrixObject, total_elements), READONLY, nullptr},
     nullptr,
 };
 
-static PyGetSetDef PyMatrixGetSet[] = {
+static PyGetSetDef PyMatrix_getset[] = {
     {"shape", (getter)PyMatrix_get_shape, nullptr, nullptr, nullptr},
     {"rank", (getter)PyMatrix_get_rank, nullptr, nullptr, nullptr},
     nullptr,
 };
 
-PyTypeObject PyMatrixType = {
+PyTypeObject PyMatrix_Type = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "matrixcore.matrix",
     .tp_basicsize = sizeof(PyMatrixObject),
     .tp_dealloc = (destructor)PyMatrix_dealloc,
     .tp_repr = (reprfunc)PyMatrix_repr,
-    .tp_as_number = &PyMatrixNumber,
-    .tp_as_mapping = &PyMatrixMap,
+    .tp_as_number = &PyMatrix_as_number,
+    .tp_as_mapping = &PyMatrix_as_mapping,
     .tp_str = (reprfunc)PyMatrix_str,
     .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_methods = PyMatrixMethod,
-    .tp_members = PyMatrixMember,
-    .tp_getset = PyMatrixGetSet,
+    .tp_methods = PyMatrix_methods,
+    .tp_members = PyMatrix_members,
+    .tp_getset = PyMatrix_getset,
     .tp_init = (initproc)PyMatrix_init,
     .tp_new = (newfunc)PyMatrix_new,
 };

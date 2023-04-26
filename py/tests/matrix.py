@@ -83,6 +83,8 @@ class Test_mat(externed_Testcase):
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.matrix(
                 numpy.array([["abc"]], dtype=object))
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.matrix("abd", 32, "fd", 4553.54)
 
     def test_repr(self):
         x = matrix_analysis.matrix.matrix(

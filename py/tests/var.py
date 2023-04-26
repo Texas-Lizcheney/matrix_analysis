@@ -13,9 +13,10 @@ class Test_var(externed_Testcase):
         y3 = matrix_analysis.var.variable(1+2j)
         z1 = matrix_analysis.var.variable(1, 3.2)
         z2 = matrix_analysis.var.variable(real=2, imag=1)
+        z3 = matrix_analysis.var.variable(1, arg=1)
         with self.assertRaises(TypeError):
             y4 = matrix_analysis.var.variable("abc")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             z3 = matrix_analysis.var.variable(1, 2, 3)
 
     def test_repr(self):
@@ -42,7 +43,7 @@ class Test_var(externed_Testcase):
         x = matrix_analysis.var.variable()
         self.assertTrue(x.is_arbitrary)
         with self.assertRaises(matrix_analysis.Undefined):
-            print(x.length)
+            print(x.r)
         with self.assertRaises(matrix_analysis.Undefined):
             print(x.arg)
         with self.assertRaises(matrix_analysis.Undefined):
@@ -50,7 +51,7 @@ class Test_var(externed_Testcase):
         with self.assertRaises(matrix_analysis.Undefined):
             print(x.pol)
         with self.assertRaises(matrix_analysis.Undefined):
-            x.length = 1
+            x.r = 1
         with self.assertRaises(matrix_analysis.Undefined):
             x.arg = 1
         with self.assertRaises(ValueError):
@@ -61,13 +62,13 @@ class Test_var(externed_Testcase):
         self.assertFalse(y.is_arbitrary)
         self.assertAlmostEqual(y.real, 1)
         self.assertAlmostEqual(y.imag, 2)
-        self.assertAlmostEqual(y.length, 5**0.5)
+        self.assertAlmostEqual(y.r, 5**0.5)
         self.assertAlmostEqual(y.arg, math.atan2(2, 1))
         self.assertTupleAlmostEqual(y.rec, (1, 2))
         self.assertTupleAlmostEqual(y.pol, (5**0.5, math.atan2(2, 1)))
         x.rec = (1, 1)
         self.assertFalse(x.is_arbitrary)
-        self.assertAlmostEqual(x.length, 2**0.5)
+        self.assertAlmostEqual(x.r, 2**0.5)
         self.assertAlmostEqual(x.arg, math.pi/4)
         self.assertTupleAlmostEqual(x.pol, (2**0.5, math.pi/4))
         matrix_analysis.var.set_arg_format("deg")

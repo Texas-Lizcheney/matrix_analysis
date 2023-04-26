@@ -104,7 +104,12 @@ void error_double::operator=(const double &x)
 
 std::ostream &operator<<(std::ostream &os, const error_double &x)
 {
-    return os << x.value;
+    os << x.value;
+    if (print_error)
+    {
+        os << "(±" << x.error << ")";
+    }
+    return os;
 }
 
 error_double sin(const error_double &x)

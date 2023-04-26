@@ -37,3 +37,102 @@ double cal_original_error(const double &x)
     exp <<= 52;
     return (double &)(exp);
 }
+
+int doubleprecision = 7;
+PyObject *SetDoublePrecision(PyObject *self, PyObject *value)
+{
+    if (!PyLong_CheckExact(value))
+    {
+        PyErr_SetString(PyExc_ValueError, "Fail to set precision! Only accept int.");
+        Py_RETURN_NONE;
+    }
+    int pre = PyLong_AsLong(value);
+    if (pre < 0)
+    {
+        doubleprecision = 0;
+        Py_RETURN_NONE;
+    }
+    doubleprecision = pre;
+    Py_RETURN_NONE;
+}
+
+bool isdeg = false;
+PyObject *SetArgFormat(PyObject *self, PyObject *value)
+{
+    if (PyUnicode_CheckExact(value))
+    {
+        const char *format = PyUnicode_AsUTF8(value);
+        if (!strcmp(format, "deg"))
+        {
+            isdeg = true;
+            Py_RETURN_NONE;
+        }
+        if (!strcmp(format, "rad"))
+        {
+            isdeg = false;
+            Py_RETURN_NONE;
+        }
+    }
+    PyErr_SetString(PyExc_ValueError, "Fail to set format! Only accept \"deg\" and \"rad\".");
+    return nullptr;
+}
+
+bool fastprint = false;
+PyObject *SetFastPrint(PyObject *self, PyObject *value)
+{
+    if (Py_IsTrue(value))
+    {
+        fastprint = true;
+    }
+    else if (Py_IsFalse(value))
+    {
+        fastprint = false;
+    }
+    else
+    {
+        PyErr_SetString(PyExc_ValueError, "Fail to set value! Only accept bool.");
+        return nullptr;
+    }
+    Py_RETURN_NONE;
+}
+
+int escape_rows_from = 3;
+int escape_rows_to = 3;
+int escape_cols_from = 3;
+int escape_cols_to = 3;
+PyObject *SetPrintArea(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {
+        (char *)"left",
+        (char *)"right",
+        (char *)"up",
+        (char *)"down",
+        nullptr,
+    };
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|$iiii", kwlist, &escape_cols_from, &escape_cols_to, &escape_rows_from, &escape_rows_to))
+    {
+        PyErr_SetString(PyExc_ValueError, "Fail to set value! Only accept ints.");
+        return nullptr;
+    }
+    Py_RETURN_NONE;
+}
+
+bool print_error = false;
+PyObject *SetPrintError(PyObject *self, PyObject *value)
+{
+
+    if (Py_IsTrue(value))
+    {
+        print_error = true;
+    }
+    else if (Py_IsFalse(value))
+    {
+        print_error = false;
+    }
+    else
+    {
+        PyErr_SetString(PyExc_ValueError, "Fail to set value! Only accept bool.");
+        return nullptr;
+    }
+    Py_RETURN_NONE;
+}
