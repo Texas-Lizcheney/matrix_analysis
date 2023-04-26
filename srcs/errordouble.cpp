@@ -1,4 +1,5 @@
 #include <errordouble.h>
+extern bool print_error;
 
 error_double::error_double(double value) : value(value),
                                            error(cal_original_error(value))

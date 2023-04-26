@@ -158,25 +158,26 @@ void PyMatrix_dealloc(PyMatrixObject *self)
 
 PyObject *PyMatrix_repr(PyMatrixObject *self)
 {
-    std::string repr;
-    repr += "[";
+    std::stringstream repr;
+    repr << std::setprecision(doubleprecision);
+    repr << "[";
     for (int r = 0; r < self->rows; r++)
     {
-        repr += "[";
+        repr << "[";
         for (int c = 0; c < self->cols; c++)
         {
-            repr += ComplexVar_repr(self->elements[r * self->cols + c]).str().c_str();
-            repr += ",";
+            repr << (self->elements[r * self->cols + c]) << ',';
         }
-        repr += "],";
+        repr << "],";
     }
-    repr += "]";
-    return PyUnicode_FromString(repr.c_str());
+    repr << "]";
+    return PyUnicode_FromString(repr.str().c_str());
 }
 
 PyObject *PyMatrix_str(PyMatrixObject *self)
 {
-    std::string repr;
+    std::stringstream repr;
+    repr << std::setprecision(doubleprecision);
     if (fastprint)
     {
         bool rowskipped = false;
@@ -187,49 +188,49 @@ PyObject *PyMatrix_str(PyMatrixObject *self)
         {
             if (r < escape_rows_from || rowd <= r)
             {
-                repr += "[";
+                repr << "[";
                 colskipped = false;
                 for (int c = 0; c < self->cols; c++)
                 {
                     if (c < escape_cols_from || cold <= c)
                     {
-                        repr += ComplexVar_str(self->elements[r * self->cols + c]).str().c_str();
+                        repr < (self->elements[r * self->cols + c]);
                         if (c != self->cols - 1)
                         {
-                            repr += "\t";
+                            repr << "\t";
                         }
                     }
                     else if (!colskipped)
                     {
-                        repr += "...";
+                        repr << "...";
                         if (c != self->cols)
                         {
-                            repr += "\t";
+                            repr << "\t";
                         }
                         colskipped = true;
                     }
                 }
-                repr += "]";
+                repr << "]";
                 if (r != self->rows - 1)
                 {
-                    repr += "\n";
+                    repr << "\n";
                 }
             }
             else if (!rowskipped)
             {
-                repr += "[";
+                repr << "[";
                 for (int c = 0; c < std::min(self->cols, escape_cols_from + escape_cols_to + 1); c++)
                 {
-                    repr += "...";
+                    repr << "...";
                     if (c != self->cols - 1)
                     {
-                        repr += "\t";
+                        repr << "\t";
                     }
                 }
-                repr += "]";
+                repr << "]";
                 if (r != self->rows - 1)
                 {
-                    repr += "\n";
+                    repr << "\n";
                 }
                 rowskipped = true;
             }
@@ -239,23 +240,23 @@ PyObject *PyMatrix_str(PyMatrixObject *self)
     {
         for (int r = 0; r < self->rows; r++)
         {
-            repr += "[";
+            repr << "[";
             for (int c = 0; c < self->cols; c++)
             {
-                repr += ComplexVar_str(self->elements[r * self->cols + c]).str().c_str();
+                repr < (self->elements[r * self->cols + c]);
                 if (c != self->cols - 1)
                 {
-                    repr += "\t";
+                    repr << "\t";
                 }
             }
-            repr += "]";
+            repr << "]";
             if (r != self->rows - 1)
             {
-                repr += "\n";
+                repr << "\n";
             }
         }
     }
-    return PyUnicode_FromString(repr.c_str());
+    return PyUnicode_FromString(repr.str().c_str());
 }
 
 static int PyMatrix_init_from_rcf(PyMatrixObject *self, PyObject *fill)

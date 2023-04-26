@@ -83,15 +83,6 @@ int Matrix_rank(const PyMatrixObject *const self)
     }
     for (Py_ssize_t r = 0; r < std::min(tmp->rows, tmp->cols); r++)
     {
-        for (Py_ssize_t i = 0; i < tmp->rows; i++)
-        {
-            for (Py_ssize_t j = 0; j < tmp->rows; j++)
-            {
-                printf("%s\t", ComplexVar_str(PyMatrixGetitem(tmp, i, j)).str().c_str());
-            }
-            printf("\n");
-        }
-        printf("\n");
         Py_ssize_t maxr = r;
         Py_ssize_t maxc = r;
         double L = 0;

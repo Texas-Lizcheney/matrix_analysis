@@ -3,7 +3,6 @@
 ComplexVar One = {1, 0, false};
 ComplexVar I = {0, 1, false};
 ComplexVar negI = {0, -1, false};
-extern int doubleprecision;
 
 ComplexVar::ComplexVar(const double &x, const double &y, bool z) : real(x),
                                                                    imag(y),
@@ -58,42 +57,40 @@ void setvalue_frompolar(error_double r, error_double a, ComplexVar &x)
     return;
 }
 
-std::stringstream ComplexVar_repr(const ComplexVar &x)
+std::ostream &operator<<(std::ostream &s, const ComplexVar &x)
 {
-    std::stringstream tmp;
     if (x.isArbitrary)
     {
-        tmp << "Unsure";
+        s << "Unsure";
     }
     else
     {
-        tmp << std::setprecision(doubleprecision) << x.real;
+        s << x.real;
         if (!std::signbit(x.imag.value) || std::isnan(x.imag.value))
         {
-            tmp << '+';
+            s << '+';
         }
-        tmp << x.imag << 'j';
+        s << x.imag << 'j';
     }
-    return tmp;
+    return s;
 }
 
-std::stringstream ComplexVar_str(const ComplexVar &x)
+std::ostream &operator<(std::ostream &s, const ComplexVar &x)
 {
-    std::stringstream tmp;
     if (x.isArbitrary)
     {
-        tmp << "undefined";
+        s << "undefined";
     }
     else
     {
-        tmp << std::setprecision(doubleprecision) << x.real;
+        s << x.real;
         if (!std::signbit(x.imag.value) || std::isnan(x.imag.value))
         {
-            tmp << '+';
+            s << '+';
         }
-        tmp << x.imag << 'i';
+        s << x.imag << 'i';
     }
-    return tmp;
+    return s;
 }
 
 ComplexVar ComplexVar_conj(const ComplexVar &x)

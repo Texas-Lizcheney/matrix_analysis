@@ -1,6 +1,6 @@
 #include <complexvar.h>
 
-int doubleprecision = 7;
+extern int doubleprecision;
 bool isdeg = false;
 extern PyObject *PyExc_Undefined;
 
@@ -96,16 +96,21 @@ int assignComplexVar_withExc(PyObject *value, ComplexVar &target)
 void PyComplexVar_dealloc(PyComplexVarObject *self)
 {
     Py_TYPE(self)->tp_free((PyObject *)self);
+    return;
 }
 
 PyObject *PyComplexVar_repr(PyComplexVarObject *self)
 {
-    return PyUnicode_FromString(ComplexVar_repr(self->num).str().c_str());
+    std::stringstream repr;
+    repr << std::setprecision(doubleprecision) << (self->num);
+    return PyUnicode_FromString(repr.str().c_str());
 }
 
 PyObject *PyComplexVar_str(PyComplexVarObject *self)
 {
-    return PyUnicode_FromString(ComplexVar_str(self->num).str().c_str());
+    std::stringstream repr;
+    repr << std::setprecision(doubleprecision) < (self->num);
+    return PyUnicode_FromString(repr.str().c_str());
 }
 
 PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, int opid)
@@ -1296,8 +1301,10 @@ static PyMethodDef PyComplexVarMethod[] = {
 };
 
 static PyMemberDef PyComplexVarMember[] = {
-    {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real), 0, nullptr},
-    {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag), 0, nullptr},
+    {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real.value), 0, nullptr},
+    {"real_error", T_DOUBLE, offsetof(PyComplexVarObject, num.real.error), 0, nullptr},
+    {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag.value), 0, nullptr},
+    {"imag_error", T_DOUBLE, offsetof(PyComplexVarObject, num.imag.error), 0, nullptr},
     {"is_arbitrary", T_BOOL, offsetof(PyComplexVarObject, num.isArbitrary), 0, nullptr},
     nullptr,
 };

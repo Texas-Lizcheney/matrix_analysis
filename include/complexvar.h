@@ -29,8 +29,8 @@ error_double ComplexVar_L2(const ComplexVar &);
 error_double ComplexVar_arg(const ComplexVar &);
 #define ComplexVar_iszero(x) (x.real == 0 && x.imag == 0 && !x.isArbitrary)
 void setvalue_frompolar(error_double r, error_double a, ComplexVar &);
-std::stringstream ComplexVar_repr(const ComplexVar &);
-std::stringstream ComplexVar_str(const ComplexVar &);
+std::ostream &operator<<(std::ostream &, const ComplexVar &);
+std::ostream &operator<(std::ostream &, const ComplexVar &);
 ComplexVar ComplexVar_conj(const ComplexVar &);
 ComplexVar ComplexVar_add(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_sub(const ComplexVar &, const ComplexVar &);

@@ -21,7 +21,9 @@ add_library("var" STATIC
 add_library("utility" STATIC
     srcs/utilities.cpp
     srcs/unsure.cpp
-    srcs/custom_exceptions.cpp)
+    srcs/custom_exceptions.cpp
+)
 add_library("errordouble" STATIC
     srcs/errordouble.cpp
+    srcs/errordoubleObject.cpp
 )

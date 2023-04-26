@@ -1,4 +1,5 @@
 #pragma once
+#include <Python.h>
 #include <utilities.h>
 #include <math.h>
 #include <iostream>
@@ -36,3 +37,11 @@ error_double abs(const error_double &);
 error_double sqrt(const error_double &);
 error_double atan2(const error_double &, const error_double &);
 error_double round(const error_double &);
+
+struct PyerrordoubleObject
+{
+    PyObject_HEAD;
+    error_double num;
+};
+
+void PyerrordoubleObject_dealloc(PyerrordoubleObject *);
