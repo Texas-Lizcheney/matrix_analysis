@@ -52,3 +52,4 @@ extern PyTypeObject PyErrordouble_Type;
 void PyErrordoubleObject_dealloc(PyErrordoubleObject *);
 PyObject *PyErrordoubleObject_repr(PyErrordoubleObject *);
 int PyErrordoubleObject_init(PyErrordoubleObject *, PyObject *, PyObject *);
+PyObject *PyErrordoubleObject_new(PyTypeObject *, PyObject *, PyObject *);

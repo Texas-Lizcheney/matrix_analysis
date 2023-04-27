@@ -99,6 +99,9 @@ class Test_mat(externed_Testcase):
             repr(x), "[[1+0j,2+0j,Unsure,],[Unsure,3+4j,Unsure,],[5+0j,1+1j,Unsure,],]")
         self.assertEqual(str(
             x), "[1+0i\t...\tundefined]\n[...\t...\t...]\n[5+0i\t...\tundefined]")
+        matrix_analysis.matrix.set_printarea()
+        self.assertEqual(str(
+            x), "[1+0i\t2+0i\tundefined]\n[undefined\t3+4i\tundefined]\n[5+0i\t1+1i\tundefined]")
         matrix_analysis.matrix.set_fastprint(False)
 
     def test_len(self):

@@ -7,8 +7,9 @@
 #include <matrix.h>
 #include <utilities.h>
 
-extern PyTypeObject PyMatrix_Type;
+extern PyTypeObject PyErrordouble_Type;
 extern PyTypeObject PyComplexVar_Type;
+extern PyTypeObject PyMatrix_Type;
 extern PyTypeObject PyUnsure_Type;
 extern PyObject *PyExc_Undefined;
 extern PyObject *PyExc_ShapeError;
@@ -34,16 +35,22 @@ PyObject *Init_varModule()
     {
         return nullptr;
     }
+    if (PyType_Ready(&PyErrordouble_Type) < 0)
+    {
+        return nullptr;
+    }
     PyObject *m = PyModule_Create(&varModule);
     if (!m)
     {
-        Py_DECREF(PyExc_Undefined);
         return nullptr;
     }
-    if ((PyModule_AddType(m, &PyComplexVar_Type) < 0))
+    Py_INCREF(&PyComplexVar_Type);
+    Py_INCREF(&PyErrordouble_Type);
+    if ((PyModule_AddType(m, &PyComplexVar_Type) < 0) ||
+        (PyModule_AddType(m, &PyErrordouble_Type) < 0))
     {
         Py_DECREF(&PyComplexVar_Type);
-        Py_DECREF(PyExc_Undefined);
+        Py_DECREF(&PyErrordouble_Type);
         Py_DECREF(m);
         return nullptr;
     }
@@ -74,6 +81,7 @@ PyObject *Init_matrixModule()
     {
         return nullptr;
     }
+    Py_INCREF(&PyMatrix_Type);
     if ((PyModule_AddType(m, &PyMatrix_Type) < 0))
     {
         Py_DECREF(&PyMatrix_Type);

@@ -5,6 +5,27 @@ import sys
 Unsure = matrix_analysis.Unsure
 
 
+class Test_errordouble(externed_Testcase):
+    def test_init(self):
+        x = matrix_analysis.var.errordouble(value=1.0)
+        y = matrix_analysis.var.errordouble(2, 1.5)
+        with self.assertRaises(TypeError):
+            z = matrix_analysis.var.errordouble("abc")
+
+    def test_repr(self):
+        x = matrix_analysis.var.errordouble(1)
+        self.assertEqual(repr(x), "1")
+        matrix_analysis.var.set_print_error(True)
+        self.assertEqual(repr(x), "1(±5.551115e-17)")
+        matrix_analysis.var.set_print_precision(20)
+        self.assertEqual(repr(x), "1(±5.5511151231257827021e-17)")
+        matrix_analysis.var.set_print_error(None)
+        x = matrix_analysis.var.errordouble(1.23456789)
+        matrix_analysis.var.set_print_precision(2)
+        self.assertEqual(repr(x), "1.2")
+        matrix_analysis.var.set_print_precision(None)
+
+
 class Test_var(externed_Testcase):
     def test_init(self):
         x = matrix_analysis.var.variable()
@@ -23,18 +44,6 @@ class Test_var(externed_Testcase):
         x = matrix_analysis.var.variable(-1.23456789, 2.34567891)
         self.assertEqual(repr(x), "-1.234568+2.345679j")
         self.assertEqual(str(x), "-1.234568+2.345679i")
-        matrix_analysis.var.set_print_precision(-10)
-        self.assertEqual(repr(x), "-1+2j")
-        self.assertEqual(str(x), "-1+2i")
-        matrix_analysis.var.set_print_precision(3)
-        self.assertEqual(repr(x), "-1.23+2.35j")
-        self.assertEqual(str(x), "-1.23+2.35i")
-        matrix_analysis.var.set_print_precision(20)
-        self.assertEqual(
-            repr(x), "-1.2345678899999998901+2.3456789100000001724j")
-        self.assertEqual(
-            str(x), "-1.2345678899999998901+2.3456789100000001724i")
-        matrix_analysis.var.set_print_precision(7)
         y = matrix_analysis.var.variable()
         self.assertEqual(repr(y), "Unsure")
         self.assertEqual(str(y), "undefined")

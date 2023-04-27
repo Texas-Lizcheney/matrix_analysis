@@ -13,6 +13,23 @@ def set_arg_format(format: typing.Literal["deg", "rad"]) -> None:
     ...
 
 
+def set_print_error(value: bool) -> None:
+    ...
+
+
+class errordouble:
+    def __repr__(self) -> str:
+        ...
+
+    @typing.overload
+    def __init__(self, value: float) -> None:
+        ...
+
+    @typing.overload
+    def __init__(self, value: float, error: float) -> None:
+        ...
+
+
 class variable:
     real: float
     imag: float
