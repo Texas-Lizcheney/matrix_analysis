@@ -21,7 +21,12 @@ struct PyMatrixObject
     int64_t total_elements;
 };
 
+extern PyTypeObject PyMatrix_Type;
+#define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrix_Type)
+#define PyMatrix_CheckExact(op) Py_IS_TYPE(((PyObject *)((a))), &PyMatrix_Type)
 #define Matrix_sameshape(x, y) ((x->rows == y->rows) && (x->cols == y->cols))
+#define PyMatrixAssign(self, r, c, value) (self)->elements[r * (self)->cols + c] = value
+#define PyMatrixGetitem(self, r, c) (self)->elements[r * (self)->cols + c]
 PyMatrixObject *Matrix_add(const PyMatrixObject *const, const PyMatrixObject *const);
 int Matrix_iadd(PyMatrixObject *, const PyMatrixObject *const);
 PyMatrixObject *Matrix_sub(const PyMatrixObject *const, const PyMatrixObject *const);
@@ -53,8 +58,6 @@ void Matrix_col_add(PyMatrixObject *, int, int, const ComplexVar &);
 int Matrix_rank(const PyMatrixObject *const);
 
 int PyMatrixAlloc(PyMatrixObject *);
-#define PyMatrixAssign(self, r, c, value) (self)->elements[r * (self)->cols + c] = value
-#define PyMatrixGetitem(self, r, c) (self)->elements[r * (self)->cols + c]
 int PyMatrixAssign_withcheck(PyMatrixObject *, int, int, const ComplexVar &);
 int PyMatrixGet_withcheck(const PyMatrixObject *const, int, int, ComplexVar &);
 PyObject *PyMatrix_copy(const PyMatrixObject *const);
@@ -91,7 +94,3 @@ int PyMatrix_ass_subscript(PyMatrixObject *, PyObject *, PyObject *);
 
 PyObject *PyMatrix_get_shape(PyMatrixObject *, void *);
 PyObject *PyMatrix_get_rank(PyMatrixObject *, void *);
-
-extern PyTypeObject PyMatrix_Type;
-#define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrix_Type)
-#define PyMatrix_CheckExact(op) Py_IS_TYPE(((PyObject *)((a))), &PyMatrix_Type)

@@ -21,9 +21,31 @@ error_double error_double::operator+(const error_double &other) const
     return error_double(value + other.value, error + other.error);
 }
 
+error_double operator+(const double &self, const error_double &other)
+{
+    return error_double(self + other.value, cal_original_error(self) + other.error);
+}
+
+error_double &error_double::operator+=(const error_double &other)
+{
+    value += other.value;
+    error += other.error;
+    return *this;
+}
+
+error_double error_double::operator+() const
+{
+    return error_double(value, error);
+}
+
 error_double error_double::operator-(const error_double &other) const
 {
     return error_double(value - other.value, error + other.error);
+}
+
+error_double operator-(const double &self, const error_double &other)
+{
+    return error_double(self - other.value, cal_original_error(self) + other.error);
 }
 
 error_double error_double::operator-() const
@@ -31,19 +53,28 @@ error_double error_double::operator-() const
     return error_double(-value, error);
 }
 
+error_double &error_double::operator-=(const error_double &other)
+{
+    value -= other.value;
+    error += other.error;
+    return *this;
+}
+
 error_double error_double::operator*(const error_double &other) const
 {
     return error_double(value * other.value, other.value * error + value * other.error);
 }
 
-void error_double::operator*=(const double &other)
+error_double operator*(const double &self, const error_double &other)
 {
-    double oldvalue = value;
-    double olderror = error;
-    double other_error = cal_original_error(other);
-    value *= other;
-    error = olderror * other + other_error * oldvalue;
-    return;
+    return error_double(self * other.value, other.value * cal_original_error(self) + self * other.error);
+}
+
+error_double &error_double::operator*=(const error_double &other)
+{
+    error = error * other.value + other.error * value;
+    value *= other.value;
+    return *this;
 }
 
 error_double error_double::operator/(const error_double &other) const
@@ -52,13 +83,33 @@ error_double error_double::operator/(const error_double &other) const
     return error_double(tmp, (error + tmp * other.error) / other.value);
 }
 
-void error_double::operator/=(const double &other)
+error_double operator/(const double &self, const error_double &other)
 {
-    double olderror = error;
-    double other_error = cal_original_error(other);
-    value /= other;
-    error = (olderror + value * other_error) / other;
-    return;
+    double tmp = self / other.value;
+    return error_double(tmp, (cal_original_error(self) + tmp * other.error) / other.value);
+}
+
+error_double &error_double::operator/=(const error_double &other)
+{
+    value /= other.value;
+    error = (error + value * other.error) / other.value;
+    return *this;
+}
+
+error_double error_double::operator%(const error_double &other) const
+{
+    return *this - floor(*this / other) * other;
+}
+
+error_double operator%(const double &self, const error_double &other)
+{
+    return self - floor(self / other) * other;
+}
+
+error_double &error_double::operator%=(const error_double &other)
+{
+    *this -= floor(*this / other) * other;
+    return *this;
 }
 
 bool error_double::operator==(const error_double &x) const
@@ -68,7 +119,7 @@ bool error_double::operator==(const error_double &x) const
 
 bool error_double::operator==(const double &x) const
 {
-    if (abs(value - x) <= error)
+    if ((value == x) || (abs(value - x) < error))
     {
         return true;
     }
@@ -133,6 +184,12 @@ error_double log(const error_double &x)
     return error_double(log(x.value), x.error / x.value);
 }
 
+error_double pow(const error_double &x, const error_double &y)
+{
+    double tmp = pow(x.value, y.value);
+    return error_double(tmp, log(x.value) * tmp * x.error + y.value * pow(x.value, y.value - 1) * y.error);
+}
+
 error_double abs(const error_double &x)
 {
     return error_double(abs(x.value), x.error);
@@ -153,4 +210,9 @@ error_double atan2(const error_double &y, const error_double &x)
 error_double round(const error_double &x)
 {
     return error_double(round(x.value));
+}
+
+error_double floor(const error_double &x)
+{
+    return error_double(floor(x.value));
 }

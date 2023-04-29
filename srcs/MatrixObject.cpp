@@ -1742,7 +1742,7 @@ static PyMappingMethods PyMatrix_as_mapping = {
 };
 
 static PyMethodDef PyMatrix_methods[] = {
-    {"conj", (PyCFunction)PyMatrix_conj, METH_NOARGS, nullptr},
+    {"__conj__", (PyCFunction)PyMatrix_conj, METH_NOARGS, nullptr},
     {"T", (PyCFunction)PyMatrix_T, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
     nullptr,

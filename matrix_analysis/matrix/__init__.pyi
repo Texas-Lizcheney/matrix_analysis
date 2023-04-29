@@ -120,7 +120,7 @@ class matrix:
     def __str__(self) -> str:
         ...
 
-    def conj(self) -> matrix:
+    def __conj__(self) -> matrix:
         ...
 
     def T(self) -> matrix:

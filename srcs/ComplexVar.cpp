@@ -181,31 +181,17 @@ ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
 ComplexVar ComplexVar_fdv(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
-    if (x.isArbitrary || y.isArbitrary)
-    {
-        result = {0, 0, true};
-    }
-    else
-    {
-        result = ComplexVar_div(x, y);
-        result.real = round(result.real);
-        result.imag = round(result.imag);
-    }
+    result = ComplexVar_div(x, y);
+    result.real = round(result.real);
+    result.imag = round(result.imag);
     return result;
 }
 
 ComplexVar ComplexVar_mod(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
-    if (x.isArbitrary || y.isArbitrary)
-    {
-        result = {0, 0, true};
-    }
-    else
-    {
-        ComplexVar tmp = ComplexVar_fdv(x, y);
-        result = ComplexVar_sub(x, ComplexVar_mul(tmp, y));
-    }
+    ComplexVar tmp = ComplexVar_fdv(x, y);
+    result = ComplexVar_sub(x, ComplexVar_mul(tmp, y));
     return result;
 }
 

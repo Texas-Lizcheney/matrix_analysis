@@ -1,8 +1,9 @@
 import typing
 from ..__init__ import Unsure
 
-__support_num = typing.Union[Unsure, int, float, complex, variable]
-__support_component = typing.Union[int, float]
+__support_num = typing.Union[Unsure,
+                             errordouble, int, float, complex, variable]
+__support_component = typing.Union[errordouble, int, float]
 
 
 def set_print_precision(precision: int) -> None:
@@ -18,7 +19,112 @@ def set_print_error(value: bool) -> None:
 
 
 class errordouble:
+    value: float
+    error: float
+
     def __repr__(self) -> str:
+        ...
+
+    def __add__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __radd__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __iadd__(self, other: __support_component) -> typing.Self:
+        ...
+
+    def __sub__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __rsub__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __isub__(self, other: __support_component) -> typing.Self:
+        ...
+
+    def __mul__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __rmul__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __imul__(self, other: __support_component) -> typing.Self:
+        ...
+
+    def __mod__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __rmod__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __imod__(self, other: __support_component) -> typing.Self:
+        ...
+
+    def __divmod__(self, other: __support_component) -> tuple[errordouble, errordouble]:
+        ...
+
+    def __rdivmod__(self, other: __support_component) -> tuple[errordouble, errordouble]:
+        ...
+
+    @typing.overload
+    def __pow__(self, other: __support_component) -> errordouble:
+        ...
+
+    @typing.overload
+    def __pow__(self, other: __support_component, mod: __support_num | None) -> errordouble:
+        ...
+
+    @typing.overload
+    def __rpow__(self, other: __support_component) -> errordouble:
+        ...
+
+    @typing.overload
+    def __rpow__(self, other: __support_component, mod: __support_num | None) -> errordouble:
+        ...
+
+    @typing.overload
+    def __ipow__(self, other: __support_component) -> typing.Self:
+        ...
+
+    @typing.overload
+    def __ipow__(self, other: __support_component, mod: __support_num | None) -> typing.Self:
+        ...
+
+    def __neg__(self) -> errordouble:
+        ...
+
+    def __pos__(self) -> errordouble:
+        ...
+
+    def __abs__(self) -> errordouble:
+        ...
+
+    def __bool__(self) -> errordouble:
+        ...
+
+    def __int__(self) -> int:
+        ...
+
+    def __float__(self) -> float:
+        ...
+
+    def __floordiv__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __rfloordiv__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __ifloordiv__(self, other: __support_component) -> typing.Self:
+        ...
+
+    def __truediv__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __rtruediv__(self, other: __support_component) -> errordouble:
+        ...
+
+    def __itruediv__(self, other: __support_component) -> typing.Self:
         ...
 
     @typing.overload
@@ -29,10 +135,13 @@ class errordouble:
     def __init__(self, value: float, error: float) -> None:
         ...
 
+    def __round__(self, __ndigits: int, /) ->float:
+        ...
+
 
 class variable:
-    real: float
-    imag: float
+    real: errordouble
+    imag: errordouble
     rec: typing.Union[typing.Tuple[float, float], Unsure]
     r: float
     arg: float
@@ -129,13 +238,13 @@ class variable:
     def __rfloordiv__(self, other: __support_num) -> variable:
         ...
 
+    def __ifloordiv__(self, other: __support_num) -> typing.Self:
+        ...
+
     def __truediv__(self, other: __support_num) -> variable:
         ...
 
     def __rtruediv__(self, other: __support_num) -> variable:
-        ...
-
-    def __ifloordiv__(self, other: __support_num) -> typing.Self:
         ...
 
     def __itruediv__(self, other: __support_num) -> typing.Self:
@@ -150,94 +259,94 @@ class variable:
     def __ne__(self, other: __support_component) -> bool | Unsure:
         ...
 
-    def conj(self) -> variable:
+    def __conj__(self) -> variable:
         ...
 
-    def exp(self) -> variable:
+    def __exp__(self) -> variable:
         ...
 
-    def ln(self) -> variable:
+    def __ln__(self) -> variable:
         ...
 
-    def log(self, base: __support_num) -> variable:
+    def __sqrt__(self) -> variable:
         ...
 
-    def log_asbase(self, x: __support_num) -> variable:
+    def __sin__(self) -> variable:
         ...
 
-    def sqrt(self) -> variable:
+    def __cos__(self) -> variable:
         ...
 
-    def sin(self) -> variable:
+    def __tan__(self) -> variable:
         ...
 
-    def cos(self) -> variable:
+    def __cot__(self) -> variable:
         ...
 
-    def tan(self) -> variable:
+    def __sec__(self) -> variable:
         ...
 
-    def cot(self) -> variable:
+    def __csc__(self) -> variable:
         ...
 
-    def sec(self) -> variable:
+    def __arcsin__(self) -> variable:
         ...
 
-    def csc(self) -> variable:
+    def __arccos__(self) -> variable:
         ...
 
-    def arcsin(self) -> variable:
+    def __arctan__(self) -> variable:
         ...
 
-    def arccos(self) -> variable:
+    def __arccot__(self) -> variable:
         ...
 
-    def arctan(self) -> variable:
+    def __arcsec__(self) -> variable:
         ...
 
-    def arccot(self) -> variable:
+    def __arccsc__(self) -> variable:
         ...
 
-    def arcsec(self) -> variable:
+    def __sinh__(self) -> variable:
         ...
 
-    def arccsc(self) -> variable:
+    def __cosh__(self) -> variable:
         ...
 
-    def sinh(self) -> variable:
+    def __tanh__(self) -> variable:
         ...
 
-    def cosh(self) -> variable:
+    def __coth__(self) -> variable:
         ...
 
-    def tanh(self) -> variable:
+    def __sech__(self) -> variable:
         ...
 
-    def coth(self) -> variable:
+    def __csch__(self) -> variable:
         ...
 
-    def sech(self) -> variable:
+    def __arcsinh__(self) -> variable:
         ...
 
-    def csch(self) -> variable:
+    def __arccosh__(self) -> variable:
         ...
 
-    def arcsinh(self) -> variable:
+    def __arctanh__(self) -> variable:
         ...
 
-    def arccosh(self) -> variable:
+    def __arccoth__(self) -> variable:
         ...
 
-    def arctanh(self) -> variable:
+    def __arcsech__(self) -> variable:
         ...
 
-    def arccoth(self) -> variable:
+    def __arccsch__(self) -> variable:
         ...
 
-    def arcsech(self) -> variable:
+    def __log__(self, base: __support_num) -> variable:
         ...
 
-    def arccsch(self) -> variable:
+    def __rlog__(self, x: __support_num) -> variable:
         ...
 
     @typing.overload
