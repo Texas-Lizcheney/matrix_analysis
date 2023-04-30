@@ -419,7 +419,7 @@ PyObject *PyErrordouble_absolute(PyObject *self)
 
 int PyErrordouble_bool(PyObject *self)
 {
-    if (((PyErrordoubleObject *)self)->num == 0)
+    if ((((PyErrordoubleObject *)self)->num.value == 0)&&(((PyErrordoubleObject *)self)->num.error == 0))
     {
         return 0;
     }

@@ -3,7 +3,7 @@ def __unaryfunc_method(name: str):
         try:
             f = type(x).__dict__[f"__{name}__"]
         except:
-            raise AttributeError(f"Function __{name}__ is not implemented.")
+            raise AttributeError(f"Function __{name}__ is not implemented in {type(x)} object.")
         return f(x)
     return func
 
@@ -53,7 +53,7 @@ def __binaryfunc_method(name: str):
             v = f(y, x)
         except:
             raise AttributeError(
-                f"Both __{name}__ and __r{name}__ are not implemented.")
+                f"Both __{name}__ and __r{name}__ are not implementedin {type(x)} object.")
         return v
     return func
 

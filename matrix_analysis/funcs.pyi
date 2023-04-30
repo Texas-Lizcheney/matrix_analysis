@@ -1,7 +1,7 @@
 import typing
 
-T = typing.Generic()
-U = typing.Generic()
+T = typing.TypeVar("T")
+U = typing.TypeVar("U")
 
 
 def conj(x: T) -> T:
