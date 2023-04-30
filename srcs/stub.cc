@@ -11,7 +11,7 @@ extern PyTypeObject PyErrordouble_Type;
 extern PyTypeObject PyComplexVar_Type;
 extern PyTypeObject PyMatrix_Type;
 extern PyTypeObject PyUnsure_Type;
-extern PyObject *PyExc_Undefined;
+extern PyObject *PyExc_UndefinedWarning;
 extern PyObject *PyExc_ShapeError;
 extern PyObject PyUnsure;
 
@@ -107,17 +107,17 @@ PyMODINIT_FUNC PyInit_core()
     PyObject *varm = Init_varModule();
     PyObject *matrixm = Init_matrixModule();
     PyObject *m = PyModule_Create(&coreMoulde);
-    PyExc_Undefined = PyErr_NewException("core.Undefined", nullptr, nullptr);
+    PyExc_UndefinedWarning = PyErr_NewException("core.UndefinedWarning", PyExc_Warning, nullptr);
     PyExc_ShapeError = PyErr_NewException("core.ShapeError", nullptr, nullptr);
     if (!varm ||
         !matrixm ||
-        !PyExc_Undefined ||
+        !PyExc_UndefinedWarning ||
         !PyExc_ShapeError ||
         !m)
     {
         Py_XDECREF(varm);
         Py_XDECREF(matrixm);
-        Py_XDECREF(PyExc_Undefined);
+        Py_XDECREF(PyExc_UndefinedWarning);
         Py_XDECREF(PyExc_ShapeError);
         Py_XDECREF(m);
         return nullptr;
@@ -125,13 +125,13 @@ PyMODINIT_FUNC PyInit_core()
     Py_INCREF(&PyUnsure);
     if ((PyModule_AddObject(m, "matrixcore", matrixm) < 0) ||
         (PyModule_AddObject(m, "varcore", varm) < 0) ||
-        (PyModule_AddObject(m, "Undefined", PyExc_Undefined) < 0) ||
+        (PyModule_AddObject(m, "UndefinedWarning", PyExc_UndefinedWarning) < 0) ||
         (PyModule_AddObject(m, "ShapeError", PyExc_ShapeError) < 0) ||
         (PyModule_AddObject(m, "Unsure", &PyUnsure) < 0))
     {
         Py_DECREF(varm);
         Py_DECREF(matrixm);
-        Py_DECREF(PyExc_Undefined);
+        Py_DECREF(PyExc_UndefinedWarning);
         Py_DECREF(PyExc_ShapeError);
         Py_DECREF(&PyUnsure);
         Py_DECREF(m);

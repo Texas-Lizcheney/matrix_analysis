@@ -4,5 +4,5 @@ from . import matrix
 from . import funcs
 
 ShapeError = __core.ShapeError
-Undefined = __core.Undefined
+UndefinedWarning = __core.UndefinedWarning
 Unsure = __core.Unsure

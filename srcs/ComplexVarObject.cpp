@@ -2,7 +2,7 @@
 
 extern int doubleprecision;
 extern bool isdeg;
-extern PyObject *PyExc_Undefined;
+extern PyObject *PyExc_UndefinedWarning;
 
 int assignComplexVar(PyObject *value, ComplexVar &target)
 {
@@ -53,27 +53,27 @@ int assignComplexVar_withExc(PyObject *value, ComplexVar &target)
     return 0;
 }
 
-void PyComplexVar_dealloc(PyComplexVarObject *self)
+static void PyComplexVar_dealloc(PyComplexVarObject *self)
 {
     Py_TYPE(self)->tp_free((PyObject *)self);
     return;
 }
 
-PyObject *PyComplexVar_repr(PyComplexVarObject *self)
+static PyObject *PyComplexVar_repr(PyComplexVarObject *self)
 {
     std::stringstream repr;
     repr << std::setprecision(doubleprecision) << (self->num);
     return PyUnicode_FromString(repr.str().c_str());
 }
 
-PyObject *PyComplexVar_str(PyComplexVarObject *self)
+static PyObject *PyComplexVar_str(PyComplexVarObject *self)
 {
     std::stringstream repr;
     repr << std::setprecision(doubleprecision) < (self->num);
     return PyUnicode_FromString(repr.str().c_str());
 }
 
-PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, int opid)
+static PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, int opid)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -112,7 +112,7 @@ PyObject *PyComplexVar_richcompare(PyComplexVarObject *self, PyObject *other, in
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
+static int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist0[] = {
         (char *)"num",
@@ -155,13 +155,14 @@ int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
             y *= std::numbers::pi;
         }
         setvalue_frompolar(x, y, self->num);
+        self->num.isArbitrary = false;
         return 0;
     }
     PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
     return -1;
 }
 
-PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+static PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyObject *self = type->tp_alloc(type, 0);
     if (!self)
@@ -174,7 +175,7 @@ PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 // as number
 
-PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -213,7 +214,7 @@ PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -252,7 +253,7 @@ PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -291,7 +292,7 @@ PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -330,7 +331,7 @@ PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *D = nullptr;
     D = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -381,7 +382,7 @@ PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
     return returnvalue;
 }
 
-PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *mod)
+static PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *mod)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -454,7 +455,7 @@ PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *mod)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_negative(PyObject *self)
+static PyObject *PyComplexVar_negative(PyObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -467,7 +468,7 @@ PyObject *PyComplexVar_negative(PyObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_positive(PyObject *self)
+static PyObject *PyComplexVar_positive(PyObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -480,7 +481,7 @@ PyObject *PyComplexVar_positive(PyObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_absolute(PyObject *self)
+static PyObject *PyComplexVar_absolute(PyObject *self)
 {
     if (((PyComplexVarObject *)self)->num.isArbitrary)
     {
@@ -489,7 +490,7 @@ PyObject *PyComplexVar_absolute(PyObject *self)
     return PyFloat_FromDouble(ComplexVar_L2(((PyComplexVarObject *)self)->num).value);
 }
 
-int PyComplexVar_bool(PyObject *self)
+static int PyComplexVar_bool(PyObject *self)
 {
     if (((PyComplexVarObject *)self)->num.isArbitrary)
     {
@@ -502,7 +503,7 @@ int PyComplexVar_bool(PyObject *self)
     return 1;
 }
 
-PyObject *PyComplexVar_invert(PyObject *self)
+static PyObject *PyComplexVar_invert(PyObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -514,7 +515,7 @@ PyObject *PyComplexVar_invert(PyObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_inplace_add(PyComplexVarObject *self, PyObject *other)
+static PyObject *PyComplexVar_inplace_add(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -526,7 +527,7 @@ PyObject *PyComplexVar_inplace_add(PyComplexVarObject *self, PyObject *other)
     return (PyObject *)self;
 }
 
-PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *self, PyObject *other)
+static PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -538,7 +539,7 @@ PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *self, PyObject *othe
     return (PyObject *)self;
 }
 
-PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *self, PyObject *other)
+static PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -550,7 +551,7 @@ PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *self, PyObject *othe
     return (PyObject *)self;
 }
 
-PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *self, PyObject *other)
+static PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -562,7 +563,7 @@ PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *self, PyObject *oth
     return (PyObject *)self;
 }
 
-PyObject *PyComplexVar_inplace_power(PyComplexVarObject *self, PyObject *other, PyObject *mod)
+static PyObject *PyComplexVar_inplace_power(PyComplexVarObject *self, PyObject *other, PyObject *mod)
 {
     ComplexVar tmp;
     ComplexVar powvalue;
@@ -588,7 +589,7 @@ PyObject *PyComplexVar_inplace_power(PyComplexVarObject *self, PyObject *other, 
     return (PyObject *)self;
 }
 
-PyObject *PyComplexVar_floor_divide(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_floor_divide(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -627,7 +628,7 @@ PyObject *PyComplexVar_floor_divide(PyObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
+static PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -666,7 +667,7 @@ PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *self, PyObject *other)
+static PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -678,7 +679,7 @@ PyObject *PyComplexVar_inplace_floor_divide(PyComplexVarObject *self, PyObject *
     return (PyObject *)self;
 }
 
-PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyObject *other)
+static PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (assignComplexVar(other, tmp))
@@ -692,7 +693,7 @@ PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyObject *o
 
 // methods
 
-PyObject *PyComplexVar_conj(PyComplexVarObject *self)
+static PyObject *PyComplexVar_conj(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -705,7 +706,7 @@ PyObject *PyComplexVar_conj(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
+static PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -719,7 +720,7 @@ PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
+static PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -732,7 +733,7 @@ PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
+static PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
 {
     ComplexVar tmp;
     if (assignComplexVar(base, tmp))
@@ -750,7 +751,7 @@ PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
+static PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
 {
     ComplexVar tmp;
     if (assignComplexVar(neur, tmp))
@@ -768,7 +769,7 @@ PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_sqrt(PyComplexVarObject *self)
+static PyObject *PyComplexVar_sqrt(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -781,7 +782,7 @@ PyObject *PyComplexVar_sqrt(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_sin(PyComplexVarObject *self)
+static PyObject *PyComplexVar_sin(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -794,7 +795,7 @@ PyObject *PyComplexVar_sin(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_cos(PyComplexVarObject *self)
+static PyObject *PyComplexVar_cos(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -807,7 +808,7 @@ PyObject *PyComplexVar_cos(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_tan(PyComplexVarObject *self)
+static PyObject *PyComplexVar_tan(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -820,7 +821,7 @@ PyObject *PyComplexVar_tan(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_cot(PyComplexVarObject *self)
+static PyObject *PyComplexVar_cot(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -833,7 +834,7 @@ PyObject *PyComplexVar_cot(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_sec(PyComplexVarObject *self)
+static PyObject *PyComplexVar_sec(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -846,7 +847,7 @@ PyObject *PyComplexVar_sec(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_csc(PyComplexVarObject *self)
+static PyObject *PyComplexVar_csc(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -859,7 +860,7 @@ PyObject *PyComplexVar_csc(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arcsin(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arcsin(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -872,7 +873,7 @@ PyObject *PyComplexVar_arcsin(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -885,7 +886,7 @@ PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arctan(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arctan(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -898,7 +899,7 @@ PyObject *PyComplexVar_arctan(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arccot(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arccot(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -911,7 +912,7 @@ PyObject *PyComplexVar_arccot(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arcsec(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arcsec(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -924,7 +925,7 @@ PyObject *PyComplexVar_arcsec(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arccsc(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arccsc(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -937,7 +938,7 @@ PyObject *PyComplexVar_arccsc(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_sinh(PyComplexVarObject *self)
+static PyObject *PyComplexVar_sinh(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -950,7 +951,7 @@ PyObject *PyComplexVar_sinh(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_cosh(PyComplexVarObject *self)
+static PyObject *PyComplexVar_cosh(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -963,7 +964,7 @@ PyObject *PyComplexVar_cosh(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_tanh(PyComplexVarObject *self)
+static PyObject *PyComplexVar_tanh(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -976,7 +977,7 @@ PyObject *PyComplexVar_tanh(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_coth(PyComplexVarObject *self)
+static PyObject *PyComplexVar_coth(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -989,7 +990,7 @@ PyObject *PyComplexVar_coth(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_sech(PyComplexVarObject *self)
+static PyObject *PyComplexVar_sech(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1002,7 +1003,7 @@ PyObject *PyComplexVar_sech(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_csch(PyComplexVarObject *self)
+static PyObject *PyComplexVar_csch(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1015,7 +1016,7 @@ PyObject *PyComplexVar_csch(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arcsinh(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arcsinh(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1028,7 +1029,7 @@ PyObject *PyComplexVar_arcsinh(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arccosh(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arccosh(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1041,7 +1042,7 @@ PyObject *PyComplexVar_arccosh(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arctanh(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arctanh(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1054,7 +1055,7 @@ PyObject *PyComplexVar_arctanh(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arccoth(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arccoth(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1067,7 +1068,7 @@ PyObject *PyComplexVar_arccoth(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arcsech(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arcsech(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1080,7 +1081,7 @@ PyObject *PyComplexVar_arcsech(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
+static PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1095,7 +1096,7 @@ PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
 
 // get set methods
 
-PyObject *PyComplexVar_get_real(PyComplexVarObject *self, void *closure)
+static PyObject *PyComplexVar_get_real(PyComplexVarObject *self, void *closure)
 {
     PyErrordoubleObject *real = nullptr;
     real = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -1104,7 +1105,7 @@ PyObject *PyComplexVar_get_real(PyComplexVarObject *self, void *closure)
     return (PyObject *)real;
 }
 
-int PyComplexVar_set_real(PyComplexVarObject *self, PyObject *value, void *closure)
+static int PyComplexVar_set_real(PyComplexVarObject *self, PyObject *value, void *closure)
 {
     if (!value)
     {
@@ -1123,17 +1124,44 @@ int PyComplexVar_set_real(PyComplexVarObject *self, PyObject *value, void *closu
     return 0;
 }
 
-PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
+static PyObject *PyComplexVar_get_imag(PyComplexVarObject *self, void *closure)
+{
+    PyErrordoubleObject *imag = nullptr;
+    imag = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    imag->num = self->num.imag;
+    imag->parent = &(self->num.imag);
+    return (PyObject *)imag;
+}
+
+static int PyComplexVar_set_imag(PyComplexVarObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.isArbitrary = true;
+        self->num.imag = 0;
+        return 0;
+    }
+    try
+    {
+        self->num.imag = error_double(value);
+    }
+    catch (std::exception &e)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+static PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
 {
     if (self->num.isArbitrary)
     {
-        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
-        return PyFloat_FromDouble(nan(""));
+        PyErr_WarnEx(PyExc_UndefinedWarning, "This object is still undefined", 1);
     }
     return PyFloat_FromDouble(ComplexVar_L2(self->num).value);
 }
 
-int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closure)
+static int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closure)
 {
     if (!value)
     {
@@ -1142,8 +1170,7 @@ int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closur
     }
     if (self->num.isArbitrary)
     {
-        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
-        return -1;
+        PyErr_WarnEx(PyExc_UndefinedWarning, "This object is still undefined", 1);
     }
     try
     {
@@ -1156,12 +1183,11 @@ int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closur
     return 0;
 }
 
-PyObject *PyComplexVar_get_arg(PyComplexVarObject *self, void *closure)
+static PyObject *PyComplexVar_get_arg(PyComplexVarObject *self, void *closure)
 {
     if (self->num.isArbitrary)
     {
-        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
-        return PyFloat_FromDouble(nan(""));
+        PyErr_WarnEx(PyExc_UndefinedWarning, "This object is still undefined", 1);
     }
     double result = ComplexVar_arg(self->num).value;
     if (*((bool *)closure))
@@ -1172,7 +1198,7 @@ PyObject *PyComplexVar_get_arg(PyComplexVarObject *self, void *closure)
     return PyFloat_FromDouble(result);
 }
 
-int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closure)
+static int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closure)
 {
     if (!value)
     {
@@ -1181,8 +1207,7 @@ int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closur
     }
     if (self->num.isArbitrary)
     {
-        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
-        return -1;
+        PyErr_WarnEx(PyExc_UndefinedWarning, "This object is still undefined", 1);
     }
     try
     {
@@ -1199,77 +1224,6 @@ int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closur
         return -1;
     }
     return 0;
-}
-
-PyObject *PyComplexVar_get_recpair(PyComplexVarObject *self, void *closure)
-{
-    if (self->num.isArbitrary)
-    {
-        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
-        Py_RETURN_NONE;
-    }
-    return Py_BuildValue("dd", self->num.real.value, self->num.imag.value);
-}
-
-int PyComplexVar_set_recpair(PyComplexVarObject *self, PyObject *value, void *closure)
-{
-    if (!value)
-    {
-        self->num.isArbitrary = true;
-        return 0;
-    }
-    if (PyTuple_CheckExact(value))
-    {
-        if (PyArg_ParseTuple(value, "dd|", &self->num.real, &self->num.imag))
-        {
-            self->num.isArbitrary = false;
-            return 0;
-        }
-    }
-    PyErr_SetString(PyExc_ValueError, "Only take tuple with two float elements.");
-    return -1;
-}
-
-PyObject *PyComplexVar_get_polarpair(PyComplexVarObject *self, void *closure)
-{
-    if (self->num.isArbitrary)
-    {
-        PyErr_SetString(PyExc_Undefined, "This object is still undefined");
-        Py_RETURN_NONE;
-    }
-    double arg = ComplexVar_arg(self->num).value;
-    if (*((bool *)closure))
-    {
-        arg *= 180;
-        arg /= std::numbers::pi;
-    }
-    return Py_BuildValue("dd", ComplexVar_L2(self->num).value, arg);
-}
-
-int PyComplexVar_set_polarpair(PyComplexVarObject *self, PyObject *value, void *closure)
-{
-    if (!value)
-    {
-        self->num.isArbitrary = true;
-        return 0;
-    }
-    if (PyTuple_CheckExact(value))
-    {
-        double r;
-        double a;
-        if (PyArg_ParseTuple(value, "dd|", &r, &a))
-        {
-            if (*((bool *)closure))
-            {
-                a *= std::numbers::pi;
-                a /= 180;
-            }
-            setvalue_frompolar(r, a, self->num);
-            return 0;
-        }
-    }
-    PyErr_SetString(PyExc_ValueError, "Only take tuple with two float elements.");
-    return -1;
 }
 
 static PyNumberMethods PyComplexVar_as_number = {
@@ -1330,18 +1284,15 @@ static PyMethodDef PyComplexVar_methods[] = {
 };
 
 static PyMemberDef PyComplexVar_members[] = {
-    {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag.value), 0, nullptr},
-    {"imag_error", T_DOUBLE, offsetof(PyComplexVarObject, num.imag.error), 0, nullptr},
     {"is_arbitrary", T_BOOL, offsetof(PyComplexVarObject, num.isArbitrary), 0, nullptr},
     nullptr,
 };
 
 static PyGetSetDef PyComplexVar_getset[] = {
     {"real", (getter)PyComplexVar_get_real, (setter)PyComplexVar_set_real, nullptr, nullptr},
+    {"imag", (getter)PyComplexVar_get_imag, (setter)PyComplexVar_set_imag, nullptr, nullptr},
     {"r", (getter)PyComplexVar_get_len, (setter)PyComplexVar_set_len, nullptr, nullptr},
     {"arg", (getter)PyComplexVar_get_arg, (setter)PyComplexVar_set_arg, nullptr, &isdeg},
-    {"rec", (getter)PyComplexVar_get_recpair, (setter)PyComplexVar_set_recpair, nullptr, nullptr},
-    {"pol", (getter)PyComplexVar_get_polarpair, (setter)PyComplexVar_set_polarpair, nullptr, &isdeg},
     nullptr,
 };
 

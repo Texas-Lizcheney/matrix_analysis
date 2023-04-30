@@ -53,7 +53,6 @@ void setvalue_frompolar(const error_double &r, const error_double &a, ComplexVar
 {
     x.real = cos(a) * r;
     x.imag = sin(a) * r;
-    x.isArbitrary = false;
     return;
 }
 
@@ -205,6 +204,7 @@ ComplexVar ComplexVar_exp(const ComplexVar &x)
     else
     {
         setvalue_frompolar(exp(x.real), x.imag, result);
+        result.isArbitrary = false;
     }
     return result;
 }
@@ -308,6 +308,7 @@ ComplexVar ComplexVar_sqrt(const ComplexVar &x)
     else
     {
         setvalue_frompolar(sqrt(ComplexVar_L2(x)), ComplexVar_arg(x) / 2, result);
+        result.isArbitrary = false;
     }
     return result;
 }

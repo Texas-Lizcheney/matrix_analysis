@@ -11,5 +11,5 @@ class ShapeError(Exception):
     ...
 
 
-class Undefined(Exception):
+class UndefinedWarning(Warning):
     ...

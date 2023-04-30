@@ -6,7 +6,7 @@ __support_num = typing.Union[Unsure,
 __support_component = typing.Union[errordouble, int, float]
 
 
-def set_print_precision(precision: int) -> None:
+def set_print_precision(precision: int | None) -> None:
     ...
 
 
@@ -14,13 +14,26 @@ def set_arg_format(format: typing.Literal["deg", "rad"]) -> None:
     ...
 
 
-def set_print_error(value: bool) -> None:
+def set_print_error(value: bool | None) -> None:
     ...
 
 
-class errordouble:
-    value: float
-    error: float
+class errordouble():
+    @property
+    def value(self) -> float:
+        ...
+
+    @value.setter
+    def value(self, value: int | float) -> None:
+        ...
+
+    @property
+    def error(self) -> float:
+        ...
+
+    @value.setter
+    def error(self, value: int | float) -> None:
+        ...
 
     def __repr__(self) -> str:
         ...
@@ -128,11 +141,11 @@ class errordouble:
         ...
 
     @typing.overload
-    def __init__(self, value: float) -> None:
+    def __init__(self, value: int | float) -> None:
         ...
 
     @typing.overload
-    def __init__(self, value: float, error: float) -> None:
+    def __init__(self, value: int | float, error: int | float) -> None:
         ...
 
     def __round__(self, __ndigits: int, /) ->float:
@@ -140,12 +153,38 @@ class errordouble:
 
 
 class variable:
-    real: errordouble
-    imag: errordouble
-    rec: tuple[errordouble, errordouble] | Unsure
-    r: float
-    arg: float
-    pol: tuple[errordouble, errordouble] | Unsure
+    @property
+    def real(self) -> errordouble:
+        ...
+
+    @real.setter
+    def real(self, value: __support_component) -> None:
+        ...
+
+    @property
+    def imag(self) -> errordouble:
+        ...
+
+    @imag.setter
+    def imag(self, value: __support_component) -> None:
+        ...
+
+    @property
+    def r(self) -> float:
+        ...
+
+    @r.setter
+    def r(self, value: __support_component) -> None:
+        ...
+
+    @property
+    def arg(self) -> float:
+        ...
+
+    @arg.setter
+    def arg(self, value: __support_component) -> None:
+        ...
+
     is_arbitrary: bool
 
     def __repr__(self) -> str:
@@ -253,10 +292,10 @@ class variable:
     def __str__(self) -> str:
         ...
 
-    def __eq__(self, other: __support_component) -> bool | Unsure:
+    def __eq__(self, other: typing.Any) -> bool | Unsure:
         ...
 
-    def __ne__(self, other: __support_component) -> bool | Unsure:
+    def __ne__(self, other: typing.Any) -> bool | Unsure:
         ...
 
     def __conj__(self) -> variable:
@@ -350,19 +389,19 @@ class variable:
         ...
 
     @typing.overload
-    def __init__(self) -> variable:
+    def __init__(self) -> None:
         ...
 
     @typing.overload
-    def __init__(self, num: __support_num) -> variable:
+    def __init__(self, num: __support_num) -> None:
         ...
 
     @typing.overload
     def __init__(self, real: __support_component,
-                 imag: __support_component) -> variable:
+                 imag: __support_component) -> None:
         ...
 
     @typing.overload
     def __init__(self, r: __support_component,
-                 arg: __support_component) -> variable:
+                 arg: __support_component) -> None:
         ...
