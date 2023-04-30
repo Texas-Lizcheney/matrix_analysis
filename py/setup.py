@@ -16,7 +16,7 @@ def main():
                            extra_compile_args=["--std=c++20"],
                            library_dirs=[f"{os.getcwd()}/libs"],
                            include_dirs=[np_api, f"{os.getcwd()}/include"])
-    setup(name="matrix_analysis", version="2.0.3", ext_modules=[Ext_matrix])
+    setup(name="matrix_analysis", version="2.0.4", ext_modules=[Ext_matrix])
 
 
 if __name__ == "__main__":

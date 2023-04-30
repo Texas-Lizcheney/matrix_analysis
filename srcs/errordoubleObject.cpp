@@ -2,21 +2,21 @@
 
 extern int doubleprecision;
 
-void PyErrordoubleObject_dealloc(PyErrordoubleObject *self)
+static void PyErrordoubleObject_dealloc(PyErrordoubleObject *self)
 {
     self->parent = nullptr;
     Py_TYPE(self)->tp_free((PyObject *)self);
     return;
 }
 
-PyObject *PyErrordoubleObject_repr(PyErrordoubleObject *self)
+static PyObject *PyErrordoubleObject_repr(PyErrordoubleObject *self)
 {
     std::stringstream tmp;
     tmp << std::setprecision(doubleprecision) << self->num;
     return PyUnicode_FromString(tmp.str().c_str());
 }
 
-int PyErrordoubleObject_init(PyErrordoubleObject *self, PyObject *args, PyObject *kwds)
+static int PyErrordoubleObject_init(PyErrordoubleObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist0[] = {
         (char *)"value",
@@ -42,7 +42,7 @@ int PyErrordoubleObject_init(PyErrordoubleObject *self, PyObject *args, PyObject
     return -1;
 }
 
-PyObject *PyErrordoubleObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+static PyObject *PyErrordoubleObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyObject *self = type->tp_alloc(type, 0);
     ((PyErrordoubleObject *)self)->parent = nullptr;
@@ -56,7 +56,7 @@ PyObject *PyErrordoubleObject_new(PyTypeObject *type, PyObject *args, PyObject *
 
 // as number
 
-PyObject *PyErrordouble_add(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_add(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -97,7 +97,7 @@ PyObject *PyErrordouble_add(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyErrordouble_subtract(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_subtract(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -138,7 +138,7 @@ PyObject *PyErrordouble_subtract(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyErrordouble_multiply(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_multiply(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -179,7 +179,7 @@ PyObject *PyErrordouble_multiply(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyErrordouble_remainder(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_remainder(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -220,7 +220,7 @@ PyObject *PyErrordouble_remainder(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyErrordouble_divmod(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_divmod(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *D = nullptr;
     D = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -283,7 +283,7 @@ PyObject *PyErrordouble_divmod(PyObject *self, PyObject *other)
     return returnvalue;
 }
 
-PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *mod)
+static PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *mod)
 {
     error_double powvalue;
     if (PyErrordouble_Check(self))
@@ -378,7 +378,7 @@ PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *mod)
     return (PyObject *)result;
 }
 
-PyObject *PyErrordouble_negative(PyObject *self)
+static PyObject *PyErrordouble_negative(PyObject *self)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -391,7 +391,7 @@ PyObject *PyErrordouble_negative(PyObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyErrordouble_positive(PyObject *self)
+static PyObject *PyErrordouble_positive(PyObject *self)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -404,7 +404,7 @@ PyObject *PyErrordouble_positive(PyObject *self)
     return (PyObject *)result;
 }
 
-PyObject *PyErrordouble_absolute(PyObject *self)
+static PyObject *PyErrordouble_absolute(PyObject *self)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -417,7 +417,7 @@ PyObject *PyErrordouble_absolute(PyObject *self)
     return (PyObject *)result;
 }
 
-int PyErrordouble_bool(PyObject *self)
+static int PyErrordouble_bool(PyObject *self)
 {
     if ((((PyErrordoubleObject *)self)->num.value == 0) && (((PyErrordoubleObject *)self)->num.error == 0))
     {
@@ -426,17 +426,17 @@ int PyErrordouble_bool(PyObject *self)
     return 1;
 }
 
-PyObject *PyErrordouble_int(PyObject *self)
+static PyObject *PyErrordouble_int(PyObject *self)
 {
     return PyLong_FromDouble(((PyErrordoubleObject *)self)->num.value);
 }
 
-PyObject *PyErrordouble_float(PyObject *self)
+static PyObject *PyErrordouble_float(PyObject *self)
 {
     return PyFloat_FromDouble(((PyErrordoubleObject *)self)->num.value);
 }
 
-PyObject *PyErrordouble_inplace_add(PyErrordoubleObject *self, PyObject *other)
+static PyObject *PyErrordouble_inplace_add(PyErrordoubleObject *self, PyObject *other)
 {
     if (PyErrordouble_Check(other))
     {
@@ -458,7 +458,7 @@ PyObject *PyErrordouble_inplace_add(PyErrordoubleObject *self, PyObject *other)
     return (PyObject *)self;
 }
 
-PyObject *PyErrordouble_inplace_subtract(PyErrordoubleObject *self, PyObject *other)
+static PyObject *PyErrordouble_inplace_subtract(PyErrordoubleObject *self, PyObject *other)
 {
     if (PyErrordouble_Check(other))
     {
@@ -480,7 +480,7 @@ PyObject *PyErrordouble_inplace_subtract(PyErrordoubleObject *self, PyObject *ot
     return (PyObject *)self;
 }
 
-PyObject *PyErrordouble_inplace_multiply(PyErrordoubleObject *self, PyObject *other)
+static PyObject *PyErrordouble_inplace_multiply(PyErrordoubleObject *self, PyObject *other)
 {
     if (PyErrordouble_Check(other))
     {
@@ -502,7 +502,7 @@ PyObject *PyErrordouble_inplace_multiply(PyErrordoubleObject *self, PyObject *ot
     return (PyObject *)self;
 }
 
-PyObject *PyErrordouble_inplace_remainder(PyErrordoubleObject *self, PyObject *other)
+static PyObject *PyErrordouble_inplace_remainder(PyErrordoubleObject *self, PyObject *other)
 {
     if (PyErrordouble_Check(other))
     {
@@ -524,7 +524,7 @@ PyObject *PyErrordouble_inplace_remainder(PyErrordoubleObject *self, PyObject *o
     return (PyObject *)self;
 }
 
-PyObject *PyErrordouble_inplace_power(PyErrordoubleObject *self, PyObject *other, PyObject *mod)
+static PyObject *PyErrordouble_inplace_power(PyErrordoubleObject *self, PyObject *other, PyObject *mod)
 {
     if (PyErrordouble_Check(other))
     {
@@ -565,7 +565,7 @@ PyObject *PyErrordouble_inplace_power(PyErrordoubleObject *self, PyObject *other
     return (PyObject *)self;
 }
 
-PyObject *PyErrordouble_floor_divide(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_floor_divide(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -606,7 +606,7 @@ PyObject *PyErrordouble_floor_divide(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyErrordouble_true_divide(PyObject *self, PyObject *other)
+static PyObject *PyErrordouble_true_divide(PyObject *self, PyObject *other)
 {
     PyErrordoubleObject *result = nullptr;
     result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
@@ -647,7 +647,7 @@ PyObject *PyErrordouble_true_divide(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyErrordouble_inplace_floor_divide(PyErrordoubleObject *self, PyObject *other)
+static PyObject *PyErrordouble_inplace_floor_divide(PyErrordoubleObject *self, PyObject *other)
 {
     if (PyErrordouble_Check(other))
     {
@@ -672,7 +672,7 @@ PyObject *PyErrordouble_inplace_floor_divide(PyErrordoubleObject *self, PyObject
     return (PyObject *)self;
 }
 
-PyObject *PyErrordouble_inplace_true_divide(PyErrordoubleObject *self, PyObject *other)
+static PyObject *PyErrordouble_inplace_true_divide(PyErrordoubleObject *self, PyObject *other)
 {
     if (PyErrordouble_Check(other))
     {
@@ -696,7 +696,7 @@ PyObject *PyErrordouble_inplace_true_divide(PyErrordoubleObject *self, PyObject 
 
 // methods
 
-PyObject *PyErrordouble_round(PyErrordoubleObject *self, PyObject *const *args, Py_ssize_t nargs)
+static PyObject *PyErrordouble_round(PyErrordoubleObject *self, PyObject *const *args, Py_ssize_t nargs)
 {
     if (!_PyArg_CheckPositional("__round__", nargs, 0, 1))
     {
@@ -719,12 +719,12 @@ PyObject *PyErrordouble_round(PyErrordoubleObject *self, PyObject *const *args, 
 }
 
 // getset
-PyObject *PyErrordouble_get_value(PyErrordoubleObject *self, void *closure)
+static PyObject *PyErrordouble_get_value(PyErrordoubleObject *self, void *closure)
 {
     return PyFloat_FromDouble(self->num.value);
 }
 
-int PyErrordouble_set_value(PyErrordoubleObject *self, PyObject *value, void *closure)
+static int PyErrordouble_set_value(PyErrordoubleObject *self, PyObject *value, void *closure)
 {
     if (!value)
     {
@@ -744,12 +744,12 @@ int PyErrordouble_set_value(PyErrordoubleObject *self, PyObject *value, void *cl
     return 0;
 }
 
-PyObject *PyErrordouble_get_error(PyErrordoubleObject *self, void *closure)
+static PyObject *PyErrordouble_get_error(PyErrordoubleObject *self, void *closure)
 {
     return PyFloat_FromDouble(self->num.error);
 }
 
-int PyErrordouble_set_error(PyErrordoubleObject *self, PyObject *value, void *closure)
+static int PyErrordouble_set_error(PyErrordoubleObject *self, PyObject *value, void *closure)
 {
     if (!value)
     {

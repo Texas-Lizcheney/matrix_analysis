@@ -61,36 +61,3 @@ int PyMatrixAlloc(PyMatrixObject *);
 int PyMatrixAssign_withcheck(PyMatrixObject *, int, int, const ComplexVar &);
 int PyMatrixGet_withcheck(const PyMatrixObject *const, int, int, ComplexVar &);
 PyObject *PyMatrix_copy(const PyMatrixObject *const);
-void PyMatrix_dealloc(PyMatrixObject *);
-PyObject *PyMatrix_repr(PyMatrixObject *);
-PyObject *PyMatrix_str(PyMatrixObject *);
-int PyMatrix_init(PyMatrixObject *, PyObject *, PyObject *);
-PyObject *PyMatrix_new(PyTypeObject *, PyObject *, PyObject *);
-
-PyObject *PyMatrix_add(PyObject *, PyObject *);
-PyObject *PyMatrix_subtract(PyObject *, PyObject *);
-PyObject *PyMatrix_multiply(PyObject *, PyObject *);
-PyObject *PyMatrix_remainder(PyObject *, PyObject *);
-PyObject *PyMatrix_divmod(PyObject *, PyObject *);
-PyObject *PyMatrix_negative(PyObject *);
-PyObject *PyMatrix_positive(PyObject *);
-PyObject *PyMatrix_inplace_add(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_inplace_subtract(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_inplace_multiply(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_inplace_remainder(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_floor_divide(PyObject *, PyObject *);
-PyObject *PyMatrix_true_divide(PyObject *, PyObject *);
-PyObject *PyMatrix_inplace_floor_divide(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_matrix_multiply(PyObject *, PyObject *);
-
-PyObject *PyMatrix_conj(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_T(PyMatrixObject *, PyObject *);
-PyObject *PyMatrix_H(PyMatrixObject *, PyObject *);
-
-Py_ssize_t PyMatrix_length(PyMatrixObject *);
-PyObject *PyMatrix_subscript(PyMatrixObject *, PyObject *);
-int PyMatrix_ass_subscript(PyMatrixObject *, PyObject *, PyObject *);
-
-PyObject *PyMatrix_get_shape(PyMatrixObject *, void *);
-PyObject *PyMatrix_get_rank(PyMatrixObject *, void *);

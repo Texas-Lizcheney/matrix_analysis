@@ -110,7 +110,7 @@ PyObject *PyMatrix_copy(const PyMatrixObject *const self)
     return (PyObject *)result;
 }
 
-void PyMatrix_dealloc(PyMatrixObject *self)
+static void PyMatrix_dealloc(PyMatrixObject *self)
 {
     if (self->elements)
     {
@@ -119,7 +119,7 @@ void PyMatrix_dealloc(PyMatrixObject *self)
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-PyObject *PyMatrix_repr(PyMatrixObject *self)
+static PyObject *PyMatrix_repr(PyMatrixObject *self)
 {
     std::stringstream repr;
     repr << std::setprecision(doubleprecision);
@@ -137,7 +137,7 @@ PyObject *PyMatrix_repr(PyMatrixObject *self)
     return PyUnicode_FromString(repr.str().c_str());
 }
 
-PyObject *PyMatrix_str(PyMatrixObject *self)
+static PyObject *PyMatrix_str(PyMatrixObject *self)
 {
     std::stringstream repr;
     repr << std::setprecision(doubleprecision);
@@ -576,7 +576,7 @@ static int PyMatrix_init_from_nparray(PyMatrixObject *self, PyArrayObject *array
     return 0;
 }
 
-int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
+static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
 {
     self->elements = nullptr;
     static char *kwlist_0[] = {
@@ -650,7 +650,7 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
     return -1;
 }
 
-PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+static PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyObject *self = type->tp_alloc(type, 0);
     if (!self)
@@ -664,7 +664,7 @@ PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 // as number
 
-PyObject *PyMatrix_add(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_add(PyObject *self, PyObject *other)
 {
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
@@ -673,7 +673,7 @@ PyObject *PyMatrix_add(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
 {
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
@@ -682,7 +682,7 @@ PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
@@ -698,7 +698,7 @@ PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
@@ -714,7 +714,7 @@ PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
 {
     PyMatrixObject *D = nullptr;
     PyMatrixObject *M = nullptr;
@@ -778,17 +778,17 @@ PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_negative(PyObject *self)
+static PyObject *PyMatrix_negative(PyObject *self)
 {
     return (PyObject *)Matrix_neg((PyMatrixObject *)self);
 }
 
-PyObject *PyMatrix_positive(PyObject *self)
+static PyObject *PyMatrix_positive(PyObject *self)
 {
     return PyMatrix_copy((PyMatrixObject *)self);
 }
 
-PyObject *PyMatrix_inplace_add(PyMatrixObject *self, PyObject *other)
+static PyObject *PyMatrix_inplace_add(PyMatrixObject *self, PyObject *other)
 {
     if (PyMatrix_Check(other))
     {
@@ -802,7 +802,7 @@ PyObject *PyMatrix_inplace_add(PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_inplace_subtract(PyMatrixObject *self, PyObject *other)
+static PyObject *PyMatrix_inplace_subtract(PyMatrixObject *self, PyObject *other)
 {
     if (PyMatrix_Check(other))
     {
@@ -816,7 +816,7 @@ PyObject *PyMatrix_inplace_subtract(PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_inplace_multiply(PyMatrixObject *self, PyObject *other)
+static PyObject *PyMatrix_inplace_multiply(PyMatrixObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (!assignComplexVar(other, tmp))
@@ -828,7 +828,7 @@ PyObject *PyMatrix_inplace_multiply(PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_inplace_remainder(PyMatrixObject *self, PyObject *other)
+static PyObject *PyMatrix_inplace_remainder(PyMatrixObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (!assignComplexVar(other, tmp))
@@ -840,7 +840,7 @@ PyObject *PyMatrix_inplace_remainder(PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
@@ -856,7 +856,7 @@ PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
@@ -872,7 +872,7 @@ PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_inplace_floor_divide(PyMatrixObject *self, PyObject *other)
+static PyObject *PyMatrix_inplace_floor_divide(PyMatrixObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (!assignComplexVar(other, tmp))
@@ -884,7 +884,7 @@ PyObject *PyMatrix_inplace_floor_divide(PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *self, PyObject *other)
+static PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *self, PyObject *other)
 {
     ComplexVar tmp;
     if (!assignComplexVar(other, tmp))
@@ -896,7 +896,7 @@ PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
+static PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 {
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
@@ -907,24 +907,24 @@ PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 
 // method
 
-PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
+static PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
 {
     return (PyObject *)Matrix_conj(self);
 }
 
-PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
+static PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
 {
     return (PyObject *)Matrix_transpose(self);
 }
 
-PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
+static PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
 {
     return (PyObject *)Matrix_hermite_transpose(self);
 }
 
 // as map
 
-Py_ssize_t PyMatrix_length(PyMatrixObject *self)
+static Py_ssize_t PyMatrix_length(PyMatrixObject *self)
 {
     return self->total_elements;
 }
@@ -1077,7 +1077,7 @@ static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObje
     return (PyObject *)result;
 }
 
-PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
+static PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
 {
     if (index == Py_Ellipsis)
     {
@@ -1645,7 +1645,7 @@ static int PyMatrix_ass_subscript_SSV(PyMatrixObject *self, PyObject *a, PyObjec
     return 0;
 }
 
-int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *value)
+static int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *value)
 {
     if (index == Py_Ellipsis)
     {
@@ -1696,12 +1696,12 @@ int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObject *valu
 
 // get set
 
-PyObject *PyMatrix_get_shape(PyMatrixObject *self, void *closure)
+static PyObject *PyMatrix_get_shape(PyMatrixObject *self, void *closure)
 {
     return Py_BuildValue("ii", self->rows, self->cols);
 }
 
-PyObject *PyMatrix_get_rank(PyMatrixObject *self, void *closure)
+static PyObject *PyMatrix_get_rank(PyMatrixObject *self, void *closure)
 {
     int r = Matrix_rank(self);
     if (r == -1)

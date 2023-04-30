@@ -70,37 +70,3 @@ struct PyErrordoubleObject
 extern PyTypeObject PyErrordouble_Type;
 #define PyErrordouble_Check(op) PyObject_TypeCheck(op, &PyErrordouble_Type)
 #define PyErrordouble_CheckExact(op) Py_IS_TYPE(op, &PyErrordouble_Type)
-
-void PyErrordoubleObject_dealloc(PyErrordoubleObject *);
-PyObject *PyErrordoubleObject_repr(PyErrordoubleObject *);
-int PyErrordoubleObject_init(PyErrordoubleObject *, PyObject *, PyObject *);
-PyObject *PyErrordoubleObject_new(PyTypeObject *, PyObject *, PyObject *);
-
-PyObject *PyErrordouble_add(PyObject *, PyObject *);
-PyObject *PyErrordouble_subtract(PyObject *, PyObject *);
-PyObject *PyErrordouble_multiply(PyObject *, PyObject *);
-PyObject *PyErrordouble_remainder(PyObject *, PyObject *);
-PyObject *PyErrordouble_divmod(PyObject *, PyObject *);
-PyObject *PyErrordouble_power(PyObject *, PyObject *, PyObject *);
-PyObject *PyErrordouble_negative(PyObject *);
-PyObject *PyErrordouble_positive(PyObject *);
-PyObject *PyErrordouble_absolute(PyObject *);
-int PyErrordouble_bool(PyObject *);
-PyObject *PyErrordouble_int(PyObject *);
-PyObject *PyErrordouble_float(PyObject *);
-PyObject *PyErrordouble_inplace_add(PyErrordoubleObject *, PyObject *);
-PyObject *PyErrordouble_inplace_subtract(PyErrordoubleObject *, PyObject *);
-PyObject *PyErrordouble_inplace_multiply(PyErrordoubleObject *, PyObject *);
-PyObject *PyErrordouble_inplace_remainder(PyErrordoubleObject *, PyObject *);
-PyObject *PyErrordouble_inplace_power(PyErrordoubleObject *, PyObject *, PyObject *);
-PyObject *PyErrordouble_floor_divide(PyObject *, PyObject *);
-PyObject *PyErrordouble_true_divide(PyObject *, PyObject *);
-PyObject *PyErrordouble_inplace_floor_divide(PyErrordoubleObject *, PyObject *);
-PyObject *PyErrordouble_inplace_true_divide(PyErrordoubleObject *, PyObject *);
-
-PyObject *PyErrordouble_round(PyErrordoubleObject *, PyObject *const *, Py_ssize_t);
-
-PyObject *PyErrordouble_get_value(PyErrordoubleObject *, void *);
-int PyErrordouble_set_value(PyErrordoubleObject *, PyObject *, void *);
-PyObject *PyErrordouble_get_error(PyErrordoubleObject *, void *);
-int PyErrordouble_set_error(PyErrordoubleObject *, PyObject *, void *);
