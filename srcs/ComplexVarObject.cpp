@@ -9,7 +9,7 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
     if (!value)
     {
         target.isArbitrary = true;
-        goto set_both_zero;
+        return 0;
     }
     if (PyComplexVar_CheckExact(value))
     {
@@ -19,35 +19,27 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
     if (Py_IsUnsure(value))
     {
         target.isArbitrary = true;
-        goto set_both_zero;
+        target.real = 0;
+        target.imag = 0;
+        return 0;
     }
     target.isArbitrary = false;
-    if (PyLong_CheckExact(value))
-    {
-        target.real = PyLong_AsDouble(value);
-        goto set_imag_zero;
-    }
-    if (PyFloat_CheckExact(value))
-    {
-        target.real = PyFloat_AsDouble(value);
-        goto set_imag_zero;
-    }
-    if (PyErrordouble_CheckExact(value))
-    {
-        target.real = ((PyErrordoubleObject *)value)->num;
-        goto set_imag_zero;
-    }
     if (PyComplex_CheckExact(value))
     {
         target.real = PyComplex_RealAsDouble(value);
         target.imag = PyComplex_ImagAsDouble(value);
         return 0;
     }
-    return -1;
-set_both_zero:
-    target.real = 0;
-set_imag_zero:
-    target.imag = 0;
+    try
+    {
+        target.real = error_double(value);
+        target.imag = 0;
+        target.isArbitrary = false;
+    }
+    catch (std::exception &e)
+    {
+        return -1;
+    }
     return 0;
 }
 
@@ -145,14 +137,16 @@ int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
         {
             return -1;
         }
-        goto ComplexVar_init_done;
+        return 0;
     }
+    PyErr_Clear();
     if (PyArg_ParseTupleAndKeywords(args, kwds, "dd|", kwlist1, &x, &y))
     {
         self->num.real = x;
         self->num.imag = y;
-        goto ComplexVar_init_done;
+        return 0;
     }
+    PyErr_Clear();
     if (PyArg_ParseTupleAndKeywords(args, kwds, "dd|", kwlist2, &x, &y))
     {
         if (isdeg)
@@ -161,13 +155,10 @@ int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject *kwds)
             y *= std::numbers::pi;
         }
         setvalue_frompolar(x, y, self->num);
-        goto ComplexVar_init_done;
+        return 0;
     }
     PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
     return -1;
-ComplexVar_init_done:
-    PyErr_Clear();
-    return 0;
 }
 
 PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -1104,6 +1095,34 @@ PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
 
 // get set methods
 
+PyObject *PyComplexVar_get_real(PyComplexVarObject *self, void *closure)
+{
+    PyErrordoubleObject *real = nullptr;
+    real = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    real->num = self->num.real;
+    real->parent = &(self->num.real);
+    return (PyObject *)real;
+}
+
+int PyComplexVar_set_real(PyComplexVarObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.isArbitrary = true;
+        self->num.real = 0;
+        return 0;
+    }
+    try
+    {
+        self->num.real = error_double(value);
+    }
+    catch (std::exception &e)
+    {
+        return -1;
+    }
+    return 0;
+}
+
 PyObject *PyComplexVar_get_len(PyComplexVarObject *self, void *closure)
 {
     if (self->num.isArbitrary)
@@ -1126,8 +1145,14 @@ int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void *closur
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         return -1;
     }
-    double length = getdouble_fromPyObject(value);
-    setvalue_frompolar(length, ComplexVar_arg(self->num), self->num);
+    try
+    {
+        setvalue_frompolar(error_double(value), ComplexVar_arg(self->num), self->num);
+    }
+    catch (std::exception &e)
+    {
+        return -1;
+    }
     return 0;
 }
 
@@ -1159,13 +1184,20 @@ int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void *closur
         PyErr_SetString(PyExc_Undefined, "This object is still undefined");
         return -1;
     }
-    error_double arg = {getdouble_fromPyObject(value)};
-    if (*((bool *)closure))
+    try
     {
-        arg *= std::numbers::pi;
-        arg /= 180;
+        error_double arg{value};
+        if (*((bool *)closure))
+        {
+            arg *= std::numbers::pi;
+            arg /= 180;
+        }
+        setvalue_frompolar(ComplexVar_L2(self->num), arg, self->num);
     }
-    setvalue_frompolar(ComplexVar_L2(self->num), arg, self->num);
+    catch (std::exception &e)
+    {
+        return -1;
+    }
     return 0;
 }
 
@@ -1298,8 +1330,6 @@ static PyMethodDef PyComplexVar_methods[] = {
 };
 
 static PyMemberDef PyComplexVar_members[] = {
-    {"real", T_DOUBLE, offsetof(PyComplexVarObject, num.real.value), 0, nullptr},
-    {"real_error", T_DOUBLE, offsetof(PyComplexVarObject, num.real.error), 0, nullptr},
     {"imag", T_DOUBLE, offsetof(PyComplexVarObject, num.imag.value), 0, nullptr},
     {"imag_error", T_DOUBLE, offsetof(PyComplexVarObject, num.imag.error), 0, nullptr},
     {"is_arbitrary", T_BOOL, offsetof(PyComplexVarObject, num.isArbitrary), 0, nullptr},
@@ -1307,6 +1337,7 @@ static PyMemberDef PyComplexVar_members[] = {
 };
 
 static PyGetSetDef PyComplexVar_getset[] = {
+    {"real", (getter)PyComplexVar_get_real, (setter)PyComplexVar_set_real, nullptr, nullptr},
     {"r", (getter)PyComplexVar_get_len, (setter)PyComplexVar_set_len, nullptr, nullptr},
     {"arg", (getter)PyComplexVar_get_arg, (setter)PyComplexVar_set_arg, nullptr, &isdeg},
     {"rec", (getter)PyComplexVar_get_recpair, (setter)PyComplexVar_set_recpair, nullptr, nullptr},

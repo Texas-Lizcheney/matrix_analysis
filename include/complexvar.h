@@ -25,7 +25,7 @@ error_double ComplexVar_L1(const ComplexVar &);
 error_double ComplexVar_squaredL2(const ComplexVar &);
 error_double ComplexVar_L2(const ComplexVar &);
 error_double ComplexVar_arg(const ComplexVar &);
-void setvalue_frompolar(error_double r, error_double a, ComplexVar &);
+void setvalue_frompolar(const error_double &r, const error_double &a, ComplexVar &);
 std::ostream &operator<<(std::ostream &, const ComplexVar &);
 std::ostream &operator<(std::ostream &, const ComplexVar &);
 ComplexVar ComplexVar_conj(const ComplexVar &);
@@ -139,6 +139,8 @@ PyObject *PyComplexVar_arccoth(PyComplexVarObject *);
 PyObject *PyComplexVar_arcsech(PyComplexVarObject *);
 PyObject *PyComplexVar_arccsch(PyComplexVarObject *);
 
+PyObject *PyComplexVar_get_real(PyComplexVarObject *, void *);
+int PyComplexVar_set_real(PyComplexVarObject *, PyObject *, void *);
 PyObject *PyComplexVar_get_len(PyComplexVarObject *, void *);
 int PyComplexVar_set_len(PyComplexVarObject *, PyObject *, void *);
 PyObject *PyComplexVar_get_arg(PyComplexVarObject *, void *);

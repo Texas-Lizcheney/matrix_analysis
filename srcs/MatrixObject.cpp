@@ -282,7 +282,7 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
                     PyObject *value;
                     PyObject *traceback;
                     PyErr_Fetch(&type, &value, &traceback);
-                    PyObject *newvalue = PyUnicode_FromFormat("%S\nAt row:%ld\tcol%ld", value, i, j);
+                    PyObject *newvalue = PyUnicode_FromFormat("%S\nAt row:%ld\tcol:%ld", value, i, j);
                     PyErr_Restore(type, newvalue, traceback);
                     Py_DECREF(value);
                     return -1;
@@ -602,8 +602,9 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
         {
             return -1;
         }
-        goto PyMatrix_init_done;
+        return 0;
     }
+    PyErr_Clear();
     if (PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kwlist_1, &tmp_matrix, &tmp_object))
     {
         if (PyList_CheckExact(tmp_matrix))
@@ -621,7 +622,7 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
                 {
                     return -1;
                 }
-                goto PyMatrix_init_done;
+                return 0;
             }
             else if (PyTuple_CheckExact(tmp))
             {
@@ -629,10 +630,11 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
                 {
                     return -1;
                 }
-                goto PyMatrix_init_done;
+                return 0;
             }
         }
     }
+    PyErr_Clear();
     if (PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist_2, &tmp_matrix))
     {
         if (PyArray_Check(tmp_matrix))
@@ -641,14 +643,11 @@ int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
             {
                 return -1;
             }
-            goto PyMatrix_init_done;
+            return 0;
         }
     }
     PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
     return -1;
-PyMatrix_init_done:
-    PyErr_Clear();
-    return 0;
 }
 
 PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -1252,7 +1251,7 @@ static int PyMatrix_ass_subscript_List(PyMatrixObject *self, PyObject *a, PyObje
         tmp = PyList_GetItem(value, i);
         if (!PyList_CheckExact(tmp))
         {
-            PyErr_Format(PyExc_ValueError, "Inconsistency value format. On index:%ld", i);
+            PyErr_Format(PyExc_ValueError, "Inconsistency value format at %ld", i);
             return -1;
         }
         for (Py_ssize_t j = 0; j < PyList_Size(tmp); j++)

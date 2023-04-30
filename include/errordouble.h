@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <exception>
 
 class error_double
 {
@@ -13,9 +14,10 @@ public:
     double value;
     double error;
 
-    error_double(double = 0);
-    error_double(double, double);
+    error_double(double = 0) noexcept;
+    error_double(double, double) noexcept;
     error_double(const error_double &) noexcept;
+    error_double(PyObject *);
     error_double operator+(const error_double &) const;
     friend error_double operator+(const double &, const error_double &);
     error_double &operator+=(const error_double &);
@@ -62,6 +64,7 @@ struct PyErrordoubleObject
 {
     PyObject_HEAD;
     error_double num;
+    error_double *parent;
 };
 
 extern PyTypeObject PyErrordouble_Type;
@@ -96,3 +99,8 @@ PyObject *PyErrordouble_inplace_floor_divide(PyErrordoubleObject *, PyObject *);
 PyObject *PyErrordouble_inplace_true_divide(PyErrordoubleObject *, PyObject *);
 
 PyObject *PyErrordouble_round(PyErrordoubleObject *, PyObject *const *, Py_ssize_t);
+
+PyObject *PyErrordouble_get_value(PyErrordoubleObject *, void *);
+int PyErrordouble_set_value(PyErrordoubleObject *, PyObject *, void *);
+PyObject *PyErrordouble_get_error(PyErrordoubleObject *, void *);
+int PyErrordouble_set_error(PyErrordoubleObject *, PyObject *, void *);

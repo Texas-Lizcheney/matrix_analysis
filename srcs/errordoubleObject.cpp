@@ -4,6 +4,7 @@ extern int doubleprecision;
 
 void PyErrordoubleObject_dealloc(PyErrordoubleObject *self)
 {
+    self->parent = nullptr;
     Py_TYPE(self)->tp_free((PyObject *)self);
     return;
 }
@@ -30,22 +31,21 @@ int PyErrordoubleObject_init(PyErrordoubleObject *self, PyObject *args, PyObject
     if (PyArg_ParseTupleAndKeywords(args, kwds, "d|", kwlist0, &tmp))
     {
         self->num = tmp;
-        goto ErrordoubleObject_init_done;
+        return 0;
     }
+    PyErr_Clear();
     if (PyArg_ParseTupleAndKeywords(args, kwds, "dd|", kwlist1, &self->num.value, &self->num.error))
     {
-        goto ErrordoubleObject_init_done;
+        return 0;
     }
     PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
     return -1;
-ErrordoubleObject_init_done:
-    PyErr_Clear();
-    return 0;
 }
 
 PyObject *PyErrordoubleObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyObject *self = type->tp_alloc(type, 0);
+    ((PyErrordoubleObject *)self)->parent = nullptr;
     if (!self)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -419,7 +419,7 @@ PyObject *PyErrordouble_absolute(PyObject *self)
 
 int PyErrordouble_bool(PyObject *self)
 {
-    if ((((PyErrordoubleObject *)self)->num.value == 0)&&(((PyErrordoubleObject *)self)->num.error == 0))
+    if ((((PyErrordoubleObject *)self)->num.value == 0) && (((PyErrordoubleObject *)self)->num.error == 0))
     {
         return 0;
     }
@@ -718,6 +718,57 @@ PyObject *PyErrordouble_round(PyErrordoubleObject *self, PyObject *const *args, 
     return PyFloat_FromDouble(value);
 }
 
+// getset
+PyObject *PyErrordouble_get_value(PyErrordoubleObject *self, void *closure)
+{
+    return PyFloat_FromDouble(self->num.value);
+}
+
+int PyErrordouble_set_value(PyErrordoubleObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        value = 0;
+        return 0;
+    }
+    double tmp = PyFloat_AsDouble(value);
+    if (tmp == -1 && PyErr_Occurred())
+    {
+        return -1;
+    }
+    self->num.value = tmp;
+    if (self->parent)
+    {
+        self->parent->value = tmp;
+    }
+    return 0;
+}
+
+PyObject *PyErrordouble_get_error(PyErrordoubleObject *self, void *closure)
+{
+    return PyFloat_FromDouble(self->num.error);
+}
+
+int PyErrordouble_set_error(PyErrordoubleObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        value = 0;
+        return 0;
+    }
+    double tmp = PyFloat_AsDouble(value);
+    if (tmp == -1 && PyErr_Occurred())
+    {
+        return -1;
+    }
+    self->num.error = tmp;
+    if (self->parent)
+    {
+        self->parent->error = tmp;
+    }
+    return 0;
+}
+
 static PyNumberMethods PyErrordouble_as_number = {
     .nb_add = (binaryfunc)PyErrordouble_add,
     .nb_subtract = (binaryfunc)PyErrordouble_subtract,
@@ -747,9 +798,9 @@ static PyMethodDef PyErrordouble_methods[] = {
     nullptr,
 };
 
-static PyMemberDef PyErrordouble_members[] = {
-    {"value", T_DOUBLE, offsetof(PyErrordoubleObject, num.value), 0, nullptr},
-    {"error", T_DOUBLE, offsetof(PyErrordoubleObject, num.error), 0, nullptr},
+static PyGetSetDef PyErrordouble_getset[] = {
+    {"value", (getter)PyErrordouble_get_value, (setter)PyErrordouble_set_value, nullptr, nullptr},
+    {"error", (getter)PyErrordouble_get_error, (setter)PyErrordouble_set_error, nullptr, nullptr},
     nullptr,
 };
 
@@ -761,7 +812,7 @@ PyTypeObject PyErrordouble_Type = {
     .tp_as_number = &PyErrordouble_as_number,
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_methods = PyErrordouble_methods,
-    .tp_members = PyErrordouble_members,
+    .tp_getset = PyErrordouble_getset,
     .tp_init = (initproc)PyErrordoubleObject_init,
     .tp_new = (newfunc)PyErrordoubleObject_new,
 };

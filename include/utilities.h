@@ -3,7 +3,6 @@
 #include <math.h>
 
 // global settings
-double getdouble_fromPyObject(PyObject *);
 double casthalf_to_double(const uint16_t &);
 double cal_original_error(const double &);
 PyObject *SetDoublePrecision(PyObject *, PyObject *);

@@ -142,10 +142,10 @@ class errordouble:
 class variable:
     real: errordouble
     imag: errordouble
-    rec: typing.Union[typing.Tuple[float, float], Unsure]
+    rec: tuple[errordouble, errordouble] | Unsure
     r: float
     arg: float
-    pol: typing.Union[typing.Tuple[float, float], Unsure]
+    pol: tuple[errordouble, errordouble] | Unsure
     is_arbitrary: bool
 
     def __repr__(self) -> str:

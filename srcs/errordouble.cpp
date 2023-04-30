@@ -1,19 +1,34 @@
 #include <errordouble.h>
 extern bool print_error;
 
-error_double::error_double(double value) : value(value),
-                                           error(cal_original_error(value))
+error_double::error_double(double value) noexcept : value(value),
+                                                    error(cal_original_error(value))
 {
 }
 
-error_double::error_double(double value, double error) : value(value),
-                                                         error(error)
+error_double::error_double(double value, double error) noexcept : value(value),
+                                                                  error(error)
 {
 }
 
 error_double::error_double(const error_double &x) noexcept : value(x.value),
                                                              error(x.error)
 {
+}
+
+error_double::error_double(PyObject *x)
+{
+    if (PyErrordouble_Check(x))
+    {
+        value = ((PyErrordoubleObject *)x)->num.value;
+        error = ((PyErrordoubleObject *)x)->num.error;
+    }
+    value = PyFloat_AsDouble(x);
+    if (value == -1 && PyErr_Occurred())
+    {
+        throw std::exception();
+    }
+    error = cal_original_error(value);
 }
 
 error_double error_double::operator+(const error_double &other) const

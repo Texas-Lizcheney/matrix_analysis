@@ -261,6 +261,18 @@ class Test_var(externed_Testcase):
         matrix_analysis.var.set_arg_format("rad")
         x.pol = (4, math.pi/3*2)
         self.assertTupleAlmostEqual(x.rec, (-2, 2*3**0.5))
+        x.real = matrix_analysis.var.errordouble(1)
+        self.assertAlmostEqual(x.real, 1)
+        x.real.value = 2
+        self.assertAlmostEqual(x.real.value, 2)
+        x.real.error = 3
+        self.assertAlmostEqual(x.real.error, 3)
+        x.imag = matrix_analysis.var.errordouble(2)
+        self.assertAlmostEqual(x.imag, 2)
+        x.imag.value = 3
+        self.assertAlmostEqual(x.imag.value, 3)
+        x.imag.error = 4
+        self.assertAlmostEqual(x.imag.error, 4)
 
     def test_cmp(self):
         x = matrix_analysis.var.variable()

@@ -49,7 +49,7 @@ error_double ComplexVar_arg(const ComplexVar &x)
     return atan2(x.imag, x.real);
 }
 
-void setvalue_frompolar(error_double r, error_double a, ComplexVar &x)
+void setvalue_frompolar(const error_double &r, const error_double &a, ComplexVar &x)
 {
     x.real = cos(a) * r;
     x.imag = sin(a) * r;
