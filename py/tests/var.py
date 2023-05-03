@@ -25,6 +25,36 @@ class Test_errordouble(externed_Testcase):
         self.assertEqual(repr(x), "1.2")
         matrix_analysis.var.set_print_precision(None)
 
+    def test_member(self):
+        x = matrix_analysis.var.errordouble(1)
+        x.value = 2
+        self.assertAlmostEqual(x.value, 2)
+        x.error = 3
+        self.assertAlmostEqual(x.error, 3)
+
+    def test_cmp(self):
+        x = matrix_analysis.var.errordouble(2)
+        self.assertTrue(x > 1)
+        self.assertFalse(x > 3)
+        self.assertTrue(x >= 2)
+        self.assertFalse(x >= 3)
+        self.assertTrue(x == 2)
+        self.assertFalse(x == 3)
+        self.assertTrue(x != 1)
+        self.assertFalse(x != 2)
+        self.assertTrue(x < 3)
+        self.assertFalse(x < 1)
+        self.assertTrue(x <= 2)
+        self.assertFalse(x <= 1)
+        x.error = 1
+        self.assertUnsure(x > 2.5)
+        self.assertUnsure(x >= 2.5)
+        y = matrix_analysis.var.errordouble(3.1, 0.3)
+        self.assertUnsure(x == y)
+        self.assertUnsure(x != y)
+        self.assertUnsure(x < 1.5)
+        self.assertUnsure(x <= 1.5)
+
     def test_add(self):
         x = matrix_analysis.var.errordouble(0.1)
         y = matrix_analysis.var.errordouble(0.2)
@@ -187,7 +217,7 @@ class Test_errordouble(externed_Testcase):
         with self.assertRaises(TypeError):
             pow(x, x, "abc")
 
-    def unary_test(self):
+    def test_unaryfuncs(self):
         x = matrix_analysis.var.errordouble(0.1)
         self.assertAlmostEqual(+x, 0.1)
         self.assertNotEqual(id(+x), id(x))
@@ -198,6 +228,146 @@ class Test_errordouble(externed_Testcase):
         z = matrix_analysis.var.errordouble(1)
         self.assertTrue(bool(z))
         self.assertFalse(bool(y))
+
+    def test_round(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(round(x) == round(1.3))
+        self.assertTrue(round(x, 4) == round(1.3, 4))
+
+    def test_exp(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.exp(x) == math.exp(x))
+
+    def test_ln(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.ln(x) == math.log(x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.ln(matrix_analysis.var.errordouble(-1))
+
+    def test_sin(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.sin(x) == math.sin(x))
+
+    def test_cos(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.cos(x) == math.cos(x))
+
+    def test_tan(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.tan(x) == math.tan(x))
+
+    def test_cot(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.cot(x) == 1 / math.tan(x))
+
+    def test_sec(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.sec(x) == 1 / math.cos(x))
+
+    def test_csc(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.csc(x) == 1 / math.sin(x))
+
+    def test_arcsin(self):
+        x = matrix_analysis.var.errordouble(0.9)
+        self.assertTrue(matrix_analysis.funcs.arcsin(x) == math.asin(x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arcsin(matrix_analysis.var.errordouble(1.3))
+
+    def test_arccos(self):
+        x = matrix_analysis.var.errordouble(0.9)
+        self.assertTrue(matrix_analysis.funcs.arccos(x) == math.acos(x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arccos(matrix_analysis.var.errordouble(1.3))
+
+    def test_arctan(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arctan(x) == math.atan(x))
+
+    def test_arccot(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arccot(x)
+                        == math.pi/2-math.atan(x))
+
+    def test_arcsec(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arcsec(x)
+                        == math.acos(1/x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arcsec(matrix_analysis.var.errordouble(0.9))
+
+    def test_arccsc(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arccsc(x)
+                        == math.asin(1/x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arccsc(matrix_analysis.var.errordouble(0.9))
+
+    def test_sinh(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.sinh(x) == math.sinh(x))
+
+    def test_cosh(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.cosh(x) == math.cosh(x))
+
+    def test_tanh(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.tanh(x) == math.tanh(x))
+
+    def test_coth(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.coth(x) == 1 / math.tanh(x))
+
+    def test_sech(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.sech(x) == 1 / math.cosh(x))
+
+    def test_csch(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.csch(x) == 1 / math.sinh(x))
+
+    def test_arcsinh(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arcsinh(x) == math.asinh(x))
+
+    def test_arccosh(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arccosh(x) == math.acosh(x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arccosh(matrix_analysis.var.errordouble(-1))
+
+    def test_arctanh(self):
+        x = matrix_analysis.var.errordouble(0.9)
+        self.assertTrue(matrix_analysis.funcs.arctanh(x) == math.atanh(x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arctanh(matrix_analysis.var.errordouble(1.3))
+
+    def test_arccoth(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arccoth(x) == math.atanh(1/x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arccoth(matrix_analysis.var.errordouble(0.9))
+
+    def test_arcsech(self):
+        x = matrix_analysis.var.errordouble(0.9)
+        self.assertTrue(matrix_analysis.funcs.arcsech(x) == math.acosh(1/x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arcsech(matrix_analysis.var.errordouble(1.3))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arcsech(matrix_analysis.var.errordouble(-1))
+
+    def test_arccsch(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.arccsch(x) == math.asinh(1/x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.arccsch(matrix_analysis.var.errordouble(0))
+
+    def test_sqrt(self):
+        x = matrix_analysis.var.errordouble(1.3)
+        self.assertTrue(matrix_analysis.funcs.sqrt(x) == math.sqrt(x))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.sqrt(matrix_analysis.var.errordouble(-1))
 
 
 class Test_var(externed_Testcase):
@@ -657,7 +827,7 @@ class Test_var(externed_Testcase):
         self.assertFalse(bool(y))
         self.assertTrue(bool(z))
 
-    def test_ufuncs(self):
+    def test_conj(self):
         x = matrix_analysis.var.variable(2, 3)
         p = matrix_analysis.var.variable(Unsure)
         self.assertAlmostEqual(z := matrix_analysis.funcs.conj(x), 2-3j)
@@ -666,113 +836,217 @@ class Test_var(externed_Testcase):
         self.assertAlmostEqual(z := matrix_analysis.funcs.exp(
             x), -7.31511009491+1.04274365623j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_exp(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.exp(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.ln(
             x), 1.28247467873+0.982793723247j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_ln(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.ln(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.sqrt(
             x), 1.67414922804+0.89597747613j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_sqrt(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.sqrt(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.sin(
             x), 9.15449914691-4.16890695997j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_sin(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.sin(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.cos(
             x), -4.18962569097-9.10922789376j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_cos(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.cos(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.tan(
             x), -0.0037640256415+1.00323862735j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_tan(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.tan(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.cot(
             x), -0.00373971037636-0.996757796573j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_cot(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.cot(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.sec(
             x), -0.0416749644111+0.0906111371962j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_sec(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.sec(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.csc(
             x), 0.0904732097532+0.04120099862886j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_csc(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.csc(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arcsin(
             x), 0.570652784321+1.98338702992j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arcsin(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arcsin(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arccos(
             x), 1.00014354247-1.98338702992j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arccos(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arccos(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arctan(
             x), 1.4099210496+0.229072682969j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arctan(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arctan(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arccot(
             x), 0.160875277198-0.229072682968j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arccot(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arccot(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arcsec(
             x), 1.42041072247+0.231334698574j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arcsec(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arcsec(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arccsc(
             x), 0.150385604328-0.231334698574j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_sinh(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arccsc(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.sinh(
             x), -3.59056458999+0.530921086249j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_cosh(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.sinh(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.cosh(
             x), -3.72454550492+0.511822569937j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_tanh(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.cosh(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.tanh(
             x), 0.965385879022-9.88437503832e-3j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_coth(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.tanh(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.coth(
             x), 1.03574663777+1.06047834703e-2j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_sech(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.coth(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.sech(
             x), -0.263512975158-3.62116365587e-2j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_csch(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.sech(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.csch(
             x), -0.272548661463-4.03005788568e-2j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arcsinh(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.csch(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arcsinh(
             x), 1.96863792579+0.964658504408j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arccosh(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arcsinh(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arccosh(
             x), 1.98338702992+1.00014354247j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arctanh(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arccosh(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arctanh(
             x), 0.146946666226+1.33897252229j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arccoth(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arctanh(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arccoth(
             x), 0.146946666225-0.2318238045j)
         self.assertFalse(z.is_arbitrary)
-        self.assertTrue(matrix_analysis.funcs.arccoth(p).is_arbitrary)
+
+    def test_arcsech(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
+        self.assertTrue(matrix_analysis.funcs.arcsech(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arcsech(
             x), 0.231334698574-1.42041072247j)
         self.assertFalse(z.is_arbitrary)
+
+    def test_arccsch(self):
+        x = matrix_analysis.var.variable(2, 3)
+        p = matrix_analysis.var.variable(Unsure)
         self.assertTrue(matrix_analysis.funcs.arcsech(p).is_arbitrary)
         self.assertAlmostEqual(z := matrix_analysis.funcs.arccsch(
             x), 0.157355498845-0.229962902377j)
         self.assertFalse(z.is_arbitrary)
         self.assertTrue(matrix_analysis.funcs.arccsch(p).is_arbitrary)
 
-    def test_bfuncs(self):
+    def test_log(self):
         x = matrix_analysis.var.variable(2, 3)
         y = matrix_analysis.var.variable(1, 2)
         p = matrix_analysis.var.variable(Unsure)

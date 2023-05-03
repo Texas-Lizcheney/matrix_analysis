@@ -51,6 +51,28 @@ error_double operator%(const double &, const error_double &);
 std::ostream &operator<<(std::ostream &, const error_double &);
 error_double sin(const error_double &);
 error_double cos(const error_double &);
+error_double tan(const error_double &);
+error_double cot(const error_double &);
+error_double sec(const error_double &);
+error_double csc(const error_double &);
+error_double arcsin(const error_double &);
+error_double arccos(const error_double &);
+error_double arctan(const error_double &);
+error_double arccot(const error_double &);
+error_double arcsec(const error_double &);
+error_double arccsc(const error_double &);
+error_double sinh(const error_double &);
+error_double cosh(const error_double &);
+error_double tanh(const error_double &);
+error_double coth(const error_double &);
+error_double sech(const error_double &);
+error_double csch(const error_double &);
+error_double arcsinh(const error_double &);
+error_double arccosh(const error_double &);
+error_double arctanh(const error_double &);
+error_double arccoth(const error_double &);
+error_double arcsech(const error_double &);
+error_double arccsch(const error_double &);
 error_double exp(const error_double &);
 error_double log(const error_double &);
 error_double pow(const error_double &, const error_double &);
@@ -59,6 +81,7 @@ error_double sqrt(const error_double &);
 error_double atan2(const error_double &, const error_double &);
 error_double round(const error_double &);
 error_double floor(const error_double &);
+int Errordouble_compare(const error_double &, const error_double &, int);
 
 struct PyErrordoubleObject
 {

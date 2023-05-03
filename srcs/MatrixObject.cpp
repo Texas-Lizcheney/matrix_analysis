@@ -87,7 +87,8 @@ int PyMatrixGet_withcheck(const PyMatrixObject *const self, int r, int c, Comple
 PyObject *PyMatrix_copy(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    result->elements = nullptr;
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);

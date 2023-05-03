@@ -161,7 +161,7 @@ ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
     else if (ComplexVar_iszero(y))
     {
         result = {std::nan(""), std::nan(""), false};
-        PyErr_WarnEx(PyExc_RuntimeWarning, "Divide by 0.", 2);
+        PyErr_WarnEx(PyExc_RuntimeWarning, "Dividing 0.", 2);
     }
     else if (x.isArbitrary || y.isArbitrary)
     {
@@ -221,7 +221,7 @@ ComplexVar ComplexVar_ln(const ComplexVar &x)
         if (ComplexVar_iszero(x))
         {
             result = {std::nan(""), std::nan(""), false};
-            PyErr_WarnEx(PyExc_RuntimeWarning, "Calculating log(0).", 2);
+            PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         }
         else
         {

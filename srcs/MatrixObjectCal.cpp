@@ -381,7 +381,8 @@ PyMatrixObject *Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y)
 PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    result->elements = nullptr;
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -411,7 +412,8 @@ PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
 PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    result->elements = nullptr;
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -441,7 +443,8 @@ PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
 PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    result->elements = nullptr;
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
@@ -473,7 +476,8 @@ PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
-    result = (PyMatrixObject *)PyMatrix_new(&PyMatrix_Type, nullptr, nullptr);
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    result->elements = nullptr;
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);

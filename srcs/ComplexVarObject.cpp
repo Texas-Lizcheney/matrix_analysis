@@ -712,7 +712,6 @@ static PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
     if (!result)
     {
-
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
@@ -730,42 +729,6 @@ static PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
         return nullptr;
     }
     result->num = ComplexVar_ln(self->num);
-    return (PyObject *)result;
-}
-
-static PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
-{
-    ComplexVar tmp;
-    if (assignComplexVar(base, tmp))
-    {
-        Py_RETURN_NOTIMPLEMENTED;
-    }
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
-    result->num = ComplexVar_log(self->num, tmp);
-    return (PyObject *)result;
-}
-
-static PyObject *PyComplexVar_logasbase(PyComplexVarObject *self, PyObject *neur)
-{
-    ComplexVar tmp;
-    if (assignComplexVar(neur, tmp))
-    {
-        Py_RETURN_NOTIMPLEMENTED;
-    }
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
-    result->num = ComplexVar_log(tmp, self->num);
     return (PyObject *)result;
 }
 
@@ -1094,6 +1057,42 @@ static PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
     return (PyObject *)result;
 }
 
+static PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(base, tmp))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    PyComplexVarObject *result = nullptr;
+    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->num = ComplexVar_log(self->num, tmp);
+    return (PyObject *)result;
+}
+
+static PyObject *PyComplexVar_rlog(PyComplexVarObject *self, PyObject *neur)
+{
+    ComplexVar tmp;
+    if (assignComplexVar(neur, tmp))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    PyComplexVarObject *result = nullptr;
+    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->num = ComplexVar_log(tmp, self->num);
+    return (PyObject *)result;
+}
+
 // get set methods
 
 static PyObject *PyComplexVar_get_real(PyComplexVarObject *self, void *closure)
@@ -1279,7 +1278,7 @@ static PyMethodDef PyComplexVar_methods[] = {
     {"__arcsech__", (PyCFunction)PyComplexVar_arcsech, METH_NOARGS, nullptr},
     {"__arccsch__", (PyCFunction)PyComplexVar_arccsch, METH_NOARGS, nullptr},
     {"__log__", (PyCFunction)PyComplexVar_log, METH_O, nullptr},
-    {"__rlog__", (PyCFunction)PyComplexVar_logasbase, METH_O, nullptr},
+    {"__rlog__", (PyCFunction)PyComplexVar_rlog, METH_O, nullptr},
     nullptr,
 };
 
