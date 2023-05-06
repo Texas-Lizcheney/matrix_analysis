@@ -92,7 +92,7 @@ static int PyErrordoubleObject_init(PyErrordoubleObject *self, PyObject *args, P
     {
         return 0;
     }
-    PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
+    PyErr_SetString(PyExc_TypeError, "Fail to match any overload.");
     return -1;
 }
 
@@ -1328,7 +1328,7 @@ static int PyErrordouble_set_value(PyErrordoubleObject *self, PyObject *value, v
 {
     if (!value)
     {
-        value = 0;
+        self->num.value = 0;
         return 0;
     }
     double tmp = PyFloat_AsDouble(value);
@@ -1353,7 +1353,7 @@ static int PyErrordouble_set_error(PyErrordoubleObject *self, PyObject *value, v
 {
     if (!value)
     {
-        value = 0;
+        self->num.error = 0;
         return 0;
     }
     double tmp = PyFloat_AsDouble(value);
@@ -1365,6 +1365,31 @@ static int PyErrordouble_set_error(PyErrordoubleObject *self, PyObject *value, v
     if (self->parent)
     {
         self->parent->error = tmp;
+    }
+    return 0;
+}
+
+static PyObject *PyErrordouble_get_relative_error(PyErrordoubleObject *self, void *closure)
+{
+    return PyFloat_FromDouble(abs(self->num.value) / self->num.error);
+}
+
+static int PyErrordouble_set_relative_error(PyErrordoubleObject *self, PyObject *value, void *closure)
+{
+    if (!value)
+    {
+        self->num.error = 0;
+        return 0;
+    }
+    double tmp = PyFloat_AsDouble(value);
+    if (tmp == -1 && PyErr_Occurred())
+    {
+        return -1;
+    }
+    self->num.error *= tmp;
+    if (self->parent)
+    {
+        self->parent->error *= tmp;
     }
     return 0;
 }
@@ -1430,6 +1455,7 @@ static PyMethodDef PyErrordouble_methods[] = {
 static PyGetSetDef PyErrordouble_getset[] = {
     {"value", (getter)PyErrordouble_get_value, (setter)PyErrordouble_set_value, nullptr, nullptr},
     {"error", (getter)PyErrordouble_get_error, (setter)PyErrordouble_set_error, nullptr, nullptr},
+    {"relative_error", (getter)PyErrordouble_get_relative_error, (setter)PyErrordouble_set_relative_error, nullptr, nullptr},
     nullptr,
 };
 

@@ -11,9 +11,9 @@ template <typename T>
 concept npy_real = std::is_integral_v<T> || std::is_floating_point_v<T>;
 template <typename T>
 concept npy_complex = requires(T a) {
-                          a.real;
-                          a.imag;
-                      };
+    a.real;
+    a.imag;
+};
 
 int PyMatrixAlloc(PyMatrixObject *self)
 {
@@ -597,7 +597,7 @@ static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
     };
     PyObject *tmp_object = nullptr;
     PyObject *tmp_matrix = nullptr;
-    if (PyArg_ParseTupleAndKeywords(args, kwds, "ii|O", kwlist_0, &self->rows, &self->cols, &tmp_object))
+    if (PyArg_ParseTupleAndKeywords(args, kwds, "ii|$O", kwlist_0, &self->rows, &self->cols, &tmp_object))
     {
         if (PyMatrix_init_from_rcf(self, tmp_object))
         {
@@ -606,7 +606,7 @@ static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
         return 0;
     }
     PyErr_Clear();
-    if (PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kwlist_1, &tmp_matrix, &tmp_object))
+    if (PyArg_ParseTupleAndKeywords(args, kwds, "O|$O", kwlist_1, &tmp_matrix, &tmp_object))
     {
         if (PyList_CheckExact(tmp_matrix))
         {
@@ -647,7 +647,7 @@ static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
             return 0;
         }
     }
-    PyErr_SetString(PyExc_TypeError, "Fail to match any init arguments.");
+    PyErr_SetString(PyExc_TypeError, "Fail to match any overload.");
     return -1;
 }
 
@@ -921,6 +921,46 @@ static PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
 static PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
 {
     return (PyObject *)Matrix_hermite_transpose(self);
+}
+
+static PyObject *PyMatrix_reshape(PyMatrixObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist0[] = {
+        (char *)"rows",
+        (char *)"cols",
+        nullptr,
+    };
+    static char *kwlist1[] = {
+        (char *)"shape",
+        nullptr,
+    };
+    int r = 0;
+    int c = 0;
+    PyObject *tmp = nullptr;
+    if (PyArg_ParseTupleAndKeywords(args, kwds, "ii|", kwlist0, &r, &c))
+    {
+        goto unpack_success;
+    }
+    PyErr_Clear();
+    if (PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist1, &tmp))
+    {
+        if (PyArg_ParseTuple(tmp, "ii", &r, &c))
+        {
+            goto unpack_success;
+        }
+        return nullptr;
+    }
+    PyErr_SetString(PyExc_TypeError, "Fail to match any overload.");
+    return nullptr;
+unpack_success:
+    if (r * c != self->total_elements)
+    {
+        PyErr_Format(PyExc_ShapeError, "cannot reshape matrix of size %lld into rows:%ld cols:%d", self->total_elements, r, c);
+        return nullptr;
+    }
+    self->rows = r;
+    self->cols = c;
+    Py_RETURN_NONE;
 }
 
 // as map
@@ -1745,6 +1785,7 @@ static PyMethodDef PyMatrix_methods[] = {
     {"__conj__", (PyCFunction)PyMatrix_conj, METH_NOARGS, nullptr},
     {"T", (PyCFunction)PyMatrix_T, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
+    {"reshape", (PyCFunction)PyMatrix_reshape, METH_VARARGS | METH_KEYWORDS, nullptr},
     nullptr,
 };
 

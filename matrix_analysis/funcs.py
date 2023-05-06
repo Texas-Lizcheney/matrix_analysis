@@ -3,7 +3,8 @@ def __unaryfunc_method(name: str):
         try:
             f = type(x).__dict__[f"__{name}__"]
         except:
-            raise AttributeError(f"Function __{name}__ is not implemented in {type(x)} object.")
+            raise AttributeError(
+                f"Function __{name}__ is not implemented in {type(x)} object.")
         return f(x)
     return func
 
@@ -40,21 +41,21 @@ arccsch = __unaryfunc_method("arccsch")
 
 def __binaryfunc_method(name: str):
     def func(x, y):
-        hasorigin = True
         try:
             f = type(x).__dict__[f"__{name}__"]
-            v = f(x, y)
         except:
-            hasorigin = False
-        if hasorigin:
+            pass
+        else:
+            v = f(x, y)
             return v
         try:
             f = type(y).__dict__[f"__r{name}__"]
-            v = f(y, x)
         except:
             raise AttributeError(
                 f"Both __{name}__ and __r{name}__ are not implementedin {type(x)} object.")
-        return v
+        else:
+            v = f(y, x)
+            return v
     return func
 
 

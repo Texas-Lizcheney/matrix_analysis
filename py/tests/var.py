@@ -10,7 +10,7 @@ class Test_errordouble(externed_Testcase):
         x = matrix_analysis.var.errordouble(value=1.0)
         y = matrix_analysis.var.errordouble(2, 1.5)
         with self.assertRaises(TypeError):
-            z = matrix_analysis.var.errordouble("abc")
+            z = matrix_analysis.var.errordouble("abc")  # type: ignore
 
     def test_repr(self):
         x = matrix_analysis.var.errordouble(1)
@@ -25,12 +25,21 @@ class Test_errordouble(externed_Testcase):
         self.assertEqual(repr(x), "1.2")
         matrix_analysis.var.set_print_precision(None)
 
-    def test_member(self):
+    def test_value(self):
         x = matrix_analysis.var.errordouble(1)
         x.value = 2
         self.assertAlmostEqual(x.value, 2)
+
+    def test_error(self):
+        x = matrix_analysis.var.errordouble(1)
         x.error = 3
         self.assertAlmostEqual(x.error, 3)
+
+    def test_relative_error(self):
+        x = matrix_analysis.var.errordouble(1)
+        y = x.error
+        x.relative_error = 10
+        self.assertAlmostEqual(10*y, x.error)
 
     def test_cmp(self):
         x = matrix_analysis.var.errordouble(2)
@@ -58,22 +67,22 @@ class Test_errordouble(externed_Testcase):
     def test_add(self):
         x = matrix_analysis.var.errordouble(0.1)
         y = matrix_analysis.var.errordouble(0.2)
-        self.assertAlmostEqual(x+y, 0.3)
+        self.assertAlmostEqual(0.3, x+y)
         self.assertAlmostEqual(x+1.1, 1.2)
         self.assertAlmostEqual(x+1, 1.1)
         self.assertAlmostEqual(1.1+x, 1.2)
         self.assertAlmostEqual(1+x, 1.1)
         with self.assertRaises(TypeError):
-            x+"abc"
+            x+"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"+x
+            "abc"+x  # type: ignore
         k = id(x)
         x += y
         self.assertAlmostEqual(x, 0.3)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x += "abc"
+            x += "abc"  # type: ignore
 
     def test_sub(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -84,16 +93,16 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(1.1-x, 1)
         self.assertAlmostEqual(1-x, 0.9)
         with self.assertRaises(TypeError):
-            x-"abc"
+            x-"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"-x
+            "abc"-x  # type: ignore
         k = id(x)
         x -= y
         self.assertAlmostEqual(x, -0.1)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x -= "abc"
+            x -= "abc"  # type: ignore
 
     def test_mul(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -104,16 +113,16 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(1.1*x, 0.11)
         self.assertAlmostEqual(2*x, 0.2)
         with self.assertRaises(TypeError):
-            x*"abc"
+            x*"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"*x
+            "abc"*x  # type: ignore
         k = id(x)
         x *= y
         self.assertAlmostEqual(x, 0.02)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x *= "abc"
+            x *= "abc"  # type: ignore
 
     def test_div(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -124,16 +133,16 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(1/x, 10)
         self.assertAlmostEqual(1.0/x, 10)
         with self.assertRaises(TypeError):
-            x/"abc"
+            x/"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"/x
+            "abc"/x  # type: ignore
         k = id(x)
         x /= y
         self.assertAlmostEqual(x, 0.5)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x *= "abc"
+            x *= "abc"  # type: ignore
 
     def test_floor_div(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -144,16 +153,16 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(1.05//x, 10)
         self.assertAlmostEqual(1//x, 10)
         with self.assertRaises(TypeError):
-            x//"abc"
+            x//"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"//x
+            "abc"//x  # type: ignore
         k = id(x)
         x //= y
         self.assertAlmostEqual(x, 0)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x //= "abc"
+            x //= "abc"  # type: ignore
 
     def test_mod(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -164,16 +173,16 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(1.05 % x, 0.05)
         self.assertAlmostEqual(1 % x, 0)
         with self.assertRaises(TypeError):
-            x % "abc"
+            x % "abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc" % x
+            "abc" % x  # type: ignore
         k = id(x)
         x %= 0.03
         self.assertAlmostEqual(x, 0.01)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x %= "abc"
+            x %= "abc"  # type: ignore
 
     def test_divmod(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -182,9 +191,9 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(z[0], 2)
         self.assertAlmostEqual(z[1], 0.01)
         with self.assertRaises(TypeError):
-            divmod(y, "abc")
+            divmod(y, "abc")  # type: ignore
         with self.assertRaises(TypeError):
-            divmod("abc", x)
+            divmod("abc", x)  # type: ignore
 
     def test_pow(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -195,16 +204,16 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(1.05**x, 1.05**0.1)
         self.assertAlmostEqual(2**x, 2**0.1)
         with self.assertRaises(TypeError):
-            x**"abc"
+            x**"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"**x
+            "abc"**x  # type: ignore
         k = id(x)
         x **= 0.03
         self.assertAlmostEqual(x, 0.1**0.03)
         self.assertEqual(k, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         with self.assertRaises(TypeError):
-            x **= "abc"
+            x **= "abc"  # type: ignore
         x = matrix_analysis.var.errordouble(4.4)
         y = matrix_analysis.var.errordouble(2.2)
         z = matrix_analysis.var.errordouble(3.3)
@@ -213,9 +222,9 @@ class Test_errordouble(externed_Testcase):
         self.assertAlmostEqual(pow(x, y, 3.3), 2.9372964773)
         self.assertAlmostEqual(pow(x, 2.2, 3.3), 2.9372964773)
         with self.assertRaises(TypeError):
-            pow(x, "abc", x)
+            pow(x, "abc", x)  # type: ignore
         with self.assertRaises(TypeError):
-            pow(x, x, "abc")
+            pow(x, x, "abc")  # type: ignore
 
     def test_unaryfuncs(self):
         x = matrix_analysis.var.errordouble(0.1)
@@ -380,9 +389,9 @@ class Test_var(externed_Testcase):
         z2 = matrix_analysis.var.variable(real=2, imag=1)
         z3 = matrix_analysis.var.variable(1, arg=1)
         with self.assertRaises(TypeError):
-            y4 = matrix_analysis.var.variable("abc")
+            y4 = matrix_analysis.var.variable("abc")  # type: ignore
         with self.assertRaises(TypeError):
-            z3 = matrix_analysis.var.variable(1, 2, 3)
+            z3 = matrix_analysis.var.variable(1, 2, 3)  # type: ignore
 
     def test_repr(self):
         x = matrix_analysis.var.variable(-1.23456789, 2.34567891)
@@ -423,7 +432,7 @@ class Test_var(externed_Testcase):
         self.assertAlmostEqual(x.real.value, 2)
         x.real.error = 3
         self.assertAlmostEqual(x.real.error, 3)
-        x.imag = matrix_analysis.var.errordouble(2)
+        x.imag = 2
         self.assertAlmostEqual(x.imag, 2)
         x.imag.value = 3
         self.assertAlmostEqual(x.imag.value, 3)
@@ -447,9 +456,9 @@ class Test_var(externed_Testcase):
         self.assertFalse(x == z)
         self.assertTrue(x != z)
         with self.assertRaises(TypeError):
-            x < y
+            x < y  # type: ignore
         with self.assertRaises(TypeError):
-            x < "abc"
+            x < "abc"  # type: ignore
         self.assertEqual(z, 1)
         self.assertEqual(z, 1.0)
         w = matrix_analysis.var.variable(1-1j)
@@ -469,27 +478,27 @@ class Test_var(externed_Testcase):
         z = x+f
         self.assertTrue(z.is_arbitrary)
         self.assertVarAlmostEqual(x+1, 1+x)
-        x+1
-        x+1.1
-        x+(1+1j)
-        x+matrix_analysis.Unsure
-        x+matrix_analysis.var.errordouble(1.1)
-        1+x
-        1.1+x
-        (1+1j)+x
-        matrix_analysis.Unsure+x
-        matrix_analysis.var.errordouble(1.1)+x
+        x+1  # type: ignore
+        x+1.1  # type: ignore
+        x+(1+1j)  # type: ignore
+        x+matrix_analysis.Unsure  # type: ignore
+        x+matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1+x  # type: ignore
+        1.1+x  # type: ignore
+        (1+1j)+x  # type: ignore
+        matrix_analysis.Unsure+x  # type: ignore
+        matrix_analysis.var.errordouble(1.1)+x  # type: ignore
         x += 1
         x += 1.1
         x += (1+1j)
         x += matrix_analysis.Unsure
         x += matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x+"abc"
+            x+"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"+x
+            "abc"+x  # type: ignore
         with self.assertRaises(TypeError):
-            x += "abc"
+            x += "abc"  # type: ignore
 
     def test_sub(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -505,27 +514,27 @@ class Test_var(externed_Testcase):
         z = x-f
         self.assertTrue(z.is_arbitrary)
         self.assertVarAlmostEqual(x-1, -(1-x))
-        x-1
-        x-1.1
-        x-(1+1j)
-        x-matrix_analysis.Unsure
-        x-matrix_analysis.var.errordouble(1.1)
-        1-x
-        1.1-x
-        (1+1j)-x
-        matrix_analysis.Unsure-x
-        matrix_analysis.var.errordouble(1.1)-x
+        x-1  # type: ignore
+        x-1.1  # type: ignore
+        x-(1+1j)  # type: ignore
+        x-matrix_analysis.Unsure  # type: ignore
+        x-matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1-x  # type: ignore
+        1.1-x  # type: ignore
+        (1+1j)-x  # type: ignore
+        matrix_analysis.Unsure-x  # type: ignore
+        matrix_analysis.var.errordouble(1.1)-x  # type: ignore
         x -= 1
         x -= 1.1
         x -= (1+1j)
         x -= matrix_analysis.Unsure
         x -= matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x-"abc"
+            x-"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"-x
+            "abc"-x  # type: ignore
         with self.assertRaises(TypeError):
-            x -= "abc"
+            x -= "abc"  # type: ignore
 
     def test_mul(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -545,27 +554,27 @@ class Test_var(externed_Testcase):
         self.assertFalse(z.is_arbitrary)
         self.assertAlmostEqual(z, 0)
         self.assertVarAlmostEqual(x*1, 1*x)
-        x*1
-        x*1.1
-        x*(1+1j)
-        x*matrix_analysis.Unsure
-        x*matrix_analysis.var.errordouble(1.1)
-        1*x
-        1.1*x
-        (1+1j)*x
-        matrix_analysis.Unsure*x
-        matrix_analysis.var.errordouble(1.1)*x
+        x*1  # type: ignore
+        x*1.1  # type: ignore
+        x*(1+1j)  # type: ignore
+        x*matrix_analysis.Unsure  # type: ignore
+        x*matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1*x  # type: ignore
+        1.1*x  # type: ignore
+        (1+1j)*x  # type: ignore
+        matrix_analysis.Unsure*x  # type: ignore
+        matrix_analysis.var.errordouble(1.1)*x  # type: ignore
         x *= 1
         x *= 1.1
         x *= (1+1j)
         x *= matrix_analysis.Unsure
         x *= matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x*"abc"
+            x*"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"*x
+            "abc"*x  # type: ignore
         with self.assertRaises(TypeError):
-            x *= "abc"
+            x *= "abc"  # type: ignore
 
     def test_div(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -585,27 +594,27 @@ class Test_var(externed_Testcase):
         self.assertFalse(z.is_arbitrary)
         self.assertAlmostEqual(z, 0)
         self.assertVarAlmostEqual(x/1, ~(1/x))
-        x/1
-        x/1.1
-        x/(1+1j)
-        x/matrix_analysis.Unsure
-        x/matrix_analysis.var.errordouble(1.1)
-        1/x
-        1.1/x
-        (1+1j)/x
-        matrix_analysis.Unsure/x
-        matrix_analysis.var.errordouble(1.1)/x
+        x/1  # type: ignore
+        x/1.1  # type: ignore
+        x/(1+1j)  # type: ignore
+        x/matrix_analysis.Unsure  # type: ignore
+        x/matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1/x  # type: ignore
+        1.1/x  # type: ignore
+        (1+1j)/x  # type: ignore
+        matrix_analysis.Unsure/x  # type: ignore
+        matrix_analysis.var.errordouble(1.1)/x  # type: ignore
         x /= 1
         x /= 1.1
         x /= (1+1j)
         x /= matrix_analysis.Unsure
         x /= matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x/"abc"
+            x/"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"/x
+            "abc"/x  # type: ignore
         with self.assertRaises(TypeError):
-            x /= "abc"
+            x /= "abc"  # type: ignore
 
     def test_floor_div(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -625,27 +634,27 @@ class Test_var(externed_Testcase):
         self.assertFalse(z.is_arbitrary)
         self.assertAlmostEqual(z, 0)
         self.assertAlmostEqual((4+3j)//y, 1)
-        x//1
-        x//1.1
-        x//(1+1j)
-        x//matrix_analysis.Unsure
-        x//matrix_analysis.var.errordouble(1.1)
-        1//x
-        1.1//x
-        (1+1j)//x
-        matrix_analysis.Unsure//x
-        matrix_analysis.var.errordouble(1.1)//x
+        x//1  # type: ignore
+        x//1.1  # type: ignore
+        x//(1+1j)  # type: ignore
+        x//matrix_analysis.Unsure  # type: ignore
+        x//matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1//x  # type: ignore
+        1.1//x  # type: ignore
+        (1+1j)//x  # type: ignore
+        matrix_analysis.Unsure//x  # type: ignore
+        matrix_analysis.var.errordouble(1.1)//x  # type: ignore
         x //= 1
         x //= 1.1
         x //= (1+1j)
         x //= matrix_analysis.Unsure
         x //= matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x//"abc"
+            x//"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"//x
+            "abc"//x  # type: ignore
         with self.assertRaises(TypeError):
-            x //= "abc"
+            x //= "abc"  # type: ignore
 
     def test_mod(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -665,27 +674,27 @@ class Test_var(externed_Testcase):
         self.assertFalse(z.is_arbitrary)
         self.assertAlmostEqual(z, 0)
         self.assertAlmostEqual((4+3j) % y, 2)
-        x % 1
-        x % 1.1
-        x % (1+1j)
-        x % matrix_analysis.Unsure
-        x % matrix_analysis.var.errordouble(1.1)
-        1 % x
-        1.1 % x
-        (1+1j) % x
-        matrix_analysis.Unsure % x
-        matrix_analysis.var.errordouble(1.1) % x
+        x % 1  # type: ignore
+        x % 1.1  # type: ignore
+        x % (1+1j)  # type: ignore
+        x % matrix_analysis.Unsure  # type: ignore
+        x % matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1 % x  # type: ignore
+        1.1 % x  # type: ignore
+        (1+1j) % x  # type: ignore
+        matrix_analysis.Unsure % x  # type: ignore
+        matrix_analysis.var.errordouble(1.1) % x  # type: ignore
         x %= 1
         x %= 1.1
         x %= (1+1j)
         x %= matrix_analysis.Unsure
         x %= matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x % "abc"
+            x % "abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc" % x
+            "abc" % x  # type: ignore
         with self.assertRaises(TypeError):
-            x %= "abc"
+            x %= "abc"  # type: ignore
 
     def test_divmod(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -696,9 +705,9 @@ class Test_var(externed_Testcase):
         self.assertAlmostEqual(z[0], 2)
         self.assertAlmostEqual(z[1], -1j)
         with self.assertRaises(TypeError):
-            divmod(y, "abc")
+            divmod(y, "abc")  # type: ignore
         with self.assertRaises(TypeError):
-            divmod("abc", x)
+            divmod("abc", x)  # type: ignore
 
     def test_pow(self):
         x = matrix_analysis.var.variable(1+2j)
@@ -720,27 +729,27 @@ class Test_var(externed_Testcase):
         self.assertEqual(k, id(a))
         self.assertVarAlmostEqual(a, d)
         self.assertAlmostEqual(2**y, -1.94797767186+3.4936203271j)
-        x**1
-        x**1.1
-        x**(1+1j)
-        x**matrix_analysis.Unsure
-        x**matrix_analysis.var.errordouble(1.1)
-        1**x
-        1.1**x
-        (1+1j)**x
-        matrix_analysis.Unsure**x
-        matrix_analysis.var.errordouble(1.1)**x
+        x**1  # type: ignore
+        x**1.1  # type: ignore
+        x**(1+1j)  # type: ignore
+        x**matrix_analysis.Unsure  # type: ignore
+        x**matrix_analysis.var.errordouble(1.1)  # type: ignore
+        1**x  # type: ignore
+        1.1**x  # type: ignore
+        (1+1j)**x  # type: ignore
+        matrix_analysis.Unsure**x  # type: ignore
+        matrix_analysis.var.errordouble(1.1)**x  # type: ignore
         x **= 1
         x **= 1.1
         x **= (1+1j)
         x **= matrix_analysis.Unsure
         x **= matrix_analysis.var.errordouble(1.1)
         with self.assertRaises(TypeError):
-            x**"abc"
+            x**"abc"  # type: ignore
         with self.assertRaises(TypeError):
-            "abc"**x
+            "abc"**x  # type: ignore
         with self.assertRaises(TypeError):
-            x **= "abc"
+            x **= "abc"  # type: ignore
         pow(x, 1, 1)
         pow(x, 1.1, 1)
         pow(x, 1+1j, 1)
@@ -767,34 +776,10 @@ class Test_var(externed_Testcase):
         pow(x, matrix_analysis.Unsure, matrix_analysis.var.errordouble(1.1))
         pow(x, matrix_analysis.var.errordouble(1.1),
             matrix_analysis.var.errordouble(1.1))
-        pow(1, x, 1)
-        pow(1+1j, x, 1)
-        pow(matrix_analysis.Unsure, x, 1)
-        pow(1, x, 1.1)
-        pow(1+1j, x, 1.1)
-        pow(matrix_analysis.Unsure, x, 1.1)
-        pow(1, x, 1+1j)
-        pow(1+1j, x, 1+1j)
-        pow(matrix_analysis.Unsure, x, 1+1j)
-        pow(1, x, matrix_analysis.Unsure)
-        pow(1+1j, x, matrix_analysis.Unsure)
-        pow(matrix_analysis.Unsure, x, matrix_analysis.Unsure)
-        pow(1, x, matrix_analysis.var.errordouble(1.1))
-        pow(1+1j, x, matrix_analysis.var.errordouble(1.1))
-        pow(matrix_analysis.Unsure, x, matrix_analysis.var.errordouble(1.1))
-        pow(1, 1, x)
-        pow(matrix_analysis.Unsure, 1, x)
-        pow(matrix_analysis.Unsure,  1+1j, x)
-        pow(1, matrix_analysis.Unsure, x)
-        pow(1+1j, matrix_analysis.Unsure, x)
-        pow(matrix_analysis.Unsure,  matrix_analysis.Unsure, x)
-        pow(1, matrix_analysis.var.errordouble(1.1), x)
-        pow(1+1j, matrix_analysis.var.errordouble(1.1), x)
-        pow(matrix_analysis.Unsure,  matrix_analysis.var.errordouble(1.1), x)
         with self.assertRaises(TypeError):
-            pow(x, x, "abc")
+            pow(x, x, "abc")  # type: ignore
         with self.assertRaises(TypeError):
-            pow(x, "abc", x)
+            pow(x, "abc", x)  # type: ignore
 
     def test_unaryfuncs(self):
         x = matrix_analysis.var.variable(1+2j)

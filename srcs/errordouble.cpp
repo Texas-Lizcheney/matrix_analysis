@@ -248,7 +248,7 @@ error_double arccos(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return edHalfPi - arcsin(x);
+    return error_double(acos(x.value), x.error / sqrt(1 - x.value * x.value));
 }
 
 error_double arctan(const error_double &x)

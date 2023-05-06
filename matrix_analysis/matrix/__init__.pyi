@@ -1,17 +1,25 @@
-import typing
-import numpy
+from typing import overload, TypeVar
+from numpy import ndarray
 from ..var import variable
-from ..__init__ import Unsure
+from ..__init__ import __Unsure, Unsure
 
-__support_num = typing.Union[Unsure, int, float, complex, variable]
-__support_component = typing.Union[int, float]
+__support_num = __Unsure | int | float | complex | variable
+__support_num_var = TypeVar(
+    "__support_num_var", __Unsure, int, float, complex, variable)
+__support_component = int | float
 
 
 def set_fastprint(value: bool) -> None:
     ...
 
 
+@overload
 def set_printarea(*, left: int, right: int, up: int, down: int) -> None:
+    ...
+
+
+@overload
+def set_printarea() -> None:
     ...
 
 
@@ -66,6 +74,12 @@ class matrix:
     def __rdivmod__(self, other: __support_num) -> tuple[matrix, matrix]:
         ...
 
+    def __pos__(self) -> matrix:
+        ...
+
+    def __neg__(self) -> matrix:
+        ...
+
     def __floordiv__(self, other: __support_num) -> matrix:
         ...
 
@@ -93,28 +107,36 @@ class matrix:
     def __len__(self) -> int:
         ...
 
-    @typing.overload
-    def __getitem__(self, index: tuple[int | slice, int | slice]) -> variable | matrix:
+    @overload
+    def __getitem__(self, index: tuple[int, int]) -> variable:
         ...
 
-    @typing.overload
+    @overload
+    def __getitem__(self, index: tuple[int | slice, int | slice]) -> matrix:
+        ...
+
+    @overload
     def __getitem__(self, index: ellipsis) -> matrix:
         ...
 
-    @typing.overload
+    @overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: matrix) -> matrix:
+        ...
+
+    @overload
     def __setitem__(self, index: tuple[int | slice, int | slice], value: __support_num) -> matrix:
         ...
 
-    @typing.overload
-    def __setitem__(self, index: tuple[int | slice, int | slice], value: list[list[__support_num]]) -> matrix:
+    @overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: list[list[__support_num]] | list[list[__support_num_var]]) -> matrix:
         ...
 
-    @typing.overload
-    def __setitem__(self, index: tuple[int | slice, int | slice], value: list[tuple[int, int, __support_num]]) -> matrix:
+    @overload
+    def __setitem__(self, index: tuple[int | slice, int | slice] | ellipsis, value: list[tuple[int, int, __support_num]]) -> matrix:
         ...
 
-    @typing.overload
-    def __setitem__(self, index: tuple[int | slice, int | slice], value: numpy.ndarray) -> matrix:
+    @overload
+    def __setitem__(self, index: tuple[int | slice, int | slice], value: ndarray) -> matrix:
         ...
 
     def __str__(self) -> str:
@@ -129,18 +151,26 @@ class matrix:
     def H(self) -> matrix:
         ...
 
-    @typing.overload
-    def __init__(self, rows: int, cols: int, *, fill: __support_num) -> None:
+    @overload
+    def reshape(self, rows: int, cols: int) -> None:
         ...
 
-    @typing.overload
-    def __init__(self, matrix: list[list[__support_num]], *, fill: __support_num) -> None:
+    @overload
+    def reshape(self, shape: tuple[int, int]) -> None:
         ...
 
-    @typing.overload
-    def __init__(self, matrix: list[tuple[int, int, __support_num]], *, fill: __support_num) -> None:
+    @overload
+    def __init__(self, rows: int, cols: int, *, fill: __support_num = Unsure) -> None:
         ...
 
-    @typing.overload
-    def __init__(self, matrix: numpy.ndarray) -> None:
+    @overload
+    def __init__(self, matrix: list[list[__support_num]], *, fill: __support_num = Unsure) -> None:
+        ...
+
+    @overload
+    def __init__(self, matrix: list[tuple[int, int, __support_num]], *, fill: __support_num = Unsure) -> None:
+        ...
+
+    @overload
+    def __init__(self, matrix: ndarray) -> None:
         ...

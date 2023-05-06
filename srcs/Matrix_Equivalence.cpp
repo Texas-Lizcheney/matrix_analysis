@@ -79,7 +79,7 @@ int Matrix_rank(const PyMatrixObject *const self)
     tmp = (PyMatrixObject *)PyMatrix_copy(self);
     if (!tmp)
     {
-        return -2;
+        return FAIL_RANK;
     }
     for (Py_ssize_t r = 0; r < std::min(tmp->rows, tmp->cols); r++)
     {
@@ -110,7 +110,7 @@ int Matrix_rank(const PyMatrixObject *const self)
         if (!valid_value)
         {
             Py_DECREF(tmp);
-            return -1;
+            return UNSURE_RANK;
         }
         if (L == 0)
         {

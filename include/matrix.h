@@ -49,6 +49,11 @@ PyMatrixObject *Matrix_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 
+enum RankState
+{
+    FAIL_RANK = -2,
+    UNSURE_RANK = -1,
+};
 void Matrix_row_switch(PyMatrixObject *, int, int);
 void Matrix_row_multiply(PyMatrixObject *, int, const ComplexVar &);
 void Matrix_row_add(PyMatrixObject *, int, int, const ComplexVar &);
