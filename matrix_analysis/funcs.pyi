@@ -1,4 +1,4 @@
-from typing import TypeVar, overload, Any, Protocol
+from typing import TypeVar, overload, Protocol
 
 T = TypeVar("T", covariant=True)
 _E = TypeVar("_E", contravariant=True)
@@ -256,21 +256,39 @@ def arccsch(x: _SupportArccsc[T]) -> T:
     ...
 
 
-class _SupportsLog(Protocol[_E, T]):
+class _SupportLLog(Protocol[_E, T]):
     def __log__(self, _other: _E) -> T:
         ...
 
 
-class _SupportsRLog(Protocol[_E, T]):
+class _SupportRLog(Protocol[_E, T]):
     def __rlog__(self, _other: _E) -> T:
         ...
 
 
 @overload
-def log(x: _SupportsLog[_E, T], y: _E) -> T:
+def log(x: _SupportLLog[_E, T], base: _E) -> T:
     ...
 
 
 @overload
-def log(x: _E, y: _SupportsRLog[_E, T]) -> T:
+def log(x: _E, base: _SupportRLog[_E, T]) -> T:
+    ...
+
+
+class _SupportKronecker(Protocol[_E, T]):
+    def __kronecker__(self, _other: _E) -> T:
+        ...
+
+
+def kronecker(x: _SupportKronecker[_E, T], y: _SupportKronecker[_E, T]) -> T:
+    ...
+
+
+class _SupportHadamard(Protocol[_E, T]):
+    def __kronecker__(self, _other: _E) -> T:
+        ...
+
+
+def hadamard(x: _SupportHadamard[_E, T], y: _SupportHadamard[_E, T]) -> T:
     ...

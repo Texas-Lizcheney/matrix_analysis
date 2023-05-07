@@ -1290,7 +1290,8 @@ static PyObject *PyErrordouble_log(PyErrordoubleObject *self, PyObject *base)
     }
     catch (const std::exception &e)
     {
-        Py_RETURN_NOTIMPLEMENTED;
+        PyErr_SetNone(PyExc_TypeError);
+        return nullptr;
     }
     return nullptr;
 }
@@ -1312,7 +1313,8 @@ static PyObject *PyErrordouble_rlog(PyErrordoubleObject *self, PyObject *base)
     }
     catch (const std::exception &e)
     {
-        Py_RETURN_NOTIMPLEMENTED;
+        PyErr_SetNone(PyExc_TypeError);
+        return nullptr;
     }
     return nullptr;
 }

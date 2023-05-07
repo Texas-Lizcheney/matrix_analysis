@@ -7,7 +7,7 @@ class unsure():
     ...
 
 
-Unsure = unsure()
+Unsure: unsure
 
 
 class ShapeError(Exception):

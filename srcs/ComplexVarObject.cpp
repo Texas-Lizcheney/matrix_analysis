@@ -1062,7 +1062,8 @@ static PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
     ComplexVar tmp;
     if (assignComplexVar(base, tmp))
     {
-        Py_RETURN_NOTIMPLEMENTED;
+        PyErr_SetNone(PyExc_TypeError);
+        return nullptr;
     }
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -1080,7 +1081,8 @@ static PyObject *PyComplexVar_rlog(PyComplexVarObject *self, PyObject *neur)
     ComplexVar tmp;
     if (assignComplexVar(neur, tmp))
     {
-        Py_RETURN_NOTIMPLEMENTED;
+        PyErr_SetNone(PyExc_TypeError);
+        return nullptr;
     }
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);

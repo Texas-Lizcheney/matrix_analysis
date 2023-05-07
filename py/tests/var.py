@@ -240,127 +240,125 @@ class Test_errordouble(externed_Testcase):
 
     def test_round(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(round(x) == round(1.3))
-        self.assertTrue(round(x, 4) == round(1.3, 4))
+        self.assertEqual(round(x), round(1.3))
+        self.assertEqual(round(x, 4), round(1.3, 4))
 
     def test_exp(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.exp(x) == math.exp(x))
+        self.assertEqual(matrix_analysis.funcs.exp(x), math.exp(x))
 
     def test_ln(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.ln(x) == math.log(x))
+        self.assertEqual(matrix_analysis.funcs.ln(x), math.log(x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.ln(matrix_analysis.var.errordouble(-1))
 
     def test_sin(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.sin(x) == math.sin(x))
+        self.assertEqual(matrix_analysis.funcs.sin(x), math.sin(x))
 
     def test_cos(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.cos(x) == math.cos(x))
+        self.assertEqual(matrix_analysis.funcs.cos(x), math.cos(x))
 
     def test_tan(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.tan(x) == math.tan(x))
+        self.assertEqual(matrix_analysis.funcs.tan(x), math.tan(x))
 
     def test_cot(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.cot(x) == 1 / math.tan(x))
+        self.assertEqual(matrix_analysis.funcs.cot(x), 1 / math.tan(x))
 
     def test_sec(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.sec(x) == 1 / math.cos(x))
+        self.assertEqual(matrix_analysis.funcs.sec(x), 1 / math.cos(x))
 
     def test_csc(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.csc(x) == 1 / math.sin(x))
+        self.assertEqual(matrix_analysis.funcs.csc(x), 1 / math.sin(x))
 
     def test_arcsin(self):
         x = matrix_analysis.var.errordouble(0.9)
-        self.assertTrue(matrix_analysis.funcs.arcsin(x) == math.asin(x))
+        self.assertEqual(matrix_analysis.funcs.arcsin(x), math.asin(x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arcsin(matrix_analysis.var.errordouble(1.3))
 
     def test_arccos(self):
         x = matrix_analysis.var.errordouble(0.9)
-        self.assertTrue(matrix_analysis.funcs.arccos(x) == math.acos(x))
+        self.assertEqual(matrix_analysis.funcs.arccos(x), math.acos(x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arccos(matrix_analysis.var.errordouble(1.3))
 
     def test_arctan(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arctan(x) == math.atan(x))
+        self.assertEqual(matrix_analysis.funcs.arctan(x), math.atan(x))
 
     def test_arccot(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arccot(x)
-                        == math.pi/2-math.atan(x))
+        self.assertEqual(matrix_analysis.funcs.arccot(x),
+                         math.pi/2-math.atan(x))
 
     def test_arcsec(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arcsec(x)
-                        == math.acos(1/x))
+        self.assertEqual(matrix_analysis.funcs.arcsec(x), math.acos(1/x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arcsec(matrix_analysis.var.errordouble(0.9))
 
     def test_arccsc(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arccsc(x)
-                        == math.asin(1/x))
+        self.assertEqual(matrix_analysis.funcs.arccsc(x), math.asin(1/x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arccsc(matrix_analysis.var.errordouble(0.9))
 
     def test_sinh(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.sinh(x) == math.sinh(x))
+        self.assertEqual(matrix_analysis.funcs.sinh(x), math.sinh(x))
 
     def test_cosh(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.cosh(x) == math.cosh(x))
+        self.assertEqual(matrix_analysis.funcs.cosh(x), math.cosh(x))
 
     def test_tanh(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.tanh(x) == math.tanh(x))
+        self.assertEqual(matrix_analysis.funcs.tanh(x), math.tanh(x))
 
     def test_coth(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.coth(x) == 1 / math.tanh(x))
+        self.assertEqual(matrix_analysis.funcs.coth(x), 1 / math.tanh(x))
 
     def test_sech(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.sech(x) == 1 / math.cosh(x))
+        self.assertEqual(matrix_analysis.funcs.sech(x), 1 / math.cosh(x))
 
     def test_csch(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.csch(x) == 1 / math.sinh(x))
+        self.assertEqual(matrix_analysis.funcs.csch(x), 1 / math.sinh(x))
 
     def test_arcsinh(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arcsinh(x) == math.asinh(x))
+        self.assertEqual(matrix_analysis.funcs.arcsinh(x), math.asinh(x))
 
     def test_arccosh(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arccosh(x) == math.acosh(x))
+        self.assertEqual(matrix_analysis.funcs.arccosh(x), math.acosh(x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arccosh(matrix_analysis.var.errordouble(-1))
 
     def test_arctanh(self):
         x = matrix_analysis.var.errordouble(0.9)
-        self.assertTrue(matrix_analysis.funcs.arctanh(x) == math.atanh(x))
+        self.assertEqual(matrix_analysis.funcs.arctanh(x), math.atanh(x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arctanh(matrix_analysis.var.errordouble(1.3))
 
     def test_arccoth(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arccoth(x) == math.atanh(1/x))
+        self.assertEqual(matrix_analysis.funcs.arccoth(x), math.atanh(1/x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arccoth(matrix_analysis.var.errordouble(0.9))
 
     def test_arcsech(self):
         x = matrix_analysis.var.errordouble(0.9)
-        self.assertTrue(matrix_analysis.funcs.arcsech(x) == math.acosh(1/x))
+        self.assertEqual(matrix_analysis.funcs.arcsech(x), math.acosh(1/x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arcsech(matrix_analysis.var.errordouble(1.3))
         with self.assertWarns(RuntimeWarning):
@@ -368,15 +366,28 @@ class Test_errordouble(externed_Testcase):
 
     def test_arccsch(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.arccsch(x) == math.asinh(1/x))
+        self.assertEqual(matrix_analysis.funcs.arccsch(x), math.asinh(1/x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.arccsch(matrix_analysis.var.errordouble(0))
 
     def test_sqrt(self):
         x = matrix_analysis.var.errordouble(1.3)
-        self.assertTrue(matrix_analysis.funcs.sqrt(x) == math.sqrt(x))
+        self.assertEqual(matrix_analysis.funcs.sqrt(x), math.sqrt(x))
         with self.assertWarns(RuntimeWarning):
             matrix_analysis.funcs.sqrt(matrix_analysis.var.errordouble(-1))
+
+    def test_log(self):
+        x = matrix_analysis.var.errordouble(3)
+        self.assertAlmostEqual(matrix_analysis.funcs.log(x, 2), math.log(3, 2))
+        self.assertAlmostEqual(matrix_analysis.funcs.log(2, x), math.log(2, 3))
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.log(x, -1)
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.log(-1, x)
+        with self.assertRaises(TypeError):
+            matrix_analysis.funcs.log(x, "abc")  # type: ignore
+        with self.assertRaises(TypeError):
+            matrix_analysis.funcs.log("abc", x)  # type: ignore
 
 
 class Test_var(externed_Testcase):
@@ -428,16 +439,16 @@ class Test_var(externed_Testcase):
         matrix_analysis.var.set_arg_format("rad")
         x.real = 1
         self.assertAlmostEqual(x.real, 1)
-        x.real.value = 2
-        self.assertAlmostEqual(x.real.value, 2)
-        x.real.error = 3
-        self.assertAlmostEqual(x.real.error, 3)
+        x.real.value = 2  # type: ignore
+        self.assertAlmostEqual(x.real.value, 2)  # type: ignore
+        x.real.error = 3  # type: ignore
+        self.assertAlmostEqual(x.real.error, 3)  # type: ignore
         x.imag = 2
         self.assertAlmostEqual(x.imag, 2)
-        x.imag.value = 3
-        self.assertAlmostEqual(x.imag.value, 3)
-        x.imag.error = 4
-        self.assertAlmostEqual(x.imag.error, 4)
+        x.imag.value = 3  # type: ignore
+        self.assertAlmostEqual(x.imag.value, 3)  # type: ignore
+        x.imag.error = 4  # type: ignore
+        self.assertAlmostEqual(x.imag.error, 4)  # type: ignore
 
     def test_cmp(self):
         x = matrix_analysis.var.variable()
@@ -1046,3 +1057,9 @@ class Test_var(externed_Testcase):
         self.assertFalse(z.is_arbitrary)
         self.assertTrue(matrix_analysis.funcs.log(x, p).is_arbitrary)
         self.assertTrue(matrix_analysis.funcs.log(p, y).is_arbitrary)
+        with self.assertWarns(RuntimeWarning):
+            matrix_analysis.funcs.log(x, 0)
+        with self.assertRaises(TypeError):
+            matrix_analysis.funcs.log(x, "abc")  # type: ignore
+        with self.assertRaises(TypeError):
+            matrix_analysis.funcs.log("abc", x)  # type: ignore

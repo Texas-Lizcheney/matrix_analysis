@@ -24,9 +24,9 @@ struct PyMatrixObject
 extern PyTypeObject PyMatrix_Type;
 #define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrix_Type)
 #define PyMatrix_CheckExact(op) Py_IS_TYPE(((PyObject *)((a))), &PyMatrix_Type)
-#define Matrix_sameshape(x, y) ((x->rows == y->rows) && (x->cols == y->cols))
-#define PyMatrixAssign(self, r, c, value) (self)->elements[r * (self)->cols + c] = value
-#define PyMatrixGetitem(self, r, c) (self)->elements[r * (self)->cols + c]
+#define Matrix_sameshape(x, y) (((x)->rows == (y)->rows) && ((x)->cols == (y)->cols))
+#define PyMatrixAssign(self, r, c, value) (self)->elements[(r) * (self)->cols + (c)] = (value)
+#define PyMatrixGetitem(self, r, c) (self)->elements[(r) * (self)->cols + (c)]
 PyMatrixObject *Matrix_add(const PyMatrixObject *const, const PyMatrixObject *const);
 int Matrix_iadd(PyMatrixObject *, const PyMatrixObject *const);
 PyMatrixObject *Matrix_sub(const PyMatrixObject *const, const PyMatrixObject *const);
@@ -47,6 +47,7 @@ PyMatrixObject *Matrix_neg(const PyMatrixObject *const);
 PyMatrixObject *Matrix_conj(const PyMatrixObject *const);
 PyMatrixObject *Matrix_transpose(const PyMatrixObject *const);
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const);
+PyMatrixObject *Matrix_kronecker(const PyMatrixObject *const, const PyMatrixObject *const);
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 
 enum RankState

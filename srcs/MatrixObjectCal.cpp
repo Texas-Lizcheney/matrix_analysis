@@ -506,6 +506,38 @@ PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
     return result;
 }
 
+PyMatrixObject *Matrix_kronecker(const PyMatrixObject *const x, const PyMatrixObject *const y)
+{
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->rows = x->rows * y->rows;
+    result->cols = x->cols * y->cols;
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    for (Py_ssize_t i = 0; i < x->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < x->cols; j++)
+        {
+            for (Py_ssize_t p = 0; p < y->rows; p++)
+            {
+                for (Py_ssize_t q = 0; q < y->cols; q++)
+                {
+                    PyMatrixAssign(result, i * y->rows + p, j * y->cols + q, ComplexVar_mul(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, p, q)));
+                }
+            }
+        }
+    }
+    return result;
+}
+
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const x, const PyMatrixObject *const y)
 {
     if (!Matrix_sameshape(x, y))

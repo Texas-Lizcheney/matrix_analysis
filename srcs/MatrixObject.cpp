@@ -906,7 +906,7 @@ static PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
-// method
+// methods
 
 static PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
 {
@@ -961,6 +961,26 @@ unpack_success:
     self->rows = r;
     self->cols = c;
     Py_RETURN_NONE;
+}
+
+static PyObject *PyMatrix_kronecker(const PyMatrixObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(other))
+    {
+        return (PyObject *)Matrix_kronecker(self, (PyMatrixObject *)other);
+    }
+    PyErr_SetNone(PyExc_TypeError);
+    return nullptr;
+}
+
+static PyObject *PyMatrix_hadamard(const PyMatrixObject *self, PyObject *other)
+{
+    if (PyMatrix_Check(other))
+    {
+        return (PyObject *)Matrix_hadamard(self, (PyMatrixObject *)other);
+    }
+    PyErr_SetNone(PyExc_TypeError);
+    return nullptr;
 }
 
 // as map
@@ -1786,6 +1806,8 @@ static PyMethodDef PyMatrix_methods[] = {
     {"T", (PyCFunction)PyMatrix_T, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
     {"reshape", (PyCFunction)PyMatrix_reshape, METH_VARARGS | METH_KEYWORDS, nullptr},
+    {"__kronecker__", (PyCFunction)PyMatrix_kronecker, METH_O, nullptr},
+    {"__hadamard__", (PyCFunction)PyMatrix_hadamard, METH_O, nullptr},
     nullptr,
 };
 
