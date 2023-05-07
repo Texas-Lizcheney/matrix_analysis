@@ -693,7 +693,7 @@ static PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyOb
 
 // methods
 
-static PyObject *PyComplexVar_conj(PyComplexVarObject *self)
+static PyObject *PyComplexVar_conj(PyComplexVarObject *self, PyObject *args)
 {
     PyComplexVarObject *result = nullptr;
     result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
@@ -704,6 +704,13 @@ static PyObject *PyComplexVar_conj(PyComplexVarObject *self)
     }
     result->num = ComplexVar_conj(self->num);
     return (PyObject *)result;
+}
+
+static PyObject *PyComplexVar_iconj(PyComplexVarObject *self, PyObject *args)
+{
+    ComplexVar_iconj(self->num);
+    Py_INCREF(self);
+    return (PyObject *)self;
 }
 
 static PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
@@ -1252,6 +1259,7 @@ static PyNumberMethods PyComplexVar_as_number = {
 
 static PyMethodDef PyComplexVar_methods[] = {
     {"__conj__", (PyCFunction)PyComplexVar_conj, METH_NOARGS, nullptr},
+    {"iconj", (PyCFunction)PyComplexVar_iconj, METH_NOARGS, nullptr},
     {"__exp__", (PyCFunction)PyComplexVar_exp, METH_NOARGS, nullptr},
     {"__ln__", (PyCFunction)PyComplexVar_ln, METH_NOARGS, nullptr},
     {"__sqrt__", (PyCFunction)PyComplexVar_sqrt, METH_NOARGS, nullptr},

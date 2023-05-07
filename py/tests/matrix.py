@@ -428,18 +428,34 @@ class Test_mat(externed_Testcase):
         x = matrix_analysis.matrix.matrix([[1, 2],
                                            [Unsure, 1j],
                                            [2j, Unsure]])
-        self.assertMatrixAlmostEqual(matrix_analysis.funcs.conj(x), matrix_analysis.matrix.matrix([[1, 2],
-                                                                                                   [Unsure, -1j],
-                                                                                                   [-2j, Unsure]]))
+        self.assertMatrixAlmostEqual(matrix_analysis.funcs.conj(x), z := matrix_analysis.matrix.matrix([[1, 2],
+                                                                                                        [Unsure, -1j],
+                                                                                                        [-2j, Unsure]]))
+        k = id(x)
+        x.iconj()
+        self.assertMatrixAlmostEqual(x, z)
+        self.assertEqual(k, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
 
     def test_trans(self):
         x = matrix_analysis.matrix.matrix([[1, 2],
                                            [Unsure, 1j],
                                            [2j, Unsure]])
-        self.assertMatrixAlmostEqual(x.T(), matrix_analysis.matrix.matrix([[1, Unsure, 2j],
-                                                                           [2, 1j, Unsure]]))
-        self.assertMatrixAlmostEqual(x.H(), matrix_analysis.matrix.matrix([[1, Unsure, -2j],
-                                                                           [2, -1j, Unsure]]))
+        self.assertMatrixAlmostEqual(x.T(), z1 := matrix_analysis.matrix.matrix([[1, Unsure, 2j],
+                                                                                 [2, 1j, Unsure]]))
+        self.assertMatrixAlmostEqual(x.H(), z2 := matrix_analysis.matrix.matrix([[1, Unsure, -2j],
+                                                                                 [2, -1j, Unsure]]))
+        y = +x
+        k1 = id(x)
+        x.iT()
+        self.assertMatrixAlmostEqual(x, z1)
+        self.assertEqual(k1, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
+        k2 = id(y)
+        y.iH()
+        self.assertMatrixAlmostEqual(y, z2)
+        self.assertEqual(k2, id(y))
+        self.assertEqual(sys.getrefcount(y), 2)
 
     def test_kronecker(self):
         x = matrix_analysis.matrix.matrix([[1, 2],

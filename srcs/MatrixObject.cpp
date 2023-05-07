@@ -913,14 +913,35 @@ static PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
     return (PyObject *)Matrix_conj(self);
 }
 
+static PyObject *PyMatrix_iconj(PyMatrixObject *self, PyObject *args)
+{
+    Matrix_iconj(self);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
 static PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
 {
     return (PyObject *)Matrix_transpose(self);
 }
 
+static PyObject *PyMatrix_iT(PyMatrixObject *self, PyObject *args)
+{
+    Matrix_itranspose(self);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
 static PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
 {
     return (PyObject *)Matrix_hermite_transpose(self);
+}
+
+static PyObject *PyMatrix_iH(PyMatrixObject *self, PyObject *args)
+{
+    Matrix_ihermite_transpose(self);
+    Py_INCREF(self);
+    return (PyObject *)self;
 }
 
 static PyObject *PyMatrix_reshape(PyMatrixObject *self, PyObject *args, PyObject *kwds)
@@ -1803,8 +1824,11 @@ static PyMappingMethods PyMatrix_as_mapping = {
 
 static PyMethodDef PyMatrix_methods[] = {
     {"__conj__", (PyCFunction)PyMatrix_conj, METH_NOARGS, nullptr},
+    {"iconj", (PyCFunction)PyMatrix_iconj, METH_NOARGS, nullptr},
     {"T", (PyCFunction)PyMatrix_T, METH_NOARGS, nullptr},
+    {"iT", (PyCFunction)PyMatrix_iT, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
+    {"iH", (PyCFunction)PyMatrix_iH, METH_NOARGS, nullptr},
     {"reshape", (PyCFunction)PyMatrix_reshape, METH_VARARGS | METH_KEYWORDS, nullptr},
     {"__kronecker__", (PyCFunction)PyMatrix_kronecker, METH_O, nullptr},
     {"__hadamard__", (PyCFunction)PyMatrix_hadamard, METH_O, nullptr},
@@ -1832,7 +1856,7 @@ PyTypeObject PyMatrix_Type = {
     .tp_as_number = &PyMatrix_as_number,
     .tp_as_mapping = &PyMatrix_as_mapping,
     .tp_str = (reprfunc)PyMatrix_str,
-    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_methods = PyMatrix_methods,
     .tp_members = PyMatrix_members,
     .tp_getset = PyMatrix_getset,

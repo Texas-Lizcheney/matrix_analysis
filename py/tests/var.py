@@ -832,6 +832,11 @@ class Test_var(externed_Testcase):
         self.assertAlmostEqual(z := matrix_analysis.funcs.exp(
             x), -7.31511009491+1.04274365623j)
         self.assertFalse(z.is_arbitrary)
+        k = id(x)
+        x.iconj()
+        self.assertAlmostEqual(x, 2-3j)
+        self.assertEqual(k, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
 
     def test_exp(self):
         x = matrix_analysis.var.variable(2, 3)

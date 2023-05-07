@@ -99,6 +99,12 @@ ComplexVar ComplexVar_conj(const ComplexVar &x)
     return result;
 }
 
+void ComplexVar_iconj(ComplexVar &x)
+{
+    x.imag = -x.imag;
+    return;
+}
+
 ComplexVar ComplexVar_add(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;

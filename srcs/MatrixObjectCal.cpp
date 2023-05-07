@@ -440,6 +440,18 @@ PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
     return result;
 }
 
+void Matrix_iconj(PyMatrixObject *self)
+{
+    for (Py_ssize_t i = 0; i < self->rows; i++)
+    {
+        for (Py_ssize_t j = 0; j < self->cols; j++)
+        {
+            ComplexVar_iconj(PyMatrixGetitem(self, i, j));
+        }
+    }
+    return;
+}
+
 PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
@@ -473,6 +485,50 @@ PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
     return result;
 }
 
+void rorv(ComplexVar *a, int x)
+{
+    if (x == 1)
+    {
+        return;
+    }
+    ComplexVar tmp = a[x - 1];
+    int j = x - 2;
+    for (int i = x - 1; i >= 1; i--, j--)
+    {
+        std::swap(a[i], a[j]);
+    }
+    a[0] = tmp;
+    return;
+}
+
+void itranspose(ComplexVar *a, int r, int c)
+{
+    int from;
+    int to = 0;
+    int offset = 0;
+    int step = c;
+    for (int i = 0; i < c; i++)
+    {
+        from = i + offset;
+        for (int j = 0; j < r; j++)
+        {
+            rorv(a + to, from - to + 1);
+            from += step;
+            to++;
+        }
+        step--;
+        offset += r - 1;
+    }
+    return;
+}
+
+void Matrix_itranspose(PyMatrixObject *self)
+{
+    itranspose(self->elements, self->rows, self->cols);
+    std::swap(self->rows, self->cols);
+    return;
+}
+
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
@@ -504,6 +560,13 @@ PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
         }
     }
     return result;
+}
+
+void Matrix_ihermite_transpose(PyMatrixObject *self)
+{
+    Matrix_itranspose(self);
+    Matrix_iconj(self);
+    return;
 }
 
 PyMatrixObject *Matrix_kronecker(const PyMatrixObject *const x, const PyMatrixObject *const y)

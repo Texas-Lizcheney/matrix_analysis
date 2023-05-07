@@ -45,8 +45,11 @@ void Matrix_imod(PyMatrixObject *, const ComplexVar &);
 PyMatrixObject *Matrix_mod(const ComplexVar &, const PyMatrixObject *const);
 PyMatrixObject *Matrix_neg(const PyMatrixObject *const);
 PyMatrixObject *Matrix_conj(const PyMatrixObject *const);
+void Matrix_iconj(PyMatrixObject *);
 PyMatrixObject *Matrix_transpose(const PyMatrixObject *const);
+void Matrix_itranspose(PyMatrixObject *);
 PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const);
+void Matrix_ihermite_transpose(PyMatrixObject *);
 PyMatrixObject *Matrix_kronecker(const PyMatrixObject *const, const PyMatrixObject *const);
 PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const, const PyMatrixObject *const);
 

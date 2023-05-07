@@ -1,4 +1,4 @@
-from typing import overload, TypeVar, TypeAlias
+from typing import overload, TypeVar, Self
 from numpy import ndarray
 from ..var import variable
 from ..__init__ import unsure, Unsure
@@ -42,7 +42,7 @@ class matrix:
     def __radd__(self, other: matrix) -> matrix:
         ...
 
-    def __iadd__(self, other: matrix) -> matrix:
+    def __iadd__(self, other: matrix) -> Self:
         ...
 
     def __sub__(self, other: matrix) -> matrix:
@@ -51,7 +51,7 @@ class matrix:
     def __rsub__(self, other: matrix) -> matrix:
         ...
 
-    def __isub__(self, other: matrix) -> matrix:
+    def __isub__(self, other: matrix) -> Self:
         ...
 
     def __mul__(self, other: __support_num) -> matrix:
@@ -60,7 +60,7 @@ class matrix:
     def __rmul__(self, other: __support_num) -> matrix:
         ...
 
-    def __imul__(self, other: __support_num) -> matrix:
+    def __imul__(self, other: __support_num) -> Self:
         ...
 
     def __mod__(self, other: __support_num) -> matrix:
@@ -69,7 +69,7 @@ class matrix:
     def __rmod__(self, other: __support_num) -> matrix:
         ...
 
-    def __imod__(self, other: __support_num) -> matrix:
+    def __imod__(self, other: __support_num) -> Self:
         ...
 
     def __divmod__(self, other: __support_num) -> tuple[matrix, matrix]:
@@ -96,10 +96,10 @@ class matrix:
     def __rtruediv__(self, other: __support_num) -> matrix:
         ...
 
-    def __ifloordiv__(self, other: __support_num) -> matrix:
+    def __ifloordiv__(self, other: __support_num) -> Self:
         ...
 
-    def __itruediv__(self, other: __support_num) -> matrix:
+    def __itruediv__(self, other: __support_num) -> Self:
         ...
 
     def __matmul__(self, other: matrix) -> matrix:
@@ -149,10 +149,19 @@ class matrix:
     def __conj__(self) -> matrix:
         ...
 
+    def iconj(self) -> Self:
+        ...
+
     def T(self) -> matrix:
         ...
 
+    def iT(self) -> Self:
+        ...
+
     def H(self) -> matrix:
+        ...
+
+    def iH(self) -> Self:
         ...
 
     def __kronecker__(self, other: matrix) -> matrix:

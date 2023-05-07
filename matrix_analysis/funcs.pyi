@@ -153,7 +153,7 @@ class _SupportSinh(Protocol[T]):
         ...
 
 
-def sinh(x: _SupportSin[T]) -> T:
+def sinh(x: _SupportSinh[T]) -> T:
     ...
 
 
@@ -162,7 +162,7 @@ class _SupportCosh(Protocol[T]):
         ...
 
 
-def cosh(x: _SupportCos[T]) -> T:
+def cosh(x: _SupportCosh[T]) -> T:
     ...
 
 
@@ -171,7 +171,7 @@ class _SupportTanh(Protocol[T]):
         ...
 
 
-def tanh(x: _SupportTan[T]) -> T:
+def tanh(x: _SupportTanh[T]) -> T:
     ...
 
 
@@ -180,7 +180,7 @@ class _SupportCoth(Protocol[T]):
         ...
 
 
-def coth(x: _SupportCot[T]) -> T:
+def coth(x: _SupportCoth[T]) -> T:
     ...
 
 
@@ -189,7 +189,7 @@ class _SupportSech(Protocol[T]):
         ...
 
 
-def sech(x: _SupportSec[T]) -> T:
+def sech(x: _SupportSech[T]) -> T:
     ...
 
 
@@ -198,7 +198,7 @@ class _SupportCsch(Protocol[T]):
         ...
 
 
-def csch(x: _SupportCsc[T]) -> T:
+def csch(x: _SupportCsch[T]) -> T:
     ...
 
 
@@ -207,7 +207,7 @@ class _SupportArcsinh(Protocol[T]):
         ...
 
 
-def arcsinh(x: _SupportArcsin[T]) -> T:
+def arcsinh(x: _SupportArcsinh[T]) -> T:
     ...
 
 
@@ -216,7 +216,7 @@ class _SupportArccosh(Protocol[T]):
         ...
 
 
-def arccosh(x: _SupportArccos[T]) -> T:
+def arccosh(x: _SupportArccosh[T]) -> T:
     ...
 
 
@@ -225,7 +225,7 @@ class _SupportArctanh(Protocol[T]):
         ...
 
 
-def arctanh(x: _SupportArctan[T]) -> T:
+def arctanh(x: _SupportArctanh[T]) -> T:
     ...
 
 
@@ -234,7 +234,7 @@ class _SupportArccoth(Protocol[T]):
         ...
 
 
-def arccoth(x: _SupportArccot[T]) -> T:
+def arccoth(x: _SupportArccoth[T]) -> T:
     ...
 
 
@@ -243,7 +243,7 @@ class _SupportArcsech(Protocol[T]):
         ...
 
 
-def arcsech(x: _SupportArcsec[T]) -> T:
+def arcsech(x: _SupportArcsech[T]) -> T:
     ...
 
 
@@ -252,7 +252,7 @@ class _SupportArccsch(Protocol[T]):
         ...
 
 
-def arccsch(x: _SupportArccsc[T]) -> T:
+def arccsch(x: _SupportArccsch[T]) -> T:
     ...
 
 

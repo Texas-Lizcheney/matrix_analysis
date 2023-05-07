@@ -29,6 +29,7 @@ void setvalue_frompolar(const error_double &r, const error_double &a, ComplexVar
 std::ostream &operator<<(std::ostream &, const ComplexVar &);
 std::ostream &operator<(std::ostream &, const ComplexVar &);
 ComplexVar ComplexVar_conj(const ComplexVar &);
+void ComplexVar_iconj(ComplexVar &);
 ComplexVar ComplexVar_add(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_sub(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_mul(const ComplexVar &, const ComplexVar &);

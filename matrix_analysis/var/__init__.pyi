@@ -379,6 +379,9 @@ class variable():
     def __conj__(self) -> variable:
         ...
 
+    def iconj(self) -> Self:
+        ...
+
     def __exp__(self) -> variable:
         ...
 
