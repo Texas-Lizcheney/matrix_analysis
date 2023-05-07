@@ -1,11 +1,11 @@
-from typing import overload, TypeVar
+from typing import overload, TypeVar, TypeAlias
 from numpy import ndarray
 from ..var import variable
-from ..__init__ import __Unsure, Unsure
+from ..__init__ import unsure, Unsure
 
-__support_num = __Unsure | int | float | complex | variable
+__support_num = unsure | int | float | complex | variable
 __support_num_var = TypeVar(
-    "__support_num_var", __Unsure, int, float, complex, variable)
+    "__support_num_var", unsure, int, float, complex, variable)
 __support_component = int | float
 
 
@@ -28,6 +28,10 @@ class matrix:
     cols: int
     total: int
     shape: tuple[int, int]
+
+    @property
+    def rank(self) -> int | unsure:
+        ...
 
     def __repr__(self) -> str:
         ...

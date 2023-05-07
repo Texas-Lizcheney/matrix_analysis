@@ -1,8 +1,12 @@
-from . import core as __core
-from . import var
-from . import matrix
-from . import funcs
+from . import funcs as funcs
+from . import matrix as matrix
+from . import var as var
+from . core import (
+    ShapeError,
+    UndefinedWarning,
+    Unsure,
+)
 
-ShapeError = __core.ShapeError
-UndefinedWarning = __core.UndefinedWarning
-Unsure = __core.Unsure
+ShapeError = ShapeError
+UndefinedWarning = UndefinedWarning
+Unsure = Unsure

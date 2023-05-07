@@ -3,11 +3,11 @@ import matrix as matrix
 import funcs as funcs
 
 
-class __Unsure():
+class unsure():
     ...
 
 
-Unsure = __Unsure()
+Unsure = unsure()
 
 
 class ShapeError(Exception):

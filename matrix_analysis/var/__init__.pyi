@@ -1,8 +1,7 @@
 from typing import overload, Literal, Any, Self, TypeAlias, SupportsRound
-from ..__init__ import __Unsure
+from ..__init__ import unsure
 
-Unsure: TypeAlias = __Unsure
-__support_num = Unsure | errordouble | int | float | complex | variable
+__support_num = unsure | errordouble | int | float | complex | variable
 __support_component = errordouble | int | float
 
 
@@ -128,22 +127,22 @@ class errordouble(SupportsRound["errordouble"]):
     def __itruediv__(self, other: __support_component) -> Self:
         ...
 
-    def __lt__(self, other: Any) -> bool | Unsure:
+    def __lt__(self, other: Any) -> bool | unsure:
         ...
 
-    def __le__(self, other: Any) -> bool | Unsure:
+    def __le__(self, other: Any) -> bool | unsure:
         ...
 
-    def __eq__(self, other: Any) -> bool | Unsure:
+    def __eq__(self, other: Any) -> bool | unsure:
         ...
 
-    def __ne__(self, other: Any) -> bool | Unsure:
+    def __ne__(self, other: Any) -> bool | unsure:
         ...
 
-    def __gt__(self, other: Any) -> bool | Unsure:
+    def __gt__(self, other: Any) -> bool | unsure:
         ...
 
-    def __ge__(self, other: Any) -> bool | Unsure:
+    def __ge__(self, other: Any) -> bool | unsure:
         ...
 
     def __exp__(self) -> errordouble:
@@ -246,6 +245,10 @@ class errordouble(SupportsRound["errordouble"]):
 
 
 class variable():
+    r: float
+    arg: float
+    is_arbitrary: bool
+
     @property
     def real(self) -> errordouble:
         ...
@@ -261,9 +264,6 @@ class variable():
     @imag.setter
     def imag(self, value: int | float) -> None:
         ...
-    r: float
-    arg: float
-    is_arbitrary: bool
 
     def __repr__(self) -> str:
         ...
@@ -370,10 +370,10 @@ class variable():
     def __str__(self) -> str:
         ...
 
-    def __eq__(self, other: Any) -> bool | Unsure:
+    def __eq__(self, other: Any) -> bool | unsure:
         ...
 
-    def __ne__(self, other: Any) -> bool | Unsure:
+    def __ne__(self, other: Any) -> bool | unsure:
         ...
 
     def __conj__(self) -> variable:

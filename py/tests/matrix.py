@@ -239,6 +239,20 @@ class Test_mat(externed_Testcase):
         x = matrix_analysis.matrix.matrix(3, 5)
         self.assertEqual(x.shape, (3, 5))
 
+    def test_rank(self):
+        x = matrix_analysis.matrix.matrix(
+            [[1, -2, 2, -1], [2, -4, 8, 0], [-2, 4, -2, 3], [3, -6, 0, -6]])
+        self.assertEqual(x.rank, 2)
+        x = matrix_analysis.matrix.matrix(
+            [[1, -2, 2, -1, 1], [2, -4, 8, 0, 2], [-2, 4, -2, 3, 3], [3, -6, 0, -6, 4]])
+        self.assertEqual(x.rank, 3)
+        x = matrix_analysis.matrix.matrix([[1, 1j], [1j, 1]])
+        self.assertEqual(x.rank, 2)
+        x = matrix_analysis.matrix.matrix([[1, Unsure], [0, 1]])
+        self.assertEqual(x.rank, 2)
+        x = matrix_analysis.matrix.matrix([[1, 0], [0, Unsure]])
+        self.assertEqual(x.rank, Unsure)
+
     def test_add(self):
         x = matrix_analysis.matrix.matrix([[1, 2], [3, 4]])
         y = matrix_analysis.matrix.matrix(
