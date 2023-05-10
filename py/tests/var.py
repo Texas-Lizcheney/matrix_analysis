@@ -67,7 +67,7 @@ class Test_errordouble(externed_Testcase):
     def test_add(self):
         x = matrix_analysis.var.errordouble(0.1)
         y = matrix_analysis.var.errordouble(0.2)
-        self.assertAlmostEqual(0.3, x+y)
+        self.assertAlmostEqual(x+y, 0.3)
         self.assertAlmostEqual(x+1.1, 1.2)
         self.assertAlmostEqual(x+1, 1.1)
         self.assertAlmostEqual(1.1+x, 1.2)

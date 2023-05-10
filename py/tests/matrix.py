@@ -124,7 +124,7 @@ class Test_mat(externed_Testcase):
                                            [Unsure, 3+4j],
                                            [5, matrix_analysis.var.variable(1+1j)]])
         a = x[0, 0]
-        self.assertAlmostEqual(a, 1)
+        self.assertAlmostEqual(1, a)
         with self.assertRaises(IndexError):
             a = x[3, 3]
         self.assertEqual(str(x[0, :]), "[1+0i\t2+0i\tundefined]")
