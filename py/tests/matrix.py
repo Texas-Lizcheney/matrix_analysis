@@ -79,7 +79,7 @@ class Test_mat(externed_Testcase):
         for D in numpy_dtypes:
             x = matrix_analysis.matrix.matrix(numpy.array([[1]], dtype=D))
             self.assertEqual(str(x), "[1+0i]")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.matrix(
                 numpy.array([[1]], dtype=numpy.timedelta64))
         x = matrix_analysis.matrix.matrix(numpy.array([[1, 2.0],
@@ -202,7 +202,7 @@ class Test_mat(externed_Testcase):
             x[0:4:2, 0:4:2] = numpy.ones((2, 2), dtype=D)
             self.assertEqual(str(x), y)
         x = matrix_analysis.matrix.matrix(4, 4, fill=0)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             x[0, 0] = matrix_analysis.matrix.matrix(
                 numpy.array([[1]], dtype=numpy.timedelta64))
         x[1:4:2, 0:4:2] = numpy.array([[Unsure, 1],
@@ -497,3 +497,29 @@ class Test_vector(externed_Testcase):
         self.assertEqual(str(x), "[undefined]\n[undefined]\n[undefined]")
         x = matrix_analysis.matrix.vector(3, fill=1, is_horizontal=True)
         self.assertEqual(str(x), "[1+0i\t1+0i\t1+0i]")
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector(3, fill="abc")  # type: ignore
+        x = matrix_analysis.matrix.vector(
+            [1, Unsure, 1+1j], is_horizontal=True)
+        self.assertEqual(str(x), "[1+0i\tundefined\t1+1i]")
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector([1, "abc"])  # type:ignore
+        x = matrix_analysis.matrix.vector([(2, 1+1j),
+                                           (4, 1)],)
+        self.assertEqual(
+            str(x), "[undefined]\n[undefined]\n[1+1i]\n[undefined]\n[1+0i]")
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector([(0, "abc")])  # type: ignore
+        for D in numpy_dtypes:
+            x = matrix_analysis.matrix.vector(numpy.array([1, 2], dtype=D))
+            self.assertEqual(str(x), "[1+0i]\n[2+0i]")
+        for D in numpy_dtypes:
+            x = matrix_analysis.matrix.vector(
+                numpy.array([1, 2], dtype=D), is_horizontal=True)
+            self.assertEqual(str(x), "[1+0i\t2+0i]")
+        x = matrix_analysis.matrix.vector(
+            numpy.array([Unsure, Unsure], dtype=object))
+        self.assertEqual(str(x), "[undefined]\n[undefined]")
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector(
+                numpy.array([1, 2], dtype=numpy.timedelta64))

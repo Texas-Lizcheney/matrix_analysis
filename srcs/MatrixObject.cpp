@@ -506,7 +506,7 @@ static int PyMatrix_init_from_nparray(PyMatrixObject *self, PyArrayObject *array
     }
     default:
     {
-        PyErr_SetString(PyExc_ValueError, "Unsupport dtype");
+        PyErr_SetString(PyExc_TypeError, "Unsupport dtype");
         return -1;
     }
     }
@@ -1485,7 +1485,7 @@ static int PyMatrix_ass_subscript_nparray(PyMatrixObject *self, PyObject *a, PyO
     }
     default:
     {
-        PyErr_SetString(PyExc_ValueError, "Unsupport dtype");
+        PyErr_SetString(PyExc_TypeError, "Unsupport dtype");
         return -1;
     }
     }

@@ -47,7 +47,7 @@ int assignComplexVar_withExc(PyObject *value, ComplexVar &target)
 {
     if (assignComplexVar(value, target))
     {
-        PyErr_Format(PyExc_TypeError, "Unsupported type: %s", value->ob_type->tp_name);
+        PyErr_Format(PyExc_TypeError, "Unsupported type: %s\n", value->ob_type->tp_name);
         return -1;
     }
     return 0;

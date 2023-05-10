@@ -98,14 +98,12 @@ static int PyVector_init_from_sVf(PyVectorObject *self, PyObject *vector, PyObje
     }
     for (Py_ssize_t i = 0; i < total; i++)
     {
-        tmp = PyList_GetItem(vector, i);
-        PyArg_ParseTuple(tmp, "iO", &pos, &pair);
-        if (assignComplexVar_withExc(pair, tmp_value))
+        PyArg_ParseTuple(PyList_GetItem(vector, i), "iO", &pos, &pair);
+        if (assignComplexVar_withExc(pair, PyVectorGetitem(self, pos)))
         {
             Addmessage("On index:%ld", i);
             return -1;
         }
-        PyVectorAssign(self, i, tmp_value);
     }
     return 0;
 }
@@ -136,7 +134,7 @@ static int assign_from_obj(ComplexVar *target, int d, PyObject **data)
 {
     for (int i = 0; i < d; i++)
     {
-        if (assignComplexVar_withExc(data[d], target[d]))
+        if (assignComplexVar_withExc(data[i], target[i]))
         {
             Addmessage("On index:%ld", i);
             return -1;
@@ -269,7 +267,7 @@ static int PyVector_init_from_nparray(PyVectorObject *self, PyArrayObject *vecto
     }
     default:
     {
-        PyErr_SetString(PyExc_ValueError, "Unsupport dtype");
+        PyErr_SetString(PyExc_TypeError, "Unsupport dtype");
         return -1;
     }
     }
@@ -340,12 +338,15 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
         }
         if (PyList_CheckExact(vector))
         {
-            if (!PyList_Size(vector))
+            if (!PyTuple_CheckExact(PyList_GetItem(vector, 0)))
             {
-                PyErr_SetString(PyExc_ValueError, "Empty list.");
-                return -1;
+                if (!PyList_Size(vector))
+                {
+                    PyErr_SetString(PyExc_ValueError, "Empty list.");
+                    return -1;
+                }
+                return PyVector_init_from_Vf(self, vector);
             }
-            return PyVector_init_from_Vf(self, vector);
         }
         if (PyArray_Check(vector))
         {
