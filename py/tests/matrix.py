@@ -505,7 +505,7 @@ class Test_vector(externed_Testcase):
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.vector([1, "abc"])  # type:ignore
         x = matrix_analysis.matrix.vector([(2, 1+1j),
-                                           (4, 1)],)
+                                           (4, 1)])
         self.assertEqual(
             str(x), "[undefined]\n[undefined]\n[1+1i]\n[undefined]\n[1+0i]")
         with self.assertRaises(TypeError):
@@ -523,3 +523,8 @@ class Test_vector(externed_Testcase):
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.vector(
                 numpy.array([1, 2], dtype=numpy.timedelta64))
+
+    def test_repr(self):
+        x = matrix_analysis.matrix.vector([(2, 1+1j),
+                                           (4, 1)])
+        self.assertEqual(repr(x), "[Unsure,Unsure,1+1j,Unsure,1+0j,]")
