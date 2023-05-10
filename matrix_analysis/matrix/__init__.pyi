@@ -23,6 +23,16 @@ def set_printarea() -> None:
     ...
 
 
+@overload
+def reshape(self: matrix, rows: int, cols: int) -> None:
+    ...
+
+
+@overload
+def reshape(self: matrix, shape: tuple[int, int]) -> None:
+    ...
+
+
 class matrix:
     rows: int
     cols: int
@@ -171,14 +181,6 @@ class matrix:
         ...
 
     @overload
-    def reshape(self, rows: int, cols: int) -> None:
-        ...
-
-    @overload
-    def reshape(self, shape: tuple[int, int]) -> None:
-        ...
-
-    @overload
     def __init__(self, rows: int, cols: int, *, fill: __support_num = Unsure) -> None:
         ...
 
@@ -192,4 +194,22 @@ class matrix:
 
     @overload
     def __init__(self, matrix: ndarray) -> None:
+        ...
+
+
+class vector(matrix):
+    @overload
+    def __init__(self, dims: int, *, fill: __support_num = Unsure, is_horizontal: bool = False) -> None:
+        ...
+
+    @overload
+    def __init__(self, vector: list[__support_num], *, is_horizontal: bool = False) -> None:
+        ...
+
+    @overload
+    def __init__(self, vector: list[tuple[int, __support_num]], *, fill: __support_num = Unsure, is_horizontal: bool = False) -> None:
+        ...
+
+    @overload
+    def __init__(self, vector: ndarray, *, is_horizontal: bool = False) -> None:
         ...

@@ -58,9 +58,9 @@ class Test_mat(externed_Testcase):
         self.assertEqual(str(y), "[2+0i\t1+0i]")
         with self.assertRaises(MemoryError):
             z = matrix_analysis.matrix.matrix([(21000000, 21000000, 1)])
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             z = matrix_analysis.matrix.matrix([(1, 2, 3, 4)])  # type: ignore
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             z = matrix_analysis.matrix.matrix(
                 [("abc", 12, 43)])  # type: ignore
         with self.assertRaises(TypeError):
@@ -489,3 +489,11 @@ class Test_mat(externed_Testcase):
             matrix_analysis.funcs.hadamard(x, 1)  # type:ignore
         with self.assertRaises(AttributeError):
             matrix_analysis.funcs.hadamard(1, x)  # type:ignore
+
+
+class Test_vector(externed_Testcase):
+    def test_init(self):
+        x = matrix_analysis.matrix.vector(3)
+        self.assertEqual(str(x), "[undefined]\n[undefined]\n[undefined]")
+        x = matrix_analysis.matrix.vector(3, fill=1, is_horizontal=True)
+        self.assertEqual(str(x), "[1+0i\t1+0i\t1+0i]")

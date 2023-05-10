@@ -158,7 +158,7 @@ static int PyComplexVar_init(PyComplexVarObject *self, PyObject *args, PyObject 
         self->num.isArbitrary = false;
         return 0;
     }
-    PyErr_SetString(PyExc_TypeError, "Fail to match any overload.");
+    PyErr_SetString(PyExc_TypeError, "Fail to match any overload");
     return -1;
 }
 

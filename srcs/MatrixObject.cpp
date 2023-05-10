@@ -7,13 +7,6 @@ extern int escape_rows_to;
 extern int escape_cols_from;
 extern int escape_cols_to;
 extern PyObject *PyExc_ShapeError;
-template <typename T>
-concept npy_real = std::is_integral_v<T> || std::is_floating_point_v<T>;
-template <typename T>
-concept npy_complex = requires(T a) {
-    a.real;
-    a.imag;
-};
 
 int PyMatrixAlloc(PyMatrixObject *self)
 {
@@ -29,13 +22,13 @@ int PyMatrixAlloc(PyMatrixObject *self)
     }
     catch (const std::bad_array_new_length &e)
     {
-        PyErr_Format(PyExc_MemoryError, "Fail to allocate %lld numbers.", self->total_elements);
+        PyErr_Format(PyExc_MemoryError, "Fail to allocate %lld numbers", self->total_elements);
         self->elements = nullptr;
         return -1;
     }
     catch (const std::bad_alloc &e)
     {
-        PyErr_Format(PyExc_MemoryError, "Fail to allocate %lld numbers.", self->total_elements);
+        PyErr_Format(PyExc_MemoryError, "Fail to allocate %lld numbers", self->total_elements);
         self->elements = nullptr;
         return -1;
     }
@@ -56,7 +49,7 @@ int PyMatrixAssign_withcheck(PyMatrixObject *self, int r, int c, const ComplexVa
     }
     if ((R >= self->rows) || (C >= self->cols) || (R < 0) || (C < 0))
     {
-        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
         return -1;
     }
     self->elements[R * self->cols + C] = value;
@@ -77,7 +70,7 @@ int PyMatrixGet_withcheck(const PyMatrixObject *const self, int r, int c, Comple
     }
     if ((R >= self->rows) || (C >= self->cols) || (R < 0) || (C < 0))
     {
-        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
         return -1;
     }
     value = self->elements[R * self->cols + C];
@@ -123,14 +116,13 @@ static void PyMatrix_dealloc(PyMatrixObject *self)
 static PyObject *PyMatrix_repr(PyMatrixObject *self)
 {
     std::stringstream repr;
-    repr << std::setprecision(doubleprecision);
-    repr << "[";
+    repr << std::setprecision(doubleprecision) << "[";
     for (int r = 0; r < self->rows; r++)
     {
         repr << "[";
         for (int c = 0; c < self->cols; c++)
         {
-            repr << (self->elements[r * self->cols + c]) << ',';
+            repr << PyMatrixGetitem(self, r, c) << ',';
         }
         repr << "],";
     }
@@ -158,7 +150,7 @@ static PyObject *PyMatrix_str(PyMatrixObject *self)
                 {
                     if (c < escape_cols_from || cold <= c)
                     {
-                        repr < (self->elements[r * self->cols + c]);
+                        repr < PyMatrixGetitem(self, r, c);
                         if (c != self->cols - 1)
                         {
                             repr << "\t";
@@ -207,7 +199,7 @@ static PyObject *PyMatrix_str(PyMatrixObject *self)
             repr << "[";
             for (int c = 0; c < self->cols; c++)
             {
-                repr < (self->elements[r * self->cols + c]);
+                repr < PyMatrixGetitem(self, r, c);
                 if (c != self->cols - 1)
                 {
                     repr << "\t";
@@ -241,11 +233,12 @@ static int PyMatrix_init_from_rcf(PyMatrixObject *self, PyObject *fill)
     return 0;
 }
 
-static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObject *fill, PyObject *&tmp)
+static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObject *fill)
 {
+    PyObject *tmp = nullptr;
     self->rows = PyList_Size(matrix);
-    self->cols = PyList_Size(tmp);
-    for (Py_ssize_t i = 1; i < self->rows; i++)
+    self->cols = 0;
+    for (Py_ssize_t i = 0; i < self->rows; i++)
     {
         tmp = PyList_GetItem(matrix, i);
         if (!PyList_CheckExact(tmp))
@@ -268,7 +261,6 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
         return -1;
     }
     int cc;
-    ComplexVar tmp_matrix_value;
     for (Py_ssize_t i = 0; i < self->rows; i++)
     {
         tmp = PyList_GetItem(matrix, i);
@@ -277,18 +269,11 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
         {
             if (j < cc)
             {
-                if (assignComplexVar_withExc(PyList_GetItem(tmp, j), tmp_matrix_value))
+                if (assignComplexVar_withExc(PyList_GetItem(tmp, j), PyMatrixGetitem(self, i, j)))
                 {
-                    PyObject *type;
-                    PyObject *value;
-                    PyObject *traceback;
-                    PyErr_Fetch(&type, &value, &traceback);
-                    PyObject *newvalue = PyUnicode_FromFormat("%S\nAt row:%ld\tcol:%ld", value, i, j);
-                    PyErr_Restore(type, newvalue, traceback);
-                    Py_DECREF(value);
+                    Addmessage("At row:%ld\tcol:%ld", i, j);
                     return -1;
                 }
-                PyMatrixAssign(self, i, j, tmp_matrix_value);
             }
             else
             {
@@ -299,8 +284,9 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
     return 0;
 }
 
-static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObject *fill, PyObject *&tmp)
+static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObject *fill)
 {
+    PyObject *tmp = nullptr;
     self->rows = 0;
     self->cols = 0;
     Py_ssize_t total = PyList_Size(smatrix);
@@ -315,14 +301,9 @@ static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObj
             PyErr_Format(PyExc_ValueError, "Inconsistency value format. On index:%ld", i);
             return -1;
         }
-        if (PyTuple_Size(tmp) != 3)
-        {
-            PyErr_Format(PyExc_ValueError, "Only take 3 items. On index:%ld", i);
-            return -1;
-        }
         if (!PyArg_ParseTuple(tmp, "iiO", &r, &c, &pair))
         {
-            PyErr_Format(PyExc_ValueError, "Fail to parse tuple. On index:%ld", i);
+            Addmessage("On index:%ld", i);
             return -1;
         }
         if (r > self->rows)
@@ -336,38 +317,18 @@ static int PyMatrix_init_from_sMf(PyMatrixObject *self, PyObject *smatrix, PyObj
     }
     ++self->rows;
     ++self->cols;
-    ComplexVar tmp_value;
-    if (assignComplexVar_withExc(fill, tmp_value))
+    if (PyMatrix_init_from_rcf(self, fill))
     {
         return -1;
     }
-    if (PyMatrixAlloc(self))
-    {
-        return -1;
-    }
-    for (Py_ssize_t i = 0; i < self->rows; i++)
-    {
-        for (Py_ssize_t j = 0; j < self->cols; j++)
-        {
-            PyMatrixAssign(self, i, j, tmp_value);
-        }
-    }
-    ComplexVar tmp_matrix_value;
     for (Py_ssize_t i = 0; i < total; i++)
     {
         PyArg_ParseTuple(PyList_GetItem(smatrix, i), "iiO", &r, &c, &pair);
-        if (assignComplexVar_withExc(pair, tmp_matrix_value))
+        if (assignComplexVar_withExc(pair, PyMatrixGetitem(self, r, c)))
         {
-            PyObject *type;
-            PyObject *value;
-            PyObject *traceback;
-            PyErr_Fetch(&type, &value, &traceback);
-            PyObject *newvalue = PyUnicode_FromFormat("%S\nOn index:%ld", value, i);
-            PyErr_Restore(type, newvalue, traceback);
-            Py_DECREF(value);
+            Addmessage("On index:%ld", i);
             return -1;
         }
-        PyMatrixAssign(self, r, c, tmp_matrix_value);
     }
     return 0;
 }
@@ -385,6 +346,7 @@ static void assign_from_np_R(ComplexVar *target, int rows, int cols, npy_real au
             target[pos].isArbitrary = false;
         }
     }
+    return;
 }
 
 static void assign_from_np_C(ComplexVar *target, int rows, int cols, npy_complex auto *data)
@@ -400,6 +362,25 @@ static void assign_from_np_C(ComplexVar *target, int rows, int cols, npy_complex
             target[pos].isArbitrary = false;
         }
     }
+    return;
+}
+
+static int assign_from_obj(ComplexVar *target, int rows, int cols, PyObject **data)
+{
+    int64_t pos;
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            pos = i * cols + j;
+            if (assignComplexVar_withExc(data[pos], target[pos]))
+            {
+                Addmessage("At row:%ld\tcol%ld", i, j);
+                return -1;
+            }
+        }
+    }
+    return 0;
 }
 
 static void assign_from_half(ComplexVar *target, int rows, int cols, npy_half *data)
@@ -415,30 +396,7 @@ static void assign_from_half(ComplexVar *target, int rows, int cols, npy_half *d
             target[pos].isArbitrary = false;
         }
     }
-}
-
-static int assign_from_obj(ComplexVar *target, int rows, int cols, PyObject **data)
-{
-    int64_t pos;
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < cols; j++)
-        {
-            pos = i * cols + j;
-            if (assignComplexVar_withExc(data[pos], target[pos]))
-            {
-                PyObject *type;
-                PyObject *value;
-                PyObject *traceback;
-                PyErr_Fetch(&type, &value, &traceback);
-                PyObject *newvalue = PyUnicode_FromFormat("%S\nAt row:%ld\tcol%ld", value, i, j);
-                PyErr_Restore(type, newvalue, traceback);
-                Py_DECREF(value);
-                return -1;
-            }
-        }
-    }
-    return 0;
+    return;
 }
 
 static int PyMatrix_init_from_nparray(PyMatrixObject *self, PyArrayObject *array)
@@ -459,118 +417,96 @@ static int PyMatrix_init_from_nparray(PyMatrixObject *self, PyArrayObject *array
     {
     case NPY_BYTE:
     {
-        npy_byte *A = (npy_byte *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_byte *)data);
         break;
     }
     case NPY_UBYTE:
     {
-        npy_ubyte *A = (npy_ubyte *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_ubyte *)data);
         break;
     }
     case NPY_SHORT:
     {
-        npy_short *A = (npy_short *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_short *)data);
         break;
     }
     case NPY_USHORT:
     {
-        npy_ushort *A = (npy_ushort *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_ushort *)data);
         break;
     }
     case NPY_INT:
     {
-        npy_int *A = (npy_int *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_int *)data);
         break;
     }
     case NPY_UINT:
     {
-        npy_uint *A = (npy_uint *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_uint *)data);
         break;
     }
     case NPY_LONG:
     {
-        npy_long *A = (npy_long *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_long *)data);
         break;
     }
     case NPY_ULONG:
     {
-        npy_ulong *A = (npy_ulong *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_ulong *)data);
         break;
     }
     case NPY_LONGLONG:
     {
-        npy_longlong *A = (npy_longlong *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_longlong *)data);
         break;
     }
     case NPY_ULONGLONG:
     {
-        npy_ulonglong *A = (npy_ulonglong *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_ulonglong *)data);
         break;
     }
     case NPY_FLOAT:
     {
-        npy_float *A = (npy_float *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_float *)data);
         break;
     }
     case NPY_DOUBLE:
     {
-        npy_double *A = (npy_double *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_double *)data);
         break;
     }
     case NPY_LONGDOUBLE:
     {
-        npy_longdouble *A = (npy_longdouble *)data;
-        assign_from_np_R(self->elements, self->rows, self->cols, A);
+        assign_from_np_R(self->elements, self->rows, self->cols, (npy_longdouble *)data);
         break;
     }
     case NPY_CFLOAT:
     {
-        npy_cfloat *A = (npy_cfloat *)data;
-        assign_from_np_C(self->elements, self->rows, self->cols, A);
+        assign_from_np_C(self->elements, self->rows, self->cols, (npy_cfloat *)data);
         break;
     }
     case NPY_CDOUBLE:
     {
-        npy_cdouble *A = (npy_cdouble *)data;
-        assign_from_np_C(self->elements, self->rows, self->cols, A);
+        assign_from_np_C(self->elements, self->rows, self->cols, (npy_cdouble *)data);
         break;
     }
     case NPY_CLONGDOUBLE:
     {
-        npy_clongdouble *A = (npy_clongdouble *)data;
-        assign_from_np_C(self->elements, self->rows, self->cols, A);
+        assign_from_np_C(self->elements, self->rows, self->cols, (npy_clongdouble *)data);
         break;
     }
     case NPY_OBJECT:
     {
-        PyObject **A = (PyObject **)data;
-        if (assign_from_obj(self->elements, self->rows, self->cols, A))
-        {
-            return -1;
-        }
-        break;
+        return assign_from_obj(self->elements, self->rows, self->cols, (PyObject **)data);
     }
     case NPY_HALF:
     {
-        npy_half *A = (npy_half *)data;
-        assign_from_half(self->elements, self->rows, self->cols, A);
+        assign_from_half(self->elements, self->rows, self->cols, (npy_half *)data);
         break;
     }
     default:
     {
-        PyErr_SetString(PyExc_ValueError, "Unsupport dtype.");
+        PyErr_SetString(PyExc_ValueError, "Unsupport dtype");
         return -1;
     }
     }
@@ -579,7 +515,6 @@ static int PyMatrix_init_from_nparray(PyMatrixObject *self, PyArrayObject *array
 
 static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
 {
-    self->elements = nullptr;
     static char *kwlist_0[] = {
         (char *)"rows",
         (char *)"cols",
@@ -599,55 +534,41 @@ static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
     PyObject *tmp_matrix = nullptr;
     if (PyArg_ParseTupleAndKeywords(args, kwds, "ii|$O", kwlist_0, &self->rows, &self->cols, &tmp_object))
     {
-        if (PyMatrix_init_from_rcf(self, tmp_object))
-        {
-            return -1;
-        }
-        return 0;
+        return PyMatrix_init_from_rcf(self, tmp_object);
     }
     PyErr_Clear();
+    tmp_object = nullptr;
+    tmp_matrix = nullptr;
     if (PyArg_ParseTupleAndKeywords(args, kwds, "O|$O", kwlist_1, &tmp_matrix, &tmp_object))
     {
         if (PyList_CheckExact(tmp_matrix))
         {
             if (!PyList_Size(tmp_matrix))
             {
-                PyErr_SetString(PyExc_ValueError, "Empty list.");
+                PyErr_SetString(PyExc_ValueError, "Empty list");
                 return -1;
             }
-            PyObject *tmp;
-            tmp = PyList_GetItem(tmp_matrix, 0);
+            PyObject *tmp = PyList_GetItem(tmp_matrix, 0);
             if (PyList_CheckExact(tmp))
             {
-                if (PyMatrix_init_from_Mf(self, tmp_matrix, tmp_object, tmp))
-                {
-                    return -1;
-                }
-                return 0;
+                return PyMatrix_init_from_Mf(self, tmp_matrix, tmp_object);
             }
             else if (PyTuple_CheckExact(tmp))
             {
-                if (PyMatrix_init_from_sMf(self, tmp_matrix, tmp_object, tmp))
-                {
-                    return -1;
-                }
-                return 0;
+                return PyMatrix_init_from_sMf(self, tmp_matrix, tmp_object);
             }
         }
     }
     PyErr_Clear();
+    tmp_matrix = nullptr;
     if (PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist_2, &tmp_matrix))
     {
         if (PyArray_Check(tmp_matrix))
         {
-            if (PyMatrix_init_from_nparray(self, (PyArrayObject *)tmp_matrix))
-            {
-                return -1;
-            }
-            return 0;
+            return PyMatrix_init_from_nparray(self, (PyArrayObject *)tmp_matrix);
         }
     }
-    PyErr_SetString(PyExc_TypeError, "Fail to match any overload.");
+    PyErr_SetString(PyExc_TypeError, "Fail to match any overload");
     return -1;
 }
 
@@ -944,46 +865,6 @@ static PyObject *PyMatrix_iH(PyMatrixObject *self, PyObject *args)
     return (PyObject *)self;
 }
 
-static PyObject *PyMatrix_reshape(PyMatrixObject *self, PyObject *args, PyObject *kwds)
-{
-    static char *kwlist0[] = {
-        (char *)"rows",
-        (char *)"cols",
-        nullptr,
-    };
-    static char *kwlist1[] = {
-        (char *)"shape",
-        nullptr,
-    };
-    int r = 0;
-    int c = 0;
-    PyObject *tmp = nullptr;
-    if (PyArg_ParseTupleAndKeywords(args, kwds, "ii|", kwlist0, &r, &c))
-    {
-        goto unpack_success;
-    }
-    PyErr_Clear();
-    if (PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist1, &tmp))
-    {
-        if (PyArg_ParseTuple(tmp, "ii", &r, &c))
-        {
-            goto unpack_success;
-        }
-        return nullptr;
-    }
-    PyErr_SetString(PyExc_TypeError, "Fail to match any overload.");
-    return nullptr;
-unpack_success:
-    if (r * c != self->total_elements)
-    {
-        PyErr_Format(PyExc_ShapeError, "cannot reshape matrix of size %lld into rows:%ld cols:%d", self->total_elements, r, c);
-        return nullptr;
-    }
-    self->rows = r;
-    self->cols = c;
-    Py_RETURN_NONE;
-}
-
 static PyObject *PyMatrix_kronecker(const PyMatrixObject *self, PyObject *other)
 {
     if (PyMatrix_Check(other))
@@ -1039,7 +920,7 @@ static PyObject *PyMatrix_subscript_LS(PyMatrixObject *self, PyObject *a, PyObje
     }
     if ((r < 0) || (r >= self->rows))
     {
-        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
@@ -1059,7 +940,7 @@ static PyObject *PyMatrix_subscript_LS(PyMatrixObject *self, PyObject *a, PyObje
     {
         if (PyErr_ExceptionMatches(PyExc_ValueError))
         {
-            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            PyErr_SetString(PyExc_IndexError, "Index out of range");
         }
         Py_DECREF(result);
         return nullptr;
@@ -1082,7 +963,7 @@ static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObje
     }
     if ((c < 0) || (c >= self->rows))
     {
-        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
         return nullptr;
     }
     PyMatrixObject *result = nullptr;
@@ -1102,7 +983,7 @@ static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObje
     {
         if (PyErr_ExceptionMatches(PyExc_ValueError))
         {
-            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            PyErr_SetString(PyExc_IndexError, "Index out of range");
         }
         Py_DECREF(result);
         return nullptr;
@@ -1139,7 +1020,7 @@ static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObje
     {
         if (PyErr_ExceptionMatches(PyExc_ValueError))
         {
-            PyErr_SetString(PyExc_IndexError, "Index out of range.");
+            PyErr_SetString(PyExc_IndexError, "Index out of range");
         }
         Py_DECREF(result);
         return nullptr;
@@ -1167,12 +1048,12 @@ static PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
     }
     if (!PyTuple_CheckExact(index))
     {
-        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a ellipsis a tuple with 2 elements.", index->ob_type->tp_name);
+        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a ellipsis a tuple with 2 elements", index->ob_type->tp_name);
         return nullptr;
     }
     if (PyTuple_Size(index) != 2)
     {
-        PyErr_Format(PyExc_IndexError, "Get %ld items. Only take a tuple with 2 elements.", PyTuple_Size(index));
+        PyErr_Format(PyExc_IndexError, "Get %ld items. Only take a tuple with 2 elements", PyTuple_Size(index));
         return nullptr;
     }
     PyObject *a = PyTuple_GetItem(index, 0);
@@ -1193,7 +1074,7 @@ static PyObject *PyMatrix_subscript(PyMatrixObject *self, PyObject *index)
     {
         return PyMatrix_subscript_SS(self, a, b);
     }
-    PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s and %s.", a->ob_type->tp_name, b->ob_type->tp_name);
+    PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s and %s", a->ob_type->tp_name, b->ob_type->tp_name);
     return nullptr;
 }
 
@@ -1218,7 +1099,7 @@ static int index_process(PyObject *x, Py_ssize_t Ml, Py_ssize_t &x_start, Py_ssi
     }
     else
     {
-        PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s.", x->ob_type->tp_name);
+        PyErr_Format(PyExc_TypeError, "Indices must be integers or slices. Get %s", x->ob_type->tp_name);
         return -1;
     }
     if (l != supposel)
@@ -1454,13 +1335,7 @@ static int PyMatrix_ass_subscript_nparray_obj(PyMatrixObject *self, Py_ssize_t a
         {
             if (assignComplexVar_withExc(data[i * cols + j], self->elements[r * self->cols + c]))
             {
-                PyObject *type;
-                PyObject *value;
-                PyObject *traceback;
-                PyErr_Fetch(&type, &value, &traceback);
-                PyObject *newvalue = PyUnicode_FromFormat("%S\nTrying to assign object at %ld %ld to %ld %ld.", value, i, j, r, c);
-                PyErr_Restore(type, newvalue, traceback);
-                Py_DECREF(value);
+                Addmessage("Trying to assign object at %ld %ld to %ld %ld", i, j, r, c);
                 return -1;
             }
             c += b_step;
@@ -1610,7 +1485,7 @@ static int PyMatrix_ass_subscript_nparray(PyMatrixObject *self, PyObject *a, PyO
     }
     default:
     {
-        PyErr_SetString(PyExc_ValueError, "Unsupport dtype.");
+        PyErr_SetString(PyExc_ValueError, "Unsupport dtype");
         return -1;
     }
     }
@@ -1642,7 +1517,7 @@ static int PyMatrix_ass_subscript_LSV(PyMatrixObject *self, PyObject *a, PyObjec
     }
     if ((r < 0) || (r >= self->rows))
     {
-        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
         return -1;
     }
     ComplexVar tmp;
@@ -1673,7 +1548,7 @@ static int PyMatrix_ass_subscript_SLV(PyMatrixObject *self, PyObject *a, PyObjec
     }
     if ((c < 0) || (c >= self->cols))
     {
-        PyErr_SetString(PyExc_IndexError, "Index out of range.");
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
         return -1;
     }
     ComplexVar tmp;
@@ -1735,12 +1610,12 @@ static int PyMatrix_ass_subscript(PyMatrixObject *self, PyObject *index, PyObjec
     }
     if (!PyTuple_CheckExact(index))
     {
-        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a tuple with 2 elements.", index->ob_type->tp_name);
+        PyErr_Format(PyExc_TypeError, "Unsupported index type:%s. Only take a tuple with 2 elements", index->ob_type->tp_name);
         return -1;
     }
     if (PyTuple_Size(index) != 2)
     {
-        PyErr_Format(PyExc_IndexError, "Get %ld items. Only take a tuple with 2 elements.", PyTuple_Size(index));
+        PyErr_Format(PyExc_IndexError, "Get %ld items. Only take a tuple with 2 elements", PyTuple_Size(index));
         return -1;
     }
     PyObject *a = PyTuple_GetItem(index, 0);
@@ -1829,7 +1704,6 @@ static PyMethodDef PyMatrix_methods[] = {
     {"iT", (PyCFunction)PyMatrix_iT, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyMatrix_H, METH_NOARGS, nullptr},
     {"iH", (PyCFunction)PyMatrix_iH, METH_NOARGS, nullptr},
-    {"reshape", (PyCFunction)PyMatrix_reshape, METH_VARARGS | METH_KEYWORDS, nullptr},
     {"__kronecker__", (PyCFunction)PyMatrix_kronecker, METH_O, nullptr},
     {"__hadamard__", (PyCFunction)PyMatrix_hadamard, METH_O, nullptr},
     nullptr,

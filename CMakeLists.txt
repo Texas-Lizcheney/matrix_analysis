@@ -14,6 +14,9 @@ add_library("matrix" STATIC
     srcs/MatrixObjectCal.cpp
     srcs/Matrix_Equivalence.cpp
 )
+add_library("vector" STATIC
+    srcs/VectorObject.cpp
+)
 add_library("var" STATIC
     srcs/ComplexVar.cpp
     srcs/ComplexVarObject.cpp
@@ -26,4 +29,7 @@ add_library("utility" STATIC
 add_library("errordouble" STATIC
     srcs/errordouble.cpp
     srcs/errordoubleObject.cpp
+)
+add_library("modulemethods" STATIC
+    srcs/ModuleMethods.cpp
 )

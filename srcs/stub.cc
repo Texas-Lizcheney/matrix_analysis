@@ -5,11 +5,13 @@
 #include <arrayobject.h>
 #include <complexvar.h>
 #include <matrix.h>
+#include <vector.h>
 #include <utilities.h>
 
 extern PyTypeObject PyErrordouble_Type;
 extern PyTypeObject PyComplexVar_Type;
 extern PyTypeObject PyMatrix_Type;
+extern PyTypeObject PyVector_Type;
 extern PyTypeObject PyUnsure_Type;
 extern PyObject *PyExc_UndefinedWarning;
 extern PyObject *PyExc_ShapeError;
@@ -60,6 +62,7 @@ PyObject *Init_varModule()
 static PyMethodDef matrixModule_method[] = {
     {"set_fastprint", (PyCFunction)SetFastPrint, METH_O, nullptr},
     {"set_printarea", (PyCFunction)SetPrintArea, METH_VARARGS | METH_KEYWORDS, nullptr},
+    {"reshape", (PyCFunction)PyMatrix_reshape, METH_VARARGS | METH_KEYWORDS, nullptr},
     nullptr,
 };
 
@@ -76,15 +79,23 @@ PyObject *Init_matrixModule()
     {
         return nullptr;
     }
+    PyVector_Type.tp_base = &PyMatrix_Type;
+    if (PyType_Ready(&PyVector_Type) < 0)
+    {
+        return nullptr;
+    }
     PyObject *m = PyModule_Create(&matrixModule);
     if (!m)
     {
         return nullptr;
     }
     Py_INCREF(&PyMatrix_Type);
-    if ((PyModule_AddType(m, &PyMatrix_Type) < 0))
+    Py_INCREF(&PyVector_Type);
+    if ((PyModule_AddType(m, &PyMatrix_Type) < 0) ||
+        (PyModule_AddType(m, &PyVector_Type) < 0))
     {
         Py_DECREF(&PyMatrix_Type);
+        Py_DECREF(&PyVector_Type);
         Py_DECREF(m);
         return nullptr;
     }

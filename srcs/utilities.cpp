@@ -24,6 +24,24 @@ double cal_original_error(const double &x)
     return (double &)(exp);
 }
 
+void Addmessage(const char *format, ...)
+{
+    char buffer[512];
+    PyObject *type;
+    PyObject *value;
+    PyObject *traceback;
+    PyErr_Fetch(&type, &value, &traceback);
+    va_list ap;
+    va_start(ap, format);
+    PyObject *newmessage = PyUnicode_FromFormatV(format, ap);
+    va_end(ap);
+    PyObject *newvalue = PyUnicode_FromFormat("%S %S", value, newmessage);
+    PyErr_Restore(type, newvalue, traceback);
+    Py_DECREF(value);
+    Py_DECREF(newmessage);
+    return;
+}
+
 int doubleprecision = 7;
 PyObject *SetDoublePrecision(PyObject *self, PyObject *value)
 {
