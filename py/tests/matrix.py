@@ -492,6 +492,25 @@ class Test_mat(externed_Testcase):
         with self.assertRaises(AttributeError):
             matrix_analysis.funcs.hadamard(1, x)  # type:ignore
 
+    def test_stack(self):
+        x = matrix_analysis.matrix.matrix([[1, 2],
+                                           [3, 4]])
+        y = matrix_analysis.matrix.vector([5, 6])
+        z = matrix_analysis.matrix.vector([5, 6], is_horizontal=True)
+        self.assertMatrixAlmostEqual(matrix_analysis.matrix.matrix.vstack(x, z), matrix_analysis.matrix.matrix([[1, 2],
+                                                                                                                [3, 4],
+                                                                                                                [5, 6]]))
+        with self.assertRaises(matrix_analysis.ShapeError):
+            matrix_analysis.matrix.matrix.vstack(x, y)
+        with self.assertRaises(TypeError):
+            matrix_analysis.matrix.matrix.vstack(1, x)  # type: ignore
+        self.assertMatrixAlmostEqual(matrix_analysis.matrix.matrix.hstack(x, y), matrix_analysis.matrix.matrix([[1, 2, 5],
+                                                                                                                [3, 4, 6]]))
+        with self.assertRaises(matrix_analysis.ShapeError):
+            matrix_analysis.matrix.matrix.hstack(x, z)
+        with self.assertRaises(TypeError):
+            matrix_analysis.matrix.matrix.hstack(1, x)  # type: ignore
+
 
 class Test_vector(externed_Testcase):
     def test_init(self):
@@ -501,6 +520,9 @@ class Test_vector(externed_Testcase):
         self.assertEqual(str(x), "[1+0i\t1+0i\t1+0i]")
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.vector(3, fill="abc")  # type: ignore
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector(
+                3, is_horizontal="abc")  # type: ignore
         x = matrix_analysis.matrix.vector(
             [1, Unsure, 1+1j], is_horizontal=True)
         self.assertEqual(str(x), "[1+0i\tundefined\t1+1i]")
@@ -512,6 +534,9 @@ class Test_vector(externed_Testcase):
             str(x), "[undefined]\n[undefined]\n[1+1i]\n[undefined]\n[1+0i]")
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.vector([(0, "abc")])  # type: ignore
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector([(2, 1+1j),
+                                               (4, 1)], is_horizontal="abc")  # type: ignore
         for D in numpy_dtypes:
             x = matrix_analysis.matrix.vector(numpy.array([1, 2], dtype=D))
             self.assertEqual(str(x), "[1+0i]\n[2+0i]")
@@ -525,6 +550,9 @@ class Test_vector(externed_Testcase):
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.vector(
                 numpy.array([1, 2], dtype=numpy.timedelta64))
+        with self.assertRaises(TypeError):
+            x = matrix_analysis.matrix.vector(
+                numpy.array([Unsure, Unsure], dtype=object), is_horizontal="abc")  # type: ignore
         y = matrix_analysis.matrix.vector(x)
         self.assertVectorAlmostEqual(x, y)
         y = matrix_analysis.matrix.vector(x, is_horizontal=False)
@@ -568,17 +596,16 @@ class Test_vector(externed_Testcase):
         self.assertMatrixAlmostEqual(y2 := x.H(), z2 := matrix_analysis.matrix.vector([
                                      1, 2, 3-1j], is_horizontal=True))
         self.assertTrue(y2.is_horizontal)
-        # y = +x
+        y = matrix_analysis.matrix.vector(x)
         k1 = id(x)
         x.iT()
         self.assertMatrixAlmostEqual(x, z1)
         self.assertEqual(k1, id(x))
         self.assertEqual(sys.getrefcount(x), 2)
         self.assertTrue(x.is_horizontal)
-        """ k2 = id(y)
+        k2 = id(y)
         y.iH()
         self.assertMatrixAlmostEqual(y, z2)
         self.assertEqual(k2, id(y))
         self.assertEqual(sys.getrefcount(y), 2)
         self.assertTrue(y.is_horizontal)
- """

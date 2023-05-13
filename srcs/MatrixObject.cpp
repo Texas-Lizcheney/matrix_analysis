@@ -1093,6 +1093,114 @@ static PyObject *PyMatrix_hadamard(const PyMatrixObject *self, PyObject *other)
     Py_RETURN_NOTIMPLEMENTED;
 }
 
+static PyObject *PyMatrix_vstack(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
+    if (!PyMatrix_Check(args[0]))
+    {
+        PyErr_Format(PyExc_TypeError, "vstack get unsupport %s object on index 0", args[0]->ob_type->tp_name);
+        Py_DECREF(result);
+        return nullptr;
+    }
+    result->cols = ((PyMatrixObject *)(args[0]))->cols;
+    result->rows = ((PyMatrixObject *)(args[0]))->rows;
+    for (Py_ssize_t i = 1; i < nargs; i++)
+    {
+        if (!PyMatrix_Check(args[i]))
+        {
+            PyErr_Format(PyExc_TypeError, "vstack get unsupport %s object on index %ld", args[i]->ob_type->tp_name, i);
+            Py_DECREF(result);
+            return nullptr;
+        }
+        if (((PyMatrixObject *)(args[i]))->cols != result->cols)
+        {
+            PyErr_Format(PyExc_ShapeError, "suppose %ld cols, get %ld cols on index %ld", result->cols, ((PyMatrixObject *)(args[i]))->cols, i);
+            Py_DECREF(result);
+            return nullptr;
+        }
+        result->rows += ((PyMatrixObject *)(args[i]))->rows;
+    }
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    int tmp = 0;
+    for (Py_ssize_t i = 0; i < nargs; i++)
+    {
+        for (Py_ssize_t j = 0; j < ((PyMatrixObject *)(args[i]))->rows; j++)
+        {
+            for (Py_ssize_t k = 0; k < ((PyMatrixObject *)(args[i]))->cols; k++)
+            {
+                PyMatrixAssign(result, tmp + j, k, PyMatrixGetitem((PyMatrixObject *)(args[i]), j, k));
+            }
+        }
+        tmp += ((PyMatrixObject *)(args[i]))->rows;
+    }
+    return (PyObject *)result;
+}
+
+static PyObject *PyMatrix_hstack(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+{
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
+    if (!PyMatrix_Check(args[0]))
+    {
+        PyErr_Format(PyExc_TypeError, "hstack get unsupport %s object on index 0", args[0]->ob_type->tp_name);
+        Py_DECREF(result);
+        return nullptr;
+    }
+    result->cols = ((PyMatrixObject *)(args[0]))->cols;
+    result->rows = ((PyMatrixObject *)(args[0]))->rows;
+    for (Py_ssize_t i = 1; i < nargs; i++)
+    {
+        if (!PyMatrix_Check(args[i]))
+        {
+            PyErr_Format(PyExc_TypeError, "hstack get unsupport %s object on index %ld", args[i]->ob_type->tp_name, i);
+            Py_DECREF(result);
+            return nullptr;
+        }
+        if (((PyMatrixObject *)(args[i]))->rows != result->rows)
+        {
+            PyErr_Format(PyExc_ShapeError, "suppose %ld rows, get %ld rows on index %ld", result->cols, ((PyMatrixObject *)(args[i]))->cols, i);
+            Py_DECREF(result);
+            return nullptr;
+        }
+        result->cols += ((PyMatrixObject *)(args[i]))->cols;
+    }
+    if (PyMatrixAlloc(result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    int tmp = 0;
+    for (Py_ssize_t i = 0; i < nargs; i++)
+    {
+        for (Py_ssize_t j = 0; j < ((PyMatrixObject *)(args[i]))->rows; j++)
+        {
+            for (Py_ssize_t k = 0; k < ((PyMatrixObject *)(args[i]))->cols; k++)
+            {
+                PyMatrixAssign(result, j, tmp + k, PyMatrixGetitem((PyMatrixObject *)(args[i]), j, k));
+            }
+        }
+        tmp += ((PyMatrixObject *)(args[i]))->cols;
+    }
+    return (PyObject *)result;
+}
+
 // as map
 
 static Py_ssize_t PyMatrix_length(PyMatrixObject *self)
@@ -1914,6 +2022,8 @@ static PyMethodDef PyMatrix_methods[] = {
     {"iH", (PyCFunction)PyMatrix_iH, METH_NOARGS, nullptr},
     {"__kronecker__", (PyCFunction)PyMatrix_kronecker, METH_O, nullptr},
     {"__hadamard__", (PyCFunction)PyMatrix_hadamard, METH_O, nullptr},
+    {"vstack", (PyCFunction)PyMatrix_vstack, METH_FASTCALL | METH_STATIC, nullptr},
+    {"hstack", (PyCFunction)PyMatrix_hstack, METH_FASTCALL | METH_STATIC, nullptr},
     nullptr,
 };
 

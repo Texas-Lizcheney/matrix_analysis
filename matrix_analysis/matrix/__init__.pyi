@@ -183,6 +183,14 @@ class matrix:
     def __hadamard__(self, other: matrix) -> matrix:
         ...
 
+    @staticmethod
+    def vstack(*matrixs: matrix) -> matrix:
+        ...
+
+    @staticmethod
+    def hstack(*matrixs: matrix) -> matrix:
+        ...
+
     @overload
     def __init__(self, rows: int, cols: int, *, fill: __support_num = Unsure) -> None:
         ...
@@ -252,5 +260,5 @@ class vector(matrix):
         ...
 
     @overload
-    def __init__(self,vector:matrix,*,is_horizontal:bool|None=None)->None:
+    def __init__(self, vector: matrix, *, is_horizontal: bool | None = None) -> None:
         ...
