@@ -25,7 +25,6 @@ extern PyTypeObject PyMatrix_Type;
 #define PyMatrix_Check(op) PyObject_TypeCheck(op, &PyMatrix_Type)
 #define PyMatrix_CheckExact(op) Py_IS_TYPE(op, &PyMatrix_Type)
 #define Matrix_sameshape(x, y) (((x)->rows == (y)->rows) && ((x)->cols == (y)->cols))
-#define PyMatrixAssign(self, r, c, value) (self)->elements[(r) * (self)->cols + (c)] = (value)
 #define PyMatrixGetitem(self, r, c) ((self)->elements[(r) * (self)->cols + (c)])
 int Matrix_copy(const PyMatrixObject *const, PyMatrixObject *);
 int Matrix_add(const PyMatrixObject *const, const PyMatrixObject *const, PyMatrixObject *);

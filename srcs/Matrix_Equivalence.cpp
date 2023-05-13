@@ -1,5 +1,7 @@
 #include <matrix.h>
 
+extern ComplexVar One;
+
 void Matrix_row_switch(PyMatrixObject *self, int r1, int r2)
 {
     if (r1 == r2)
@@ -17,7 +19,7 @@ void Matrix_row_multiply(PyMatrixObject *self, int r, const ComplexVar &num)
 {
     for (Py_ssize_t i = 0; i < self->cols; i++)
     {
-        PyMatrixAssign(self, r, i, ComplexVar_mul(PyMatrixGetitem(self, r, i), num));
+        PyMatrixGetitem(self, r, i) = PyMatrixGetitem(self, r, i) * num;
     }
     return;
 }
@@ -26,12 +28,12 @@ void Matrix_row_add(PyMatrixObject *self, int r1, int r2, const ComplexVar &num)
 {
     if (r1 == r2)
     {
-        Matrix_row_multiply(self, r1, ComplexVar_add(num, {1, 0, false}));
+        Matrix_row_multiply(self, r1, num + One);
         return;
     }
     for (Py_ssize_t i = 0; i < self->cols; i++)
     {
-        PyMatrixAssign(self, r1, i, ComplexVar_add(PyMatrixGetitem(self, r1, i), ComplexVar_mul(PyMatrixGetitem(self, r2, i), num)));
+        PyMatrixGetitem(self, r1, i) = PyMatrixGetitem(self, r1, i) + PyMatrixGetitem(self, r2, i) * num;
     }
     return;
 }
@@ -53,7 +55,7 @@ void Matrix_col_multiply(PyMatrixObject *self, int c, const ComplexVar &num)
 {
     for (Py_ssize_t i = 0; i < self->rows; i++)
     {
-        PyMatrixAssign(self, i, c, ComplexVar_mul(PyMatrixGetitem(self, i, c), num));
+        PyMatrixGetitem(self, i, c) = PyMatrixGetitem(self, i, c) * num;
     }
     return;
 }
@@ -62,12 +64,12 @@ void Matrix_col_add(PyMatrixObject *self, int c1, int c2, const ComplexVar &num)
 {
     if (c1 == c2)
     {
-        Matrix_col_multiply(self, c1, ComplexVar_add(num, {1, 0, false}));
+        Matrix_col_multiply(self, c1, num + One);
         return;
     }
     for (Py_ssize_t i = 0; i < self->rows; i++)
     {
-        PyMatrixAssign(self, i, c1, ComplexVar_add(PyMatrixGetitem(self, i, c1), ComplexVar_mul(PyMatrixGetitem(self, i, c2), num)));
+        PyMatrixGetitem(self, i, c1) = PyMatrixGetitem(self, i, c1) + PyMatrixGetitem(self, i, c2) * num;
     }
     return;
 }
@@ -123,7 +125,7 @@ int Matrix_rank(const PyMatrixObject *const self)
         rank++;
         for (Py_ssize_t subc = r + 1; subc < tmp->cols; subc++)
         {
-            PyMatrixAssign(tmp, r, subc, ComplexVar_mul(tmp_item, PyMatrixGetitem(tmp, r, subc)));
+            PyMatrixGetitem(tmp, r, subc) = tmp_item * PyMatrixGetitem(tmp, r, subc);
         }
         for (Py_ssize_t subr = r + 1; subr < tmp->rows; subr++)
         {
@@ -131,7 +133,7 @@ int Matrix_rank(const PyMatrixObject *const self)
             PyMatrixGetitem(tmp, subr, r) = {0, 0, false};
             for (Py_ssize_t subc = r + 1; subc < tmp->cols; subc++)
             {
-                PyMatrixAssign(tmp, subr, subc, ComplexVar_sub(PyMatrixGetitem(tmp, subr, subc), ComplexVar_mul(tmp_item, PyMatrixGetitem(tmp, r, subc))));
+                PyMatrixGetitem(tmp, subr, subc) = PyMatrixGetitem(tmp, subr, subc) - tmp_item * PyMatrixGetitem(tmp, r, subc);
             }
         }
     }

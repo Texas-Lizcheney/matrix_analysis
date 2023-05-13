@@ -31,7 +31,7 @@ int Matrix_add(const PyMatrixObject *const x, const PyMatrixObject *const y, PyM
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_add(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j)));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(x, i, j) + PyMatrixGetitem(y, i, j);
         }
     }
     return 0;
@@ -44,13 +44,11 @@ int Matrix_iadd(PyMatrixObject *x, const PyMatrixObject *const y)
         PyErr_Format(PyExc_ShapeError, "cannot add matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
         return -1;
     }
-    ComplexVar tmp;
     for (Py_ssize_t i = 0; i < x->rows; i++)
     {
         for (Py_ssize_t j = 0; j < x->cols; j++)
         {
-            tmp = ComplexVar_add(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j));
-            PyMatrixAssign(x, i, j, tmp);
+            PyMatrixGetitem(x, i, j) += PyMatrixGetitem(y, i, j);
         }
     }
     return 0;
@@ -73,7 +71,7 @@ int Matrix_sub(const PyMatrixObject *const x, const PyMatrixObject *const y, PyM
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_sub(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j)));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(x, i, j) - PyMatrixGetitem(y, i, j);
         }
     }
     return 0;
@@ -91,8 +89,7 @@ int Matrix_isub(PyMatrixObject *x, const PyMatrixObject *const y)
     {
         for (Py_ssize_t j = 0; j < x->cols; j++)
         {
-            tmp = ComplexVar_sub(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j));
-            PyMatrixAssign(x, i, j, tmp);
+            PyMatrixGetitem(x, i, j) -= PyMatrixGetitem(y, i, j);
         }
     }
     return 0;
@@ -110,7 +107,7 @@ int Matrix_mul(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_mul(PyMatrixGetitem(x, i, j), y));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(x, i, j) * y;
         }
     }
     return 0;
@@ -123,8 +120,8 @@ int Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
     {
         for (Py_ssize_t j = 0; j < x->cols; j++)
         {
-            tmp = ComplexVar_mul(PyMatrixGetitem(x, i, j), y);
-            PyMatrixAssign(x, i, j, tmp);
+            tmp = PyMatrixGetitem(x, i, j) * y;
+            PyMatrixGetitem(x, i, j) = tmp;
         }
     }
     return 0;
@@ -152,9 +149,9 @@ int Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *const y, PyM
             tmp = {0, 0, false};
             for (Py_ssize_t k = 0; k < L; k++)
             {
-                tmp = ComplexVar_add(tmp, ComplexVar_mul(PyMatrixGetitem(x, i, k), PyMatrixGetitem(y, k, j)));
+                tmp += PyMatrixGetitem(x, i, k) * PyMatrixGetitem(y, k, j);
             }
-            PyMatrixAssign(result, i, j, tmp);
+            PyMatrixGetitem(result, i, j) = tmp;
         }
     }
     return 0;
@@ -172,7 +169,7 @@ int Matrix_div(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_div(PyMatrixGetitem(x, i, j), y));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(x, i, j) / y;
         }
     }
     return 0;
@@ -185,8 +182,7 @@ int Matrix_idiv(PyMatrixObject *x, const ComplexVar &y)
     {
         for (Py_ssize_t j = 0; j < x->cols; j++)
         {
-            tmp = ComplexVar_div(PyMatrixGetitem(x, i, j), y);
-            PyMatrixAssign(x, i, j, tmp);
+            PyMatrixGetitem(x, i, j) /= y;
         }
     }
     return 0;
@@ -204,7 +200,7 @@ int Matrix_div(const ComplexVar &x, const PyMatrixObject *const y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_div(x, PyMatrixGetitem(y, i, j)));
+            PyMatrixGetitem(result, i, j) = x / PyMatrixGetitem(y, i, j);
         }
     }
     return 0;
@@ -222,7 +218,7 @@ int Matrix_fdv(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_fdv(PyMatrixGetitem(x, i, j), y));
+            PyMatrixGetitem(result, i, j) = ComplexVar_fdv(PyMatrixGetitem(x, i, j), y);
         }
     }
     return 0;
@@ -236,7 +232,7 @@ int Matrix_ifdv(PyMatrixObject *x, const ComplexVar &y)
         for (Py_ssize_t j = 0; j < x->cols; j++)
         {
             tmp = ComplexVar_fdv(PyMatrixGetitem(x, i, j), y);
-            PyMatrixAssign(x, i, j, tmp);
+            PyMatrixGetitem(x, i, j) = tmp;
         }
     }
     return 0;
@@ -254,7 +250,7 @@ int Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_fdv(x, PyMatrixGetitem(y, i, j)));
+            PyMatrixGetitem(result, i, j) = ComplexVar_fdv(x, PyMatrixGetitem(y, i, j));
         }
     }
     return 0;
@@ -272,7 +268,7 @@ int Matrix_mod(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_mod(PyMatrixGetitem(x, i, j), y));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(x, i, j) % y;
         }
     }
     return 0;
@@ -285,8 +281,7 @@ int Matrix_imod(PyMatrixObject *x, const ComplexVar &y)
     {
         for (Py_ssize_t j = 0; j < x->cols; j++)
         {
-            tmp = ComplexVar_mod(PyMatrixGetitem(x, i, j), y);
-            PyMatrixAssign(x, i, j, tmp);
+            PyMatrixGetitem(x, i, j) %= y;
         }
     }
     return 0;
@@ -304,7 +299,7 @@ int Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y, PyMatrixObjec
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_mod(x, PyMatrixGetitem(y, i, j)));
+            PyMatrixGetitem(result, i, j) = x % PyMatrixGetitem(y, i, j);
         }
     }
     return 0;
@@ -481,7 +476,7 @@ int Matrix_kronecker(const PyMatrixObject *const x, const PyMatrixObject *const 
             {
                 for (Py_ssize_t q = 0; q < y->cols; q++)
                 {
-                    PyMatrixAssign(result, i * y->rows + p, j * y->cols + q, ComplexVar_mul(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, p, q)));
+                    PyMatrixGetitem(result, i * y->rows + p, j * y->cols + q) = PyMatrixGetitem(x, i, j) * PyMatrixGetitem(y, p, q);
                 }
             }
         }
@@ -506,7 +501,7 @@ int Matrix_hadamard(const PyMatrixObject *const x, const PyMatrixObject *const y
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, ComplexVar_mul(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j)));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(x, i, j) * PyMatrixGetitem(y, i, j);
         }
     }
     return 0;

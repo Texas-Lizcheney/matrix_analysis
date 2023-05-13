@@ -188,7 +188,7 @@ static PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
     {
         if (PyComplexVar_Check(other))
         {
-            result->num = ComplexVar_add(((PyComplexVarObject *)self)->num, ((PyComplexVarObject *)other)->num);
+            result->num = ((PyComplexVarObject *)self)->num + ((PyComplexVarObject *)other)->num;
         }
         else
         {
@@ -198,7 +198,7 @@ static PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
                 Py_DECREF(result);
                 Py_RETURN_NOTIMPLEMENTED;
             }
-            result->num = ComplexVar_add(((PyComplexVarObject *)self)->num, tmp);
+            result->num = ((PyComplexVarObject *)self)->num + tmp;
         }
     }
     else
@@ -209,7 +209,7 @@ static PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
             Py_DECREF(result);
             Py_RETURN_NOTIMPLEMENTED;
         }
-        result->num = ComplexVar_add(tmp, ((PyComplexVarObject *)other)->num);
+        result->num = tmp + ((PyComplexVarObject *)other)->num;
     }
     return (PyObject *)result;
 }
@@ -227,7 +227,7 @@ static PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
     {
         if (PyComplexVar_Check(other))
         {
-            result->num = ComplexVar_sub(((PyComplexVarObject *)self)->num, ((PyComplexVarObject *)other)->num);
+            result->num = ((PyComplexVarObject *)self)->num - ((PyComplexVarObject *)other)->num;
         }
         else
         {
@@ -237,7 +237,7 @@ static PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
                 Py_DECREF(result);
                 Py_RETURN_NOTIMPLEMENTED;
             }
-            result->num = ComplexVar_sub(((PyComplexVarObject *)self)->num, tmp);
+            result->num = ((PyComplexVarObject *)self)->num - tmp;
         }
     }
     else
@@ -248,7 +248,7 @@ static PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
             Py_DECREF(result);
             Py_RETURN_NOTIMPLEMENTED;
         }
-        result->num = ComplexVar_sub(tmp, ((PyComplexVarObject *)other)->num);
+        result->num = tmp - ((PyComplexVarObject *)other)->num;
     }
     return (PyObject *)result;
 }
@@ -266,7 +266,7 @@ static PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
     {
         if (PyComplexVar_Check(other))
         {
-            result->num = ComplexVar_mul(((PyComplexVarObject *)self)->num, ((PyComplexVarObject *)other)->num);
+            result->num = ((PyComplexVarObject *)self)->num * ((PyComplexVarObject *)other)->num;
         }
         else
         {
@@ -276,7 +276,7 @@ static PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
                 Py_DECREF(result);
                 Py_RETURN_NOTIMPLEMENTED;
             }
-            result->num = ComplexVar_mul(((PyComplexVarObject *)self)->num, tmp);
+            result->num = ((PyComplexVarObject *)self)->num * tmp;
         }
     }
     else
@@ -287,7 +287,7 @@ static PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
             Py_DECREF(result);
             Py_RETURN_NOTIMPLEMENTED;
         }
-        result->num = ComplexVar_mul(tmp, ((PyComplexVarObject *)other)->num);
+        result->num = tmp * ((PyComplexVarObject *)other)->num;
     }
     return (PyObject *)result;
 }
@@ -305,7 +305,7 @@ static PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
     {
         if (PyComplexVar_Check(other))
         {
-            result->num = ComplexVar_mod(((PyComplexVarObject *)self)->num, ((PyComplexVarObject *)other)->num);
+            result->num = ((PyComplexVarObject *)self)->num % ((PyComplexVarObject *)other)->num;
         }
         else
         {
@@ -315,7 +315,7 @@ static PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
                 Py_DECREF(result);
                 Py_RETURN_NOTIMPLEMENTED;
             }
-            result->num = ComplexVar_mod(((PyComplexVarObject *)self)->num, tmp);
+            result->num = ((PyComplexVarObject *)self)->num % tmp;
         }
     }
     else
@@ -326,7 +326,7 @@ static PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
             Py_DECREF(result);
             Py_RETURN_NOTIMPLEMENTED;
         }
-        result->num = ComplexVar_mod(tmp, ((PyComplexVarObject *)other)->num);
+        result->num = tmp % ((PyComplexVarObject *)other)->num;
     }
     return (PyObject *)result;
 }
@@ -349,7 +349,7 @@ static PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
         if (PyComplexVar_Check(other))
         {
             D->num = ComplexVar_fdv(((PyComplexVarObject *)self)->num, ((PyComplexVarObject *)other)->num);
-            M->num = ComplexVar_sub(((PyComplexVarObject *)self)->num, ComplexVar_mul(D->num, ((PyComplexVarObject *)other)->num));
+            M->num = ((PyComplexVarObject *)self)->num - D->num * ((PyComplexVarObject *)other)->num;
         }
         else
         {
@@ -361,7 +361,7 @@ static PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
                 Py_RETURN_NOTIMPLEMENTED;
             }
             D->num = ComplexVar_fdv(((PyComplexVarObject *)self)->num, tmp);
-            M->num = ComplexVar_sub(((PyComplexVarObject *)self)->num, ComplexVar_mul(D->num, tmp));
+            M->num = ((PyComplexVarObject *)self)->num - D->num * tmp;
         }
     }
     else
@@ -374,7 +374,7 @@ static PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
             Py_RETURN_NOTIMPLEMENTED;
         }
         D->num = ComplexVar_fdv(tmp, ((PyComplexVarObject *)other)->num);
-        M->num = ComplexVar_sub(tmp, ComplexVar_mul(D->num, ((PyComplexVarObject *)other)->num));
+        M->num = tmp - D->num * ((PyComplexVarObject *)other)->num;
     }
     PyObject *returnvalue = Py_BuildValue("OO", D, M);
     Py_DECREF(D);
@@ -440,7 +440,7 @@ static PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *m
     }
     else if (PyComplexVar_Check(mod))
     {
-        result->num = ComplexVar_mod(powvalue, ((PyComplexVarObject *)mod)->num);
+        result->num = powvalue % ((PyComplexVarObject *)mod)->num;
     }
     else
     {
@@ -450,7 +450,7 @@ static PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *m
             Py_DECREF(result);
             Py_RETURN_NOTIMPLEMENTED;
         }
-        result->num = ComplexVar_mod(powvalue, tmp);
+        result->num = powvalue % tmp;
     }
     return (PyObject *)result;
 }
@@ -522,7 +522,7 @@ static PyObject *PyComplexVar_inplace_add(PyComplexVarObject *self, PyObject *ot
     {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    self->num = ComplexVar_add(self->num, tmp);
+    self->num += tmp;
     Py_INCREF(self);
     return (PyObject *)self;
 }
@@ -534,7 +534,7 @@ static PyObject *PyComplexVar_inplace_subtract(PyComplexVarObject *self, PyObjec
     {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    self->num = ComplexVar_sub(self->num, tmp);
+    self->num = self->num - tmp;
     Py_INCREF(self);
     return (PyObject *)self;
 }
@@ -546,7 +546,7 @@ static PyObject *PyComplexVar_inplace_multiply(PyComplexVarObject *self, PyObjec
     {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    self->num = ComplexVar_mul(self->num, tmp);
+    self->num *= tmp;
     Py_INCREF(self);
     return (PyObject *)self;
 }
@@ -558,7 +558,7 @@ static PyObject *PyComplexVar_inplace_remainder(PyComplexVarObject *self, PyObje
     {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    self->num = ComplexVar_mod(self->num, tmp);
+    self->num %= tmp;
     Py_INCREF(self);
     return (PyObject *)self;
 }
@@ -583,7 +583,7 @@ static PyObject *PyComplexVar_inplace_power(PyComplexVarObject *self, PyObject *
         {
             Py_RETURN_NOTIMPLEMENTED;
         }
-        self->num = ComplexVar_mod(powvalue, tmp2);
+        self->num = powvalue % tmp2;
     }
     Py_INCREF(self);
     return (PyObject *)self;
@@ -641,7 +641,7 @@ static PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
     {
         if (PyComplexVar_Check(other))
         {
-            result->num = ComplexVar_div(((PyComplexVarObject *)self)->num, ((PyComplexVarObject *)other)->num);
+            result->num = ((PyComplexVarObject *)self)->num / ((PyComplexVarObject *)other)->num;
         }
         else
         {
@@ -651,7 +651,7 @@ static PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
                 Py_DECREF(result);
                 Py_RETURN_NOTIMPLEMENTED;
             }
-            result->num = ComplexVar_div(((PyComplexVarObject *)self)->num, tmp);
+            result->num = ((PyComplexVarObject *)self)->num / tmp;
         }
     }
     else
@@ -662,7 +662,7 @@ static PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
             Py_DECREF(result);
             Py_RETURN_NOTIMPLEMENTED;
         }
-        result->num = ComplexVar_div(tmp, ((PyComplexVarObject *)other)->num);
+        result->num = tmp / ((PyComplexVarObject *)other)->num;
     }
     return (PyObject *)result;
 }
@@ -686,7 +686,7 @@ static PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyOb
     {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    self->num = ComplexVar_div(self->num, tmp);
+    self->num /= tmp;
     Py_INCREF(self);
     return (PyObject *)self;
 }

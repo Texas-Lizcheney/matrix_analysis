@@ -7,9 +7,9 @@ np_api = numpy.get_include()+"/numpy"
 
 def main():
     Ext_matrix = Extension("core",
-                           libraries=[":libmatrix.a",
+                           libraries=[":libvar.a",
+                                      ":libmatrix.a",
                                       ":libvector.a",
-                                      ":libvar.a",
                                       ":libutility.a",
                                       ":liberrordouble.a",
                                       ":libmodulemethods.a"],

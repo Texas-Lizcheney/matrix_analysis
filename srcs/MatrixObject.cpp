@@ -268,7 +268,7 @@ static int PyMatrix_init_from_Mf(PyMatrixObject *self, PyObject *matrix, PyObjec
             }
             else
             {
-                PyMatrixAssign(self, i, j, tmp_value);
+                PyMatrixGetitem(self, i, j) = tmp_value;
             }
         }
     }
@@ -740,7 +740,7 @@ static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
         {
             for (Py_ssize_t j = 0; j < M->cols; j++)
             {
-                PyMatrixAssign(M, i, j, ComplexVar_sub(PyMatrixGetitem((PyMatrixObject *)self, i, j), PyMatrixGetitem(M, i, j)));
+                PyMatrixGetitem(M, i, j) = PyMatrixGetitem((PyMatrixObject *)self, i, j) - PyMatrixGetitem(M, i, j);
             }
         }
         PyObject *returnvalue = Py_BuildValue("OO", D, M);
@@ -767,7 +767,7 @@ static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
         {
             for (Py_ssize_t j = 0; j < M->cols; j++)
             {
-                PyMatrixAssign(M, i, j, ComplexVar_sub(tmp, PyMatrixGetitem(M, i, j)));
+                PyMatrixGetitem(M, i, j) = tmp - PyMatrixGetitem(M, i, j);
             }
         }
         PyObject *returnvalue = Py_BuildValue("OO", D, M);
@@ -1139,7 +1139,7 @@ static PyObject *PyMatrix_vstack(PyObject *self, PyObject *const *args, Py_ssize
         {
             for (Py_ssize_t k = 0; k < ((PyMatrixObject *)(args[i]))->cols; k++)
             {
-                PyMatrixAssign(result, tmp + j, k, PyMatrixGetitem((PyMatrixObject *)(args[i]), j, k));
+                PyMatrixGetitem(result, tmp + j, k) = PyMatrixGetitem((PyMatrixObject *)(args[i]), j, k);
             }
         }
         tmp += ((PyMatrixObject *)(args[i]))->rows;
@@ -1193,7 +1193,7 @@ static PyObject *PyMatrix_hstack(PyObject *self, PyObject *const *args, Py_ssize
         {
             for (Py_ssize_t k = 0; k < ((PyMatrixObject *)(args[i]))->cols; k++)
             {
-                PyMatrixAssign(result, j, tmp + k, PyMatrixGetitem((PyMatrixObject *)(args[i]), j, k));
+                PyMatrixGetitem(result, j, tmp + k) = PyMatrixGetitem((PyMatrixObject *)(args[i]), j, k);
             }
         }
         tmp += ((PyMatrixObject *)(args[i]))->cols;
@@ -1264,7 +1264,7 @@ static PyObject *PyMatrix_subscript_LS(PyMatrixObject *self, PyObject *a, PyObje
     Py_ssize_t c = b_start;
     for (Py_ssize_t j = 0; j < result->cols; j++)
     {
-        PyMatrixAssign(result, 0, j, PyMatrixGetitem(self, r, c));
+        PyMatrixGetitem(result, 0, j) = PyMatrixGetitem(self, r, c);
         c += b_step;
     }
     return (PyObject *)result;
@@ -1307,7 +1307,7 @@ static PyObject *PyMatrix_subscript_SL(PyMatrixObject *self, PyObject *a, PyObje
     Py_ssize_t r = a_start;
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
-        PyMatrixAssign(result, i, 0, PyMatrixGetitem(self, r, c));
+        PyMatrixGetitem(result, i, 0) = PyMatrixGetitem(self, r, c);
         r += a_step;
     }
     return (PyObject *)result;
@@ -1347,7 +1347,7 @@ static PyObject *PyMatrix_subscript_SS(PyMatrixObject *self, PyObject *a, PyObje
     {
         for (Py_ssize_t j = 0; j < result->cols; j++)
         {
-            PyMatrixAssign(result, i, j, PyMatrixGetitem(self, r, c));
+            PyMatrixGetitem(result, i, j) = PyMatrixGetitem(self, r, c);
             c += b_step;
         }
         c = b_start;
@@ -1482,7 +1482,7 @@ static int PyMatrix_ass_subscript_sM(PyMatrixObject *self, PyObject *value)
         tmp = PyList_GetItem(value, i);
         PyArg_ParseTuple(tmp, "iiO", &rtmp, &ctmp, &tmp_element);
         assignComplexVar(tmp_element, tmp_element_value);
-        PyMatrixAssign(self, rtmp, ctmp, tmp_element_value);
+        PyMatrixGetitem(self, rtmp, ctmp) = tmp_element_value;
     }
     return 0;
 }
@@ -1511,7 +1511,7 @@ static int PyMatrix_ass_subscript_M(PyMatrixObject *self, PyObject *a, PyObject 
     {
         for (Py_ssize_t j = 0; j < cols; j++)
         {
-            PyMatrixAssign(self, r, c, PyMatrixGetitem(value, i, j));
+            PyMatrixGetitem(self, r, c) = PyMatrixGetitem(value, i, j);
             c += b_step;
         }
         c = b_start;
@@ -1849,7 +1849,7 @@ static int PyMatrix_ass_subscript_LSV(PyMatrixObject *self, PyObject *a, PyObjec
     Py_ssize_t c = b_start;
     for (Py_ssize_t j = 0; j < cols; j++)
     {
-        PyMatrixAssign(self, r, c, tmp);
+        PyMatrixGetitem(self, r, c) = tmp;
         c += b_step;
     }
     return 0;
@@ -1880,7 +1880,7 @@ static int PyMatrix_ass_subscript_SLV(PyMatrixObject *self, PyObject *a, PyObjec
     Py_ssize_t r = a_start;
     for (Py_ssize_t i = 0; i < rows; i++)
     {
-        PyMatrixAssign(self, r, c, tmp);
+        PyMatrixGetitem(self, r, c) = tmp;
         r += a_step;
     }
     return 0;
@@ -1909,7 +1909,7 @@ static int PyMatrix_ass_subscript_SSV(PyMatrixObject *self, PyObject *a, PyObjec
     {
         for (Py_ssize_t j = 0; j < cols; j++)
         {
-            PyMatrixAssign(self, r, c, tmp);
+            PyMatrixGetitem(self, r, c) = tmp;
             c += b_step;
         }
         c = b_start;

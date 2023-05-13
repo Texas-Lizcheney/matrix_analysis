@@ -29,6 +29,110 @@ void ComplexVar::operator=(const ComplexVar &x)
     isArbitrary = x.isArbitrary;
 }
 
+void ComplexVar::operator=(const double &x)
+{
+    real = x;
+    imag = 0;
+    isArbitrary = false;
+}
+
+ComplexVar &ComplexVar::operator+=(const ComplexVar &x)
+{
+    if (isArbitrary || x.isArbitrary)
+    {
+        real = 0;
+        imag = 0;
+        isArbitrary = true;
+    }
+    else
+    {
+        real += x.real;
+        imag += x.imag;
+    }
+    return *this;
+}
+
+ComplexVar &ComplexVar::operator-=(const ComplexVar &x)
+{
+    if (isArbitrary || x.isArbitrary)
+    {
+        real = 0;
+        imag = 0;
+        isArbitrary = true;
+    }
+    else
+    {
+        real -= x.real;
+        imag -= x.imag;
+    }
+    return *this;
+}
+
+ComplexVar &ComplexVar::operator*=(const ComplexVar &x)
+{
+    if (ComplexVar_iszero((*this)) || ComplexVar_iszero(x))
+    {
+        real = 0;
+        imag = 0;
+        isArbitrary = false;
+    }
+    else if (isArbitrary || x.isArbitrary)
+    {
+        real = 0;
+        imag = 0;
+        isArbitrary = true;
+    }
+    else
+    {
+        error_double tmpr = real * x.real - imag * x.imag;
+        error_double tmpi = imag * x.real + real * x.imag;
+        real = tmpr;
+        imag = tmpi;
+    }
+    return *this;
+}
+
+ComplexVar &ComplexVar::operator/=(const ComplexVar &x)
+{
+    if (ComplexVar_iszero((*this)))
+    {
+        real = 0;
+        imag = 0;
+        isArbitrary = false;
+    }
+    else if (ComplexVar_iszero(x))
+    {
+        real = std::nan("");
+        imag = std::nan("");
+        isArbitrary = false;
+        PyErr_WarnEx(PyExc_RuntimeWarning, "Dividing 0.", 2);
+    }
+    else if (isArbitrary || x.isArbitrary)
+    {
+        real = 0;
+        imag = 0;
+        isArbitrary = true;
+    }
+    else
+    {
+        error_double l = ComplexVar_squaredL2(x);
+        error_double tmpr = real * x.real + imag * x.imag;
+        error_double tmpi = imag * x.real - real * x.imag;
+        real = tmpr / l;
+        imag = tmpi / l;
+    }
+    return *this;
+}
+
+ComplexVar &ComplexVar::operator%=(const ComplexVar &x)
+{
+    ComplexVar tmp = (*this) - ComplexVar_fdv((*this), x) * x;
+    real = tmp.real;
+    imag = tmp.imag;
+    isArbitrary = tmp.isArbitrary;
+    return *this;
+}
+
 error_double ComplexVar_L1(const ComplexVar &x)
 {
     return abs(x.real) + abs(x.imag);
@@ -105,7 +209,7 @@ void ComplexVar_iconj(ComplexVar &x)
     return;
 }
 
-ComplexVar ComplexVar_add(const ComplexVar &x, const ComplexVar &y)
+ComplexVar operator+(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
@@ -121,7 +225,7 @@ ComplexVar ComplexVar_add(const ComplexVar &x, const ComplexVar &y)
     return result;
 }
 
-ComplexVar ComplexVar_sub(const ComplexVar &x, const ComplexVar &y)
+ComplexVar operator-(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
     if (x.isArbitrary || y.isArbitrary)
@@ -137,7 +241,7 @@ ComplexVar ComplexVar_sub(const ComplexVar &x, const ComplexVar &y)
     return result;
 }
 
-ComplexVar ComplexVar_mul(const ComplexVar &x, const ComplexVar &y)
+ComplexVar operator*(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
     if (ComplexVar_iszero(x) || ComplexVar_iszero(y))
@@ -157,7 +261,7 @@ ComplexVar ComplexVar_mul(const ComplexVar &x, const ComplexVar &y)
     return result;
 }
 
-ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
+ComplexVar operator/(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
     if (ComplexVar_iszero(x))
@@ -186,17 +290,17 @@ ComplexVar ComplexVar_div(const ComplexVar &x, const ComplexVar &y)
 ComplexVar ComplexVar_fdv(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
-    result = ComplexVar_div(x, y);
+    result = x / y;
     result.real = round(result.real);
     result.imag = round(result.imag);
     return result;
 }
 
-ComplexVar ComplexVar_mod(const ComplexVar &x, const ComplexVar &y)
+ComplexVar operator%(const ComplexVar &x, const ComplexVar &y)
 {
     ComplexVar result;
     ComplexVar tmp = ComplexVar_fdv(x, y);
-    result = ComplexVar_sub(x, ComplexVar_mul(tmp, y));
+    result = x - tmp * y;
     return result;
 }
 
@@ -242,7 +346,7 @@ ComplexVar ComplexVar_ln(const ComplexVar &x)
 
 ComplexVar ComplexVar_log(const ComplexVar &x, const ComplexVar &y)
 {
-    return ComplexVar_div(ComplexVar_ln(x), ComplexVar_ln(y));
+    return ComplexVar_ln(x) / ComplexVar_ln(y);
 }
 
 ComplexVar ComplexVar_pow(const ComplexVar &x, const ComplexVar &y)
@@ -260,7 +364,7 @@ ComplexVar ComplexVar_pow(const ComplexVar &x, const ComplexVar &y)
         }
         else
         {
-            result = ComplexVar_exp(ComplexVar_mul(y, ComplexVar_ln(x)));
+            result = ComplexVar_exp(y * ComplexVar_ln(x));
         }
     }
     return result;
@@ -329,8 +433,8 @@ ComplexVar ComplexVar_sin(const ComplexVar &x)
     }
     else
     {
-        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(I, x));
-        result = ComplexVar_mul(ComplexVar_sub(tmp, ComplexVar_ivt(tmp)), a);
+        ComplexVar tmp = ComplexVar_exp(I * x);
+        result = (tmp - ComplexVar_ivt(tmp)) * a;
     }
     return result;
 }
@@ -345,8 +449,8 @@ ComplexVar ComplexVar_cos(const ComplexVar &x)
     }
     else
     {
-        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(I, x));
-        result = ComplexVar_mul(ComplexVar_add(tmp, ComplexVar_ivt(tmp)), a);
+        ComplexVar tmp = ComplexVar_exp(I * x);
+        result = (tmp + ComplexVar_ivt(tmp)) * a;
     }
     return result;
 }
@@ -361,8 +465,8 @@ ComplexVar ComplexVar_tan(const ComplexVar &x)
     }
     else
     {
-        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(i2, x));
-        result = ComplexVar_mul(ComplexVar_div(ComplexVar_sub(tmp, One), ComplexVar_add(tmp, One)), negI);
+        ComplexVar tmp = ComplexVar_exp(i2 * x);
+        result = (tmp - One) / (tmp + One) * negI;
     }
     return result;
 }
@@ -418,7 +522,7 @@ ComplexVar ComplexVar_arcsin(const ComplexVar &x)
     }
     else
     {
-        result = ComplexVar_mul(negI, ComplexVar_ln(ComplexVar_add(ComplexVar_mul(I, x), ComplexVar_sqrt(ComplexVar_sub(One, ComplexVar_mul(x, x))))));
+        result = negI * ComplexVar_ln(I * x + ComplexVar_sqrt(One - x * x));
     }
     return result;
 }
@@ -432,7 +536,7 @@ ComplexVar ComplexVar_arccos(const ComplexVar &x)
     }
     else
     {
-        result = ComplexVar_mul(negI, ComplexVar_ln(ComplexVar_sub(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One)))));
+        result = negI * ComplexVar_ln(x - ComplexVar_sqrt(x * x - One));
         if ((x.real.value >= 0 && x.imag.value >= 0) || (x.real.value < 0 && x.imag.value < 0))
         {
             result.real = -result.real;
@@ -452,8 +556,8 @@ ComplexVar ComplexVar_arctan(const ComplexVar &x)
     }
     else
     {
-        ComplexVar tmp = ComplexVar_mul(I, x);
-        result = ComplexVar_mul(a, ComplexVar_ln(ComplexVar_div(ComplexVar_add(One, tmp), ComplexVar_sub(One, tmp))));
+        ComplexVar tmp = I * x;
+        result = a * ComplexVar_ln((One + tmp) / (One - tmp));
     }
     return result;
 }
@@ -538,7 +642,7 @@ ComplexVar ComplexVar_sinh(const ComplexVar &x)
     else
     {
         ComplexVar tmp = ComplexVar_exp(x);
-        result = ComplexVar_mul(ComplexVar_sub(tmp, ComplexVar_ivt(tmp)), a);
+        result = (tmp - ComplexVar_ivt(tmp)) * a;
     }
     return result;
 }
@@ -554,7 +658,7 @@ ComplexVar ComplexVar_cosh(const ComplexVar &x)
     else
     {
         ComplexVar tmp = ComplexVar_exp(x);
-        result = ComplexVar_mul(ComplexVar_add(tmp, ComplexVar_ivt(tmp)), a);
+        result = (tmp + ComplexVar_ivt(tmp)) * a;
     }
     return result;
 }
@@ -569,8 +673,8 @@ ComplexVar ComplexVar_tanh(const ComplexVar &x)
     }
     else
     {
-        ComplexVar tmp = ComplexVar_exp(ComplexVar_mul(i2, x));
-        result = ComplexVar_div(ComplexVar_sub(tmp, One), ComplexVar_add(tmp, One));
+        ComplexVar tmp = ComplexVar_exp(i2 * x);
+        result = (tmp - One) / (tmp + One);
     }
     return result;
 }
@@ -626,7 +730,7 @@ ComplexVar ComplexVar_arcsinh(const ComplexVar &x)
     }
     else
     {
-        result = ComplexVar_ln(ComplexVar_add(x, ComplexVar_sqrt(ComplexVar_add(One, ComplexVar_mul(x, x)))));
+        result = ComplexVar_ln(x + ComplexVar_sqrt(One + x * x));
     }
     return result;
 }
@@ -640,7 +744,7 @@ ComplexVar ComplexVar_arccosh(const ComplexVar &x)
     }
     else
     {
-        result = ComplexVar_ln(ComplexVar_sub(x, ComplexVar_sqrt(ComplexVar_sub(ComplexVar_mul(x, x), One))));
+        result = ComplexVar_ln(x - ComplexVar_sqrt(x * x - One));
     }
     if (x.real.value >= 0)
     {
@@ -660,7 +764,7 @@ ComplexVar ComplexVar_arctanh(const ComplexVar &x)
     }
     else
     {
-        result = ComplexVar_mul(a, ComplexVar_ln(ComplexVar_div(ComplexVar_add(One, x), ComplexVar_sub(One, x))));
+        result = a * ComplexVar_ln((One + x) / (One - x));
     }
     return result;
 }

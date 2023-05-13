@@ -18,6 +18,12 @@ struct ComplexVar
     ComplexVar(const error_double &, const error_double &, bool);
     ComplexVar(const ComplexVar &) noexcept;
     void operator=(const ComplexVar &);
+    void operator=(const double &);
+    ComplexVar &operator+=(const ComplexVar &);
+    ComplexVar &operator-=(const ComplexVar &);
+    ComplexVar &operator*=(const ComplexVar &);
+    ComplexVar &operator/=(const ComplexVar &);
+    ComplexVar &operator%=(const ComplexVar &);
 };
 
 #define ComplexVar_iszero(x) (x.real == 0 && x.imag == 0 && !x.isArbitrary)
@@ -30,12 +36,12 @@ std::ostream &operator<<(std::ostream &, const ComplexVar &);
 std::ostream &operator<(std::ostream &, const ComplexVar &);
 ComplexVar ComplexVar_conj(const ComplexVar &);
 void ComplexVar_iconj(ComplexVar &);
-ComplexVar ComplexVar_add(const ComplexVar &, const ComplexVar &);
-ComplexVar ComplexVar_sub(const ComplexVar &, const ComplexVar &);
-ComplexVar ComplexVar_mul(const ComplexVar &, const ComplexVar &);
-ComplexVar ComplexVar_div(const ComplexVar &, const ComplexVar &);
+ComplexVar operator+(const ComplexVar &, const ComplexVar &);
+ComplexVar operator-(const ComplexVar &, const ComplexVar &);
+ComplexVar operator*(const ComplexVar &, const ComplexVar &);
+ComplexVar operator/(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_fdv(const ComplexVar &, const ComplexVar &);
-ComplexVar ComplexVar_mod(const ComplexVar &, const ComplexVar &);
+ComplexVar operator%(const ComplexVar &, const ComplexVar &);
 ComplexVar ComplexVar_exp(const ComplexVar &);
 ComplexVar ComplexVar_ln(const ComplexVar &);
 ComplexVar ComplexVar_log(const ComplexVar &, const ComplexVar &);
