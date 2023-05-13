@@ -5,6 +5,10 @@ def __unaryfunc_method(name: str):
         except:
             raise AttributeError(
                 f"Function __{name}__ is not implemented in {type(x)} object.")
+        p = f(x)
+        if p is NotImplemented:
+            raise TypeError(
+                f"Function {name} on {type(x)} object is not implemented")
         return f(x)
     return func
 
@@ -48,6 +52,9 @@ def __binaryfunc_method(name: str, has_r: bool = True):
                 pass
             else:
                 v = f(x, y)
+                if v is NotImplemented:
+                    raise TypeError(
+                        f"Function {name} between {type(x)} object and {type(y)} object is not implemented")
                 return v
             try:
                 f = type(y).__dict__[f"__r{name}__"]
@@ -56,6 +63,9 @@ def __binaryfunc_method(name: str, has_r: bool = True):
                     f"Both __{name}__ and __r{name}__ are not implemented in {type(x)} object.")
             else:
                 v = f(y, x)
+                if v is NotImplemented:
+                    raise TypeError(
+                        f"Function {name} between {type(x)} object and {type(y)} object is not implemented")
                 return v
         return func
     else:
@@ -67,6 +77,9 @@ def __binaryfunc_method(name: str, has_r: bool = True):
                     f" __{name}__ is not implemented in {type(x)} object.")
             else:
                 v = f(x, y)
+                if v is NotImplemented:
+                    raise TypeError(
+                        f"Function {name} between {type(x)} object and {type(y)} object is not implemented")
                 return v
         return func
 

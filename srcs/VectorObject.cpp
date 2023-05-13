@@ -1,6 +1,7 @@
 #include <vector.h>
 
 extern int doubleprecision;
+extern PyObject *PyExc_ShapeError;
 
 static PyObject *PyVector_repr(PyVectorObject *self)
 {
@@ -274,6 +275,86 @@ static int PyVector_init_from_nparray(PyVectorObject *self, PyArrayObject *vecto
     return 0;
 }
 
+static int PyVector_init_from_vector(PyVectorObject *self, PyVectorObject *other, PyObject *d)
+{
+    if (Matrix_copy((PyMatrixObject *)other, (PyMatrixObject *)self))
+    {
+        return -1;
+    }
+    if (Py_IsNone(d))
+    {
+        self->isHor = other->isHor;
+    }
+    else if (Py_IsFalse(d))
+    {
+        self->isHor = false;
+        if (self->isHor ^ other->isHor)
+        {
+            std::swap(self->matrix.rows, self->matrix.cols);
+        }
+    }
+    else if (Py_IsTrue(d))
+    {
+        self->isHor = true;
+        if (self->isHor ^ other->isHor)
+        {
+            std::swap(self->matrix.rows, self->matrix.cols);
+        }
+    }
+    else
+    {
+        PyErr_Format(PyExc_TypeError, "is_horizontal gets %s object", d->ob_type->tp_name);
+        return -1;
+    }
+    return 0;
+}
+
+static int PyVector_init_from_matrix(PyVectorObject *self, PyMatrixObject *other, PyObject *d)
+{
+    if ((other->rows != 1) && (other->cols != 1))
+    {
+        PyErr_Format(PyExc_ShapeError, "cannot convert matrix with shape (%ld,%ld) to vector", other->rows, other->cols);
+        return -1;
+    }
+    if (Matrix_copy(other, (PyMatrixObject *)self))
+    {
+        return -1;
+    }
+    if (Py_IsNone(d))
+    {
+        if (self->matrix.cols == 1)
+        {
+            self->isHor = false;
+        }
+        else
+        {
+            self->isHor = true;
+        }
+    }
+    else if (Py_IsFalse(d))
+    {
+        self->isHor = false;
+        if (self->matrix.cols != 1)
+        {
+            std::swap(self->matrix.rows, self->matrix.cols);
+        }
+    }
+    else if (Py_IsTrue(d))
+    {
+        self->isHor = true;
+        if (self->matrix.rows != 1)
+        {
+            std::swap(self->matrix.rows, self->matrix.cols);
+        }
+    }
+    else
+    {
+        PyErr_Format(PyExc_TypeError, "is_horizontal gets %s object", d->ob_type->tp_name);
+        return -1;
+    }
+    return 0;
+}
+
 static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist_0[] = {
@@ -295,10 +376,10 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
     };
     int dims;
     PyObject *tmp = nullptr;
-    PyObject *direction = Py_False;
+    PyObject *direction = Py_None;
     if (PyArg_ParseTupleAndKeywords(args, kwds, "i|$OO", kwlist_0, &dims, &tmp, &direction))
     {
-        if (Py_IsFalse(direction))
+        if (Py_IsFalse(direction) || Py_IsNone(direction))
         {
             self->isHor = false;
             self->matrix.rows = dims;
@@ -312,6 +393,7 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
         }
         else
         {
+            PyErr_Format(PyExc_TypeError, "is_horizontal gets %s object", direction->ob_type->tp_name);
             return -1;
         }
         return PyVector_init_from_df(self, tmp);
@@ -319,10 +401,18 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
     PyObject *vector = nullptr;
     PyErr_Clear();
     vector = nullptr;
-    direction = Py_False;
+    direction = Py_None;
     if (PyArg_ParseTupleAndKeywords(args, kwds, "O|$O", kwlist_1, &vector, &direction))
     {
-        if (Py_IsFalse(direction))
+        if (PyVector_Check(vector))
+        {
+            return PyVector_init_from_vector(self, (PyVectorObject *)vector, direction);
+        }
+        if (PyMatrix_Check(vector))
+        {
+            return PyVector_init_from_matrix(self, (PyMatrixObject *)vector, direction);
+        }
+        if (Py_IsFalse(direction) || Py_IsNone(direction))
         {
             self->isHor = false;
             self->matrix.cols = 1;
@@ -334,6 +424,7 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
         }
         else
         {
+            PyErr_Format(PyExc_TypeError, "is_horizontal gets %s object", direction->ob_type->tp_name);
             return -1;
         }
         if (PyList_CheckExact(vector))
@@ -356,10 +447,10 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
     PyErr_Clear();
     vector = nullptr;
     tmp = nullptr;
-    direction = Py_False;
+    direction = Py_None;
     if (PyArg_ParseTupleAndKeywords(args, kwds, "O|$OO", kwlist_2, &vector, &tmp, &direction))
     {
-        if (Py_IsFalse(direction))
+        if (Py_IsFalse(direction) || Py_IsNone(direction))
         {
             self->isHor = false;
             self->matrix.cols = 1;
@@ -371,6 +462,7 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
         }
         else
         {
+            PyErr_Format(PyExc_TypeError, "is_horizontal gets %s object", direction->ob_type->tp_name);
             return -1;
         }
         if (PyList_CheckExact(vector))
@@ -387,10 +479,134 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
     return -1;
 }
 
+// methods
+
+static PyObject *PyVector_conj(PyVectorObject *self, PyObject *args)
+{
+    PyVectorObject *result = nullptr;
+    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->isHor = self->isHor;
+    result->matrix.elements = nullptr;
+    if (Matrix_conj((PyMatrixObject *)self, &(result->matrix)))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
+}
+
+static PyObject *PyVector_iconj(PyVectorObject *self, PyObject *args)
+{
+    Matrix_iconj(&(self->matrix));
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+static PyObject *PyVector_T(PyVectorObject *self, PyObject *args)
+{
+    PyVectorObject *result = nullptr;
+    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->isHor = !self->isHor;
+    result->matrix.elements = nullptr;
+    if (Matrix_copy(&(self->matrix), &(result->matrix)))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    std::swap(result->matrix.rows, result->matrix.cols);
+    return (PyObject *)result;
+}
+
+static PyObject *PyVector_iT(PyVectorObject *self, PyObject *args)
+{
+    self->isHor = !self->isHor;
+    std::swap(self->matrix.rows, self->matrix.cols);
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+static PyObject *PyVector_H(PyVectorObject *self, PyObject *args)
+{
+    PyVectorObject *result = nullptr;
+    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->isHor = !self->isHor;
+    result->matrix.elements = nullptr;
+    if (Matrix_copy(&(self->matrix), &(result->matrix)))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    std::swap(result->matrix.rows, result->matrix.cols);
+    Matrix_iconj(&(result->matrix));
+    return (PyObject *)result;
+}
+
+static PyObject *PyVector_iH(PyVectorObject *self, PyObject *args)
+{
+    self->isHor = !self->isHor;
+    std::swap(self->matrix.rows, self->matrix.cols);
+    Matrix_iconj(&(self->matrix));
+    Py_INCREF(self);
+    return (PyObject *)self;
+}
+
+// getset
+
+PyObject *PyVector_get_ishor(PyVectorObject *self, void *closure)
+{
+    if (self->isHor)
+    {
+        Py_RETURN_TRUE;
+    }
+    Py_RETURN_FALSE;
+}
+
+PyObject *PyVector_get_isver(PyVectorObject *self, void *closure)
+{
+    if (self->isHor)
+    {
+        Py_RETURN_FALSE;
+    }
+    Py_RETURN_TRUE;
+}
+
+static PyMethodDef PyVector_methods[] = {
+    {"__conj__", (PyCFunction)PyVector_conj, METH_NOARGS, nullptr},
+    {"iconj", (PyCFunction)PyVector_iconj, METH_NOARGS, nullptr},
+    {"T", (PyCFunction)PyVector_T, METH_NOARGS, nullptr},
+    {"iT", (PyCFunction)PyVector_iT, METH_NOARGS, nullptr},
+    {"H", (PyCFunction)PyVector_H, METH_NOARGS, nullptr},
+    {"iH", (PyCFunction)PyVector_iH, METH_NOARGS, nullptr},
+    nullptr,
+};
+
+static PyGetSetDef PyVector_getset[] = {
+    {"is_horizontal", (getter)PyVector_get_ishor, nullptr, nullptr, nullptr},
+    {"is_vertical", (getter)PyVector_get_isver, nullptr, nullptr, nullptr},
+    nullptr,
+};
+
 PyTypeObject PyVector_Type = {
     .ob_base = PyVarObject_HEAD_INIT(&PyType_Type, 0).tp_name = "matrixcore.vector",
     .tp_basicsize = sizeof(PyVectorObject),
     .tp_repr = (reprfunc)PyVector_repr,
     .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_methods = PyVector_methods,
+    .tp_getset = PyVector_getset,
     .tp_init = (initproc)PyVector_init,
 };

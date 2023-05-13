@@ -37,7 +37,10 @@ class matrix:
     rows: int
     cols: int
     total: int
-    shape: tuple[int, int]
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        ...
 
     @property
     def rank(self) -> int | unsure:
@@ -196,20 +199,58 @@ class matrix:
     def __init__(self, matrix: ndarray) -> None:
         ...
 
+    @overload
+    def __init__(self, matrix: matrix) -> None:
+        ...
+
 
 class vector(matrix):
-    @overload
-    def __init__(self, dims: int, *, fill: __support_num = Unsure, is_horizontal: bool = False) -> None:
+    @property
+    def is_horizontal(self) -> bool:
+        ...
+
+    @property
+    def is_vertical(self) -> bool:
+        ...
+
+    def __conj__(self) -> vector:
+        ...
+
+    def iconj(self) -> Self:
+        ...
+
+    def T(self) -> vector:
+        ...
+
+    def iT(self) -> Self:
+        ...
+
+    def H(self) -> vector:
+        ...
+
+    def iH(self) -> Self:
         ...
 
     @overload
-    def __init__(self, vector: list[__support_num], *, is_horizontal: bool = False) -> None:
+    def __init__(self, dims: int, *, fill: __support_num = Unsure, is_horizontal: bool | None = None) -> None:
         ...
 
     @overload
-    def __init__(self, vector: list[tuple[int, __support_num]], *, fill: __support_num = Unsure, is_horizontal: bool = False) -> None:
+    def __init__(self, vector: list[__support_num], *, is_horizontal: bool | None = None) -> None:
         ...
 
     @overload
-    def __init__(self, vector: ndarray, *, is_horizontal: bool = False) -> None:
+    def __init__(self, vector: list[tuple[int, __support_num]], *, fill: __support_num = Unsure, is_horizontal: bool | None = None) -> None:
+        ...
+
+    @overload
+    def __init__(self, vector: ndarray, *, is_horizontal: bool | None = None) -> None:
+        ...
+
+    @overload
+    def __init__(self, vector: vector, *, is_horizontal: bool | None = None) -> None:
+        ...
+
+    @overload
+    def __init__(self,vector:matrix,*,is_horizontal:bool|None=None)->None:
         ...

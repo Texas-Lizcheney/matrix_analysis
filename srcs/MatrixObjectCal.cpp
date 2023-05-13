@@ -2,26 +2,30 @@
 
 extern PyObject *PyExc_ShapeError;
 
-PyMatrixObject *Matrix_add(const PyMatrixObject *const x, const PyMatrixObject *const y)
+int Matrix_copy(const PyMatrixObject *const self, PyMatrixObject *result)
+{
+    result->rows = self->rows;
+    result->cols = self->cols;
+    if (PyMatrixAlloc(result))
+    {
+        return -1;
+    }
+    memcpy(result->elements, self->elements, self->total_elements * sizeof(ComplexVar));
+    return 0;
+}
+
+int Matrix_add(const PyMatrixObject *const x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
     if (!Matrix_sameshape(x, y))
     {
-        PyErr_SetNone(PyExc_ShapeError);
-        return nullptr;
-    }
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
+        PyErr_Format(PyExc_ShapeError, "cannot add matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
+        return -1;
     }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -30,14 +34,14 @@ PyMatrixObject *Matrix_add(const PyMatrixObject *const x, const PyMatrixObject *
             PyMatrixAssign(result, i, j, ComplexVar_add(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j)));
         }
     }
-    return result;
+    return 0;
 }
 
 int Matrix_iadd(PyMatrixObject *x, const PyMatrixObject *const y)
 {
     if (!Matrix_sameshape(x, y))
     {
-        PyErr_SetNone(PyExc_ShapeError);
+        PyErr_Format(PyExc_ShapeError, "cannot add matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
         return -1;
     }
     ComplexVar tmp;
@@ -52,26 +56,18 @@ int Matrix_iadd(PyMatrixObject *x, const PyMatrixObject *const y)
     return 0;
 }
 
-PyMatrixObject *Matrix_sub(const PyMatrixObject *const x, const PyMatrixObject *const y)
+int Matrix_sub(const PyMatrixObject *const x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
     if (!Matrix_sameshape(x, y))
     {
-        PyErr_SetNone(PyExc_ShapeError);
-        return nullptr;
-    }
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
+        PyErr_Format(PyExc_ShapeError, "cannot sub matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
+        return -1;
     }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -80,14 +76,14 @@ PyMatrixObject *Matrix_sub(const PyMatrixObject *const x, const PyMatrixObject *
             PyMatrixAssign(result, i, j, ComplexVar_sub(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j)));
         }
     }
-    return result;
+    return 0;
 }
 
 int Matrix_isub(PyMatrixObject *x, const PyMatrixObject *const y)
 {
     if (!Matrix_sameshape(x, y))
     {
-        PyErr_SetNone(PyExc_ShapeError);
+        PyErr_Format(PyExc_ShapeError, "cannot sub matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
         return -1;
     }
     ComplexVar tmp;
@@ -102,21 +98,13 @@ int Matrix_isub(PyMatrixObject *x, const PyMatrixObject *const y)
     return 0;
 }
 
-PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const ComplexVar &y)
+int Matrix_mul(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -125,10 +113,10 @@ PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const ComplexVar &y)
             PyMatrixAssign(result, i, j, ComplexVar_mul(PyMatrixGetitem(x, i, j), y));
         }
     }
-    return result;
+    return 0;
 }
 
-void Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
+int Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
 {
     ComplexVar tmp;
     for (Py_ssize_t i = 0; i < x->rows; i++)
@@ -139,31 +127,23 @@ void Matrix_imul(PyMatrixObject *x, const ComplexVar &y)
             PyMatrixAssign(x, i, j, tmp);
         }
     }
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *const y)
+int Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
     if (x->cols != y->rows)
     {
-        PyErr_SetNone(PyExc_ShapeError);
-        return nullptr;
+        PyErr_Format(PyExc_ShapeError, "cannot mul matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
+        return -1;
     }
     Py_ssize_t L = x->cols;
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = x->rows;
     result->cols = y->cols;
     ComplexVar tmp;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -177,24 +157,16 @@ PyMatrixObject *Matrix_mul(const PyMatrixObject *const x, const PyMatrixObject *
             PyMatrixAssign(result, i, j, tmp);
         }
     }
-    return result;
+    return 0;
 }
 
-PyMatrixObject *Matrix_div(const PyMatrixObject *const x, const ComplexVar &y)
+int Matrix_div(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -203,10 +175,10 @@ PyMatrixObject *Matrix_div(const PyMatrixObject *const x, const ComplexVar &y)
             PyMatrixAssign(result, i, j, ComplexVar_div(PyMatrixGetitem(x, i, j), y));
         }
     }
-    return result;
+    return 0;
 }
 
-void Matrix_idiv(PyMatrixObject *x, const ComplexVar &y)
+int Matrix_idiv(PyMatrixObject *x, const ComplexVar &y)
 {
     ComplexVar tmp;
     for (Py_ssize_t i = 0; i < x->rows; i++)
@@ -217,24 +189,16 @@ void Matrix_idiv(PyMatrixObject *x, const ComplexVar &y)
             PyMatrixAssign(x, i, j, tmp);
         }
     }
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_div(const ComplexVar &x, const PyMatrixObject *const y)
+int Matrix_div(const ComplexVar &x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = y->rows;
     result->cols = y->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -243,24 +207,16 @@ PyMatrixObject *Matrix_div(const ComplexVar &x, const PyMatrixObject *const y)
             PyMatrixAssign(result, i, j, ComplexVar_div(x, PyMatrixGetitem(y, i, j)));
         }
     }
-    return result;
+    return 0;
 }
 
-PyMatrixObject *Matrix_fdv(const PyMatrixObject *const x, const ComplexVar &y)
+int Matrix_fdv(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -269,10 +225,10 @@ PyMatrixObject *Matrix_fdv(const PyMatrixObject *const x, const ComplexVar &y)
             PyMatrixAssign(result, i, j, ComplexVar_fdv(PyMatrixGetitem(x, i, j), y));
         }
     }
-    return result;
+    return 0;
 }
 
-void Matrix_ifdv(PyMatrixObject *x, const ComplexVar &y)
+int Matrix_ifdv(PyMatrixObject *x, const ComplexVar &y)
 {
     ComplexVar tmp;
     for (Py_ssize_t i = 0; i < x->rows; i++)
@@ -283,24 +239,16 @@ void Matrix_ifdv(PyMatrixObject *x, const ComplexVar &y)
             PyMatrixAssign(x, i, j, tmp);
         }
     }
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y)
+int Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = y->rows;
     result->cols = y->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -309,24 +257,16 @@ PyMatrixObject *Matrix_fdv(const ComplexVar &x, const PyMatrixObject *const y)
             PyMatrixAssign(result, i, j, ComplexVar_fdv(x, PyMatrixGetitem(y, i, j)));
         }
     }
-    return result;
+    return 0;
 }
 
-PyMatrixObject *Matrix_mod(const PyMatrixObject *const x, const ComplexVar &y)
+int Matrix_mod(const PyMatrixObject *const x, const ComplexVar &y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -335,10 +275,10 @@ PyMatrixObject *Matrix_mod(const PyMatrixObject *const x, const ComplexVar &y)
             PyMatrixAssign(result, i, j, ComplexVar_mod(PyMatrixGetitem(x, i, j), y));
         }
     }
-    return result;
+    return 0;
 }
 
-void Matrix_imod(PyMatrixObject *x, const ComplexVar &y)
+int Matrix_imod(PyMatrixObject *x, const ComplexVar &y)
 {
     ComplexVar tmp;
     for (Py_ssize_t i = 0; i < x->rows; i++)
@@ -349,24 +289,16 @@ void Matrix_imod(PyMatrixObject *x, const ComplexVar &y)
             PyMatrixAssign(x, i, j, tmp);
         }
     }
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y)
+int Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = y->rows;
     result->cols = y->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -375,25 +307,16 @@ PyMatrixObject *Matrix_mod(const ComplexVar &x, const PyMatrixObject *const y)
             PyMatrixAssign(result, i, j, ComplexVar_mod(x, PyMatrixGetitem(y, i, j)));
         }
     }
-    return result;
+    return 0;
 }
 
-PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
+int Matrix_neg(const PyMatrixObject *const self, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    result->elements = nullptr;
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = self->rows;
     result->cols = self->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     int64_t pos;
     for (Py_ssize_t i = 0; i < result->rows; i++)
@@ -406,25 +329,16 @@ PyMatrixObject *Matrix_neg(const PyMatrixObject *const self)
             result->elements[pos].isArbitrary = self->elements[pos].isArbitrary;
         }
     }
-    return result;
+    return 0;
 }
 
-PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
+int Matrix_conj(const PyMatrixObject *const self, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    result->elements = nullptr;
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = self->rows;
     result->cols = self->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     int64_t pos;
     for (Py_ssize_t i = 0; i < result->rows; i++)
@@ -437,10 +351,10 @@ PyMatrixObject *Matrix_conj(const PyMatrixObject *const self)
             result->elements[pos].isArbitrary = self->elements[pos].isArbitrary;
         }
     }
-    return result;
+    return 0;
 }
 
-void Matrix_iconj(PyMatrixObject *self)
+int Matrix_iconj(PyMatrixObject *self)
 {
     for (Py_ssize_t i = 0; i < self->rows; i++)
     {
@@ -449,25 +363,16 @@ void Matrix_iconj(PyMatrixObject *self)
             ComplexVar_iconj(PyMatrixGetitem(self, i, j));
         }
     }
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
+int Matrix_transpose(const PyMatrixObject *const self, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    result->elements = nullptr;
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = self->cols;
     result->cols = self->rows;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     int64_t rpos;
     int64_t spos;
@@ -482,7 +387,7 @@ PyMatrixObject *Matrix_transpose(const PyMatrixObject *const self)
             result->elements[rpos].isArbitrary = self->elements[spos].isArbitrary;
         }
     }
-    return result;
+    return 0;
 }
 
 void rorv(ComplexVar *a, int x)
@@ -522,29 +427,20 @@ void itranspose(ComplexVar *a, int r, int c)
     return;
 }
 
-void Matrix_itranspose(PyMatrixObject *self)
+int Matrix_itranspose(PyMatrixObject *self)
 {
     itranspose(self->elements, self->rows, self->cols);
     std::swap(self->rows, self->cols);
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
+int Matrix_hermite_transpose(const PyMatrixObject *const self, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    result->elements = nullptr;
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = self->cols;
     result->cols = self->rows;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     int64_t rpos;
     int64_t spos;
@@ -559,31 +455,23 @@ PyMatrixObject *Matrix_hermite_transpose(const PyMatrixObject *const self)
             result->elements[rpos].isArbitrary = self->elements[spos].isArbitrary;
         }
     }
-    return result;
+    return 0;
 }
 
-void Matrix_ihermite_transpose(PyMatrixObject *self)
+int Matrix_ihermite_transpose(PyMatrixObject *self)
 {
     Matrix_itranspose(self);
     Matrix_iconj(self);
-    return;
+    return 0;
 }
 
-PyMatrixObject *Matrix_kronecker(const PyMatrixObject *const x, const PyMatrixObject *const y)
+int Matrix_kronecker(const PyMatrixObject *const x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
     result->rows = x->rows * y->rows;
     result->cols = x->cols * y->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < x->rows; i++)
     {
@@ -598,29 +486,21 @@ PyMatrixObject *Matrix_kronecker(const PyMatrixObject *const x, const PyMatrixOb
             }
         }
     }
-    return result;
+    return 0;
 }
 
-PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const x, const PyMatrixObject *const y)
+int Matrix_hadamard(const PyMatrixObject *const x, const PyMatrixObject *const y, PyMatrixObject *result)
 {
     if (!Matrix_sameshape(x, y))
     {
-        PyErr_SetNone(PyExc_ShapeError);
-        return nullptr;
-    }
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!result)
-    {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
+        PyErr_Format(PyExc_ShapeError, "cannot do hadamard mul matrix with shape (%ld,%ld) and matrix with shape (%ld,%ld)", x->rows, x->cols, y->rows, y->cols);
+        return -1;
     }
     result->rows = x->rows;
     result->cols = x->cols;
     if (PyMatrixAlloc(result))
     {
-        Py_DECREF(result);
-        return nullptr;
+        return -1;
     }
     for (Py_ssize_t i = 0; i < result->rows; i++)
     {
@@ -629,5 +509,5 @@ PyMatrixObject *Matrix_hadamard(const PyMatrixObject *const x, const PyMatrixObj
             PyMatrixAssign(result, i, j, ComplexVar_mul(PyMatrixGetitem(x, i, j), PyMatrixGetitem(y, i, j)));
         }
     }
-    return result;
+    return 0;
 }

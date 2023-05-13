@@ -1,7 +1,7 @@
 import unittest
 from matrix_analysis import Unsure
 from matrix_analysis.var import variable
-from matrix_analysis.matrix import matrix
+from matrix_analysis.matrix import matrix, vector
 
 
 class externed_Testcase(unittest.TestCase):
@@ -22,6 +22,10 @@ class externed_Testcase(unittest.TestCase):
         for i in range(p[0]):
             for j in range(p[1]):
                 self.assertVarAlmostEqual(first[i, j], second[i, j])
+
+    def assertVectorAlmostEqual(self, first: vector, second: vector, places=None, msg=None, delta=None):
+        self.assertEqual(first.is_horizontal, second.is_horizontal)
+        self.assertMatrixAlmostEqual(first, second, places, msg, delta)
 
 
 class seqTestLoader(unittest.TestLoader):

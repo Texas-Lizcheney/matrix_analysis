@@ -81,25 +81,16 @@ PyObject *PyMatrix_copy(const PyMatrixObject *const self)
 {
     PyMatrixObject *result = nullptr;
     result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    result->elements = nullptr;
     if (!result)
     {
         PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->rows = self->rows;
-    result->cols = self->cols;
-    if (PyMatrixAlloc(result))
+    result->elements = nullptr;
+    if (Matrix_copy(self, result))
     {
         Py_DECREF(result);
         return nullptr;
-    }
-    for (Py_ssize_t i = 0; i < result->rows; i++)
-    {
-        for (Py_ssize_t j = 0; j < result->cols; j++)
-        {
-            PyMatrixAssign(result, i, j, PyMatrixGetitem(self, i, j));
-        }
     }
     return (PyObject *)result;
 }
@@ -513,6 +504,11 @@ static int PyMatrix_init_from_nparray(PyMatrixObject *self, PyArrayObject *array
     return 0;
 }
 
+static int PyMatrix_init_from_matrix(PyMatrixObject *self, PyMatrixObject *other)
+{
+    return Matrix_copy(other, self);
+}
+
 static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist_0[] = {
@@ -567,6 +563,10 @@ static int PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds)
         {
             return PyMatrix_init_from_nparray(self, (PyArrayObject *)tmp_matrix);
         }
+        if (PyMatrix_Check(tmp_matrix))
+        {
+            return PyMatrix_init_from_matrix(self, (PyMatrixObject *)tmp_matrix);
+        }
     }
     PyErr_SetString(PyExc_TypeError, "Fail to match any overload");
     return -1;
@@ -588,51 +588,118 @@ static PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds
 
 static PyObject *PyMatrix_add(PyObject *self, PyObject *other)
 {
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)Matrix_add((PyMatrixObject *)self, (PyMatrixObject *)other);
+
+        if (Matrix_add((PyMatrixObject *)self, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
 {
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)Matrix_sub((PyMatrixObject *)self, (PyMatrixObject *)other);
+        if (Matrix_sub((PyMatrixObject *)self, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
-        return (PyObject *)Matrix_mul((PyMatrixObject *)self, tmp);
+        if (Matrix_mul((PyMatrixObject *)self, tmp, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
     if (PyMatrix_Check(other) && CanBeComplexVar(self))
     {
         assignComplexVar(self, tmp);
-        return (PyObject *)Matrix_mul((PyMatrixObject *)other, tmp);
+        if (Matrix_mul((PyMatrixObject *)other, tmp, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
-        return (PyObject *)Matrix_mod((PyMatrixObject *)self, tmp);
+        if (Matrix_mod((PyMatrixObject *)self, tmp, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
     if (PyMatrix_Check(other) && CanBeComplexVar(self))
     {
         assignComplexVar(self, tmp);
-        return (PyObject *)Matrix_mod(tmp, (PyMatrixObject *)other);
+        if (Matrix_mod(tmp, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
@@ -640,21 +707,33 @@ static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
 {
     PyMatrixObject *D = nullptr;
     PyMatrixObject *M = nullptr;
+    D = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!D)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    M = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!M)
+    {
+        Py_DECREF(D);
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
     ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
-        D = Matrix_fdv((PyMatrixObject *)self, tmp);
-        if (!D)
-        {
-            PyErr_SetNone(PyExc_MemoryError);
-            return nullptr;
-        }
-        M = Matrix_mul(D, tmp);
-        if (!M)
+        if (Matrix_fdv((PyMatrixObject *)self, tmp, D))
         {
             Py_DECREF(D);
-            PyErr_SetNone(PyExc_MemoryError);
+            Py_DECREF(M);
+            return nullptr;
+        }
+        if (Matrix_mul(D, tmp, M))
+        {
+            Py_DECREF(D);
+            Py_DECREF(M);
             return nullptr;
         }
         for (Py_ssize_t i = 0; i < M->rows; i++)
@@ -672,17 +751,16 @@ static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
     if (PyMatrix_Check(other) && CanBeComplexVar(self))
     {
         assignComplexVar(self, tmp);
-        D = Matrix_fdv(tmp, (PyMatrixObject *)other);
-        if (!D)
-        {
-            PyErr_SetNone(PyExc_MemoryError);
-            return nullptr;
-        }
-        M = Matrix_hadamard(D, (PyMatrixObject *)other);
-        if (!M)
+        if (Matrix_fdv(tmp, (PyMatrixObject *)other, D))
         {
             Py_DECREF(D);
-            PyErr_SetNone(PyExc_MemoryError);
+            Py_DECREF(M);
+            return nullptr;
+        }
+        if (Matrix_hadamard(D, (PyMatrixObject *)other, M))
+        {
+            Py_DECREF(D);
+            Py_DECREF(M);
             return nullptr;
         }
         for (Py_ssize_t i = 0; i < M->rows; i++)
@@ -702,7 +780,20 @@ static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_negative(PyObject *self)
 {
-    return (PyObject *)Matrix_neg((PyMatrixObject *)self);
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
+    if (Matrix_neg((PyMatrixObject *)self, result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
 }
 
 static PyObject *PyMatrix_positive(PyObject *self)
@@ -765,32 +856,70 @@ static PyObject *PyMatrix_inplace_remainder(PyMatrixObject *self, PyObject *othe
 static PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
-        return (PyObject *)Matrix_fdv((PyMatrixObject *)self, tmp);
+        if (Matrix_fdv((PyMatrixObject *)self, tmp, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
     if (PyMatrix_Check(other) && CanBeComplexVar(self))
     {
         assignComplexVar(self, tmp);
-        return (PyObject *)Matrix_fdv(tmp, (PyMatrixObject *)other);
+        if (Matrix_fdv(tmp, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
 {
     ComplexVar tmp;
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
-        return (PyObject *)Matrix_div((PyMatrixObject *)self, tmp);
+        if (Matrix_div((PyMatrixObject *)self, tmp, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
     if (PyMatrix_Check(other) && CanBeComplexVar(self))
     {
         assignComplexVar(self, tmp);
-        return (PyObject *)Matrix_div(tmp, (PyMatrixObject *)other);
+        if (Matrix_div(tmp, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
@@ -820,10 +949,24 @@ static PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *self, PyObject *ot
 
 static PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 {
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-        return (PyObject *)Matrix_mul((PyMatrixObject *)self, (PyMatrixObject *)other);
+        if (Matrix_mul((PyMatrixObject *)self, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
     }
+    Py_DECREF(result);
     Py_RETURN_NOTIMPLEMENTED;
 }
 
@@ -831,7 +974,20 @@ static PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
 {
-    return (PyObject *)Matrix_conj(self);
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
+    if (Matrix_conj((PyMatrixObject *)self, result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
 }
 
 static PyObject *PyMatrix_iconj(PyMatrixObject *self, PyObject *args)
@@ -843,7 +999,20 @@ static PyObject *PyMatrix_iconj(PyMatrixObject *self, PyObject *args)
 
 static PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
 {
-    return (PyObject *)Matrix_transpose(self);
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
+    if (Matrix_transpose((PyMatrixObject *)self, result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
 }
 
 static PyObject *PyMatrix_iT(PyMatrixObject *self, PyObject *args)
@@ -855,7 +1024,20 @@ static PyObject *PyMatrix_iT(PyMatrixObject *self, PyObject *args)
 
 static PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
 {
-    return (PyObject *)Matrix_hermite_transpose(self);
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->elements = nullptr;
+    if (Matrix_hermite_transpose((PyMatrixObject *)self, result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
 }
 
 static PyObject *PyMatrix_iH(PyMatrixObject *self, PyObject *args)
@@ -867,22 +1049,48 @@ static PyObject *PyMatrix_iH(PyMatrixObject *self, PyObject *args)
 
 static PyObject *PyMatrix_kronecker(const PyMatrixObject *self, PyObject *other)
 {
-    if (PyMatrix_Check(other))
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
     {
-        return (PyObject *)Matrix_kronecker(self, (PyMatrixObject *)other);
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
     }
-    PyErr_SetNone(PyExc_TypeError);
-    return nullptr;
+    result->elements = nullptr;
+    if (PyMatrix_Check(self) && PyMatrix_Check(other))
+    {
+        if (Matrix_kronecker((PyMatrixObject *)self, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
+    }
+    Py_DECREF(result);
+    Py_RETURN_NOTIMPLEMENTED;
 }
 
 static PyObject *PyMatrix_hadamard(const PyMatrixObject *self, PyObject *other)
 {
-    if (PyMatrix_Check(other))
+    PyMatrixObject *result = nullptr;
+    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    if (!result)
     {
-        return (PyObject *)Matrix_hadamard(self, (PyMatrixObject *)other);
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
     }
-    PyErr_SetNone(PyExc_TypeError);
-    return nullptr;
+    result->elements = nullptr;
+    if (PyMatrix_Check(self) && PyMatrix_Check(other))
+    {
+        if (Matrix_hadamard((PyMatrixObject *)self, (PyMatrixObject *)other, result))
+        {
+            Py_DECREF(result);
+            return nullptr;
+        }
+        return (PyObject *)result;
+    }
+    Py_DECREF(result);
+    Py_RETURN_NOTIMPLEMENTED;
 }
 
 // as map

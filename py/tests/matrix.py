@@ -93,6 +93,8 @@ class Test_mat(externed_Testcase):
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.matrix(
                 "abd", 32, "fd", 4553.54)  # type: ignore
+        z = matrix_analysis.matrix.matrix(x)
+        self.assertMatrixAlmostEqual(x, z)
 
     def test_repr(self):
         x = matrix_analysis.matrix.matrix([[1, 2.0, Unsure],
@@ -523,8 +525,60 @@ class Test_vector(externed_Testcase):
         with self.assertRaises(TypeError):
             x = matrix_analysis.matrix.vector(
                 numpy.array([1, 2], dtype=numpy.timedelta64))
+        y = matrix_analysis.matrix.vector(x)
+        self.assertVectorAlmostEqual(x, y)
+        y = matrix_analysis.matrix.vector(x, is_horizontal=False)
+        self.assertVectorAlmostEqual(x, y)
+        y = matrix_analysis.matrix.vector(x, is_horizontal=True)
+        self.assertVectorAlmostEqual(x.T(), y)
+        z = matrix_analysis.matrix.matrix([[1, 2, 3]])
+        y = matrix_analysis.matrix.vector(z)
+        self.assertVectorAlmostEqual(
+            y, matrix_analysis.matrix.vector([1, 2, 3], is_horizontal=True))
+        y = matrix_analysis.matrix.vector(z, is_horizontal=False)
+        self.assertVectorAlmostEqual(
+            y, matrix_analysis.matrix.vector([1, 2, 3]))
+        y = matrix_analysis.matrix.vector(z, is_horizontal=True)
+        self.assertVectorAlmostEqual(
+            y, matrix_analysis.matrix.vector([1, 2, 3], is_horizontal=True))
+        with self.assertRaises(matrix_analysis.ShapeError):
+            matrix_analysis.matrix.vector(
+                matrix_analysis.matrix.matrix([[1, 2], [3, 4]]))
 
     def test_repr(self):
         x = matrix_analysis.matrix.vector([(2, 1+1j),
                                            (4, 1)])
         self.assertEqual(repr(x), "[Unsure,Unsure,1+1j,Unsure,1+0j,]")
+
+    def test_conj(self):
+        x = matrix_analysis.matrix.vector([1, 2, 3+1j])
+        self.assertMatrixAlmostEqual(matrix_analysis.funcs.conj(
+            x), z := matrix_analysis.matrix.vector([1, 2, 3-1j]))
+        k = id(x)
+        x.iconj()
+        self.assertMatrixAlmostEqual(x, z)
+        self.assertEqual(k, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
+
+    def test_trans(self):
+        x = matrix_analysis.matrix.vector([1, 2, 3+1j])
+        self.assertMatrixAlmostEqual(y1 := x.T(), z1 := matrix_analysis.matrix.vector([
+                                     1, 2, 3+1j], is_horizontal=True))
+        self.assertTrue(y1.is_horizontal)
+        self.assertMatrixAlmostEqual(y2 := x.H(), z2 := matrix_analysis.matrix.vector([
+                                     1, 2, 3-1j], is_horizontal=True))
+        self.assertTrue(y2.is_horizontal)
+        # y = +x
+        k1 = id(x)
+        x.iT()
+        self.assertMatrixAlmostEqual(x, z1)
+        self.assertEqual(k1, id(x))
+        self.assertEqual(sys.getrefcount(x), 2)
+        self.assertTrue(x.is_horizontal)
+        """ k2 = id(y)
+        y.iH()
+        self.assertMatrixAlmostEqual(y, z2)
+        self.assertEqual(k2, id(y))
+        self.assertEqual(sys.getrefcount(y), 2)
+        self.assertTrue(y.is_horizontal)
+ """
