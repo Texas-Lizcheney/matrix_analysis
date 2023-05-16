@@ -79,6 +79,21 @@ int PyMatrixGet_withcheck(const PyMatrixObject *const self, int r, int c, Comple
 
 PyObject *PyMatrix_copy(const PyMatrixObject *const self)
 {
+    PyMatrixObject *result = internal_new_PyMatrix();
+    if (!result)
+    {
+        return nullptr;
+    }
+    if (Matrix_copy(self, result))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
+}
+
+PyMatrixObject *internal_new_PyMatrix()
+{
     PyMatrixObject *result = nullptr;
     result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
     if (!result)
@@ -87,12 +102,7 @@ PyObject *PyMatrix_copy(const PyMatrixObject *const self)
         return nullptr;
     }
     result->elements = nullptr;
-    if (Matrix_copy(self, result))
-    {
-        Py_DECREF(result);
-        return nullptr;
-    }
-    return (PyObject *)result;
+    return result;
 }
 
 static void PyMatrix_dealloc(PyMatrixObject *self)
@@ -588,17 +598,13 @@ static PyObject *PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds
 
 static PyObject *PyMatrix_add(PyObject *self, PyObject *other)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
-
         if (Matrix_add((PyMatrixObject *)self, (PyMatrixObject *)other, result))
         {
             Py_DECREF(result);
@@ -612,14 +618,11 @@ static PyObject *PyMatrix_add(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
         if (Matrix_sub((PyMatrixObject *)self, (PyMatrixObject *)other, result))
@@ -635,15 +638,12 @@ static PyObject *PyMatrix_subtract(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
 {
-    ComplexVar tmp;
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
+    ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
@@ -670,15 +670,12 @@ static PyObject *PyMatrix_multiply(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
 {
-    ComplexVar tmp;
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
+    ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
@@ -705,19 +702,12 @@ static PyObject *PyMatrix_remainder(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
 {
-    PyMatrixObject *D = nullptr;
-    PyMatrixObject *M = nullptr;
-    D = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!D)
+    PyMatrixObject *D = internal_new_PyMatrix();
+    PyMatrixObject *M = internal_new_PyMatrix();
+    if (!D || !M)
     {
-        PyErr_SetNone(PyExc_MemoryError);
-        return nullptr;
-    }
-    M = PyObject_New(PyMatrixObject, &PyMatrix_Type);
-    if (!M)
-    {
-        Py_DECREF(D);
-        PyErr_SetNone(PyExc_MemoryError);
+        Py_XDECREF(D);
+        Py_XDECREF(M);
         return nullptr;
     }
     ComplexVar tmp;
@@ -780,14 +770,11 @@ static PyObject *PyMatrix_divmod(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_negative(PyObject *self)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (Matrix_neg((PyMatrixObject *)self, result))
     {
         Py_DECREF(result);
@@ -855,15 +842,12 @@ static PyObject *PyMatrix_inplace_remainder(PyMatrixObject *self, PyObject *othe
 
 static PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
 {
-    ComplexVar tmp;
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
+    ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
@@ -890,15 +874,12 @@ static PyObject *PyMatrix_floor_divide(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_true_divide(PyObject *self, PyObject *other)
 {
-    ComplexVar tmp;
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
+    ComplexVar tmp;
     if (PyMatrix_Check(self) && CanBeComplexVar(other))
     {
         assignComplexVar(other, tmp);
@@ -949,14 +930,11 @@ static PyObject *PyMatrix_inplace_true_divide(PyMatrixObject *self, PyObject *ot
 
 static PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
         if (Matrix_mul((PyMatrixObject *)self, (PyMatrixObject *)other, result))
@@ -974,14 +952,11 @@ static PyObject *PyMatrix_matrix_multiply(PyObject *self, PyObject *other)
 
 static PyObject *PyMatrix_conj(PyMatrixObject *self, PyObject *args)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (Matrix_conj((PyMatrixObject *)self, result))
     {
         Py_DECREF(result);
@@ -999,14 +974,11 @@ static PyObject *PyMatrix_iconj(PyMatrixObject *self, PyObject *args)
 
 static PyObject *PyMatrix_T(PyMatrixObject *self, PyObject *args)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (Matrix_transpose((PyMatrixObject *)self, result))
     {
         Py_DECREF(result);
@@ -1024,14 +996,11 @@ static PyObject *PyMatrix_iT(PyMatrixObject *self, PyObject *args)
 
 static PyObject *PyMatrix_H(PyMatrixObject *self, PyObject *args)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (Matrix_hermite_transpose((PyMatrixObject *)self, result))
     {
         Py_DECREF(result);
@@ -1049,14 +1018,11 @@ static PyObject *PyMatrix_iH(PyMatrixObject *self, PyObject *args)
 
 static PyObject *PyMatrix_kronecker(const PyMatrixObject *self, PyObject *other)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
         if (Matrix_kronecker((PyMatrixObject *)self, (PyMatrixObject *)other, result))
@@ -1072,14 +1038,11 @@ static PyObject *PyMatrix_kronecker(const PyMatrixObject *self, PyObject *other)
 
 static PyObject *PyMatrix_hadamard(const PyMatrixObject *self, PyObject *other)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (PyMatrix_Check(self) && PyMatrix_Check(other))
     {
         if (Matrix_hadamard((PyMatrixObject *)self, (PyMatrixObject *)other, result))
@@ -1095,14 +1058,11 @@ static PyObject *PyMatrix_hadamard(const PyMatrixObject *self, PyObject *other)
 
 static PyObject *PyMatrix_vstack(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (!PyMatrix_Check(args[0]))
     {
         PyErr_Format(PyExc_TypeError, "vstack get unsupport %s object on index 0", args[0]->ob_type->tp_name);
@@ -1149,14 +1109,11 @@ static PyObject *PyMatrix_vstack(PyObject *self, PyObject *const *args, Py_ssize
 
 static PyObject *PyMatrix_hstack(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
 {
-    PyMatrixObject *result = nullptr;
-    result = PyObject_New(PyMatrixObject, &PyMatrix_Type);
+    PyMatrixObject *result = internal_new_PyMatrix();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
-    result->elements = nullptr;
     if (!PyMatrix_Check(args[0]))
     {
         PyErr_Format(PyExc_TypeError, "hstack get unsupport %s object on index 0", args[0]->ob_type->tp_name);

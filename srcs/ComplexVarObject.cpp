@@ -53,6 +53,18 @@ int assignComplexVar_withExc(PyObject *value, ComplexVar &target)
     return 0;
 }
 
+PyComplexVarObject *internal_new_PyComplexVar()
+{
+    PyComplexVarObject *result = nullptr;
+    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    return result;
+}
+
 static void PyComplexVar_dealloc(PyComplexVarObject *self)
 {
     Py_TYPE(self)->tp_free((PyObject *)self);
@@ -177,11 +189,9 @@ static PyObject *PyComplexVar_new(PyTypeObject *type, PyObject *args, PyObject *
 
 static PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyComplexVar_Check(self))
@@ -216,11 +226,9 @@ static PyObject *PyComplexVar_add(PyObject *self, PyObject *other)
 
 static PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyComplexVar_Check(self))
@@ -255,11 +263,9 @@ static PyObject *PyComplexVar_subtract(PyObject *self, PyObject *other)
 
 static PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyComplexVar_Check(self))
@@ -294,11 +300,9 @@ static PyObject *PyComplexVar_multiply(PyObject *self, PyObject *other)
 
 static PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyComplexVar_Check(self))
@@ -333,10 +337,8 @@ static PyObject *PyComplexVar_remainder(PyObject *self, PyObject *other)
 
 static PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *D = nullptr;
-    D = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
-    PyComplexVarObject *M = nullptr;
-    M = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *D = internal_new_PyComplexVar();
+    PyComplexVarObject *M = internal_new_PyComplexVar();
     if (!D || !M)
     {
         Py_XDECREF(D);
@@ -384,11 +386,9 @@ static PyObject *PyComplexVar_divmod(PyObject *self, PyObject *other)
 
 static PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *mod)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     ComplexVar powvalue;
@@ -443,11 +443,9 @@ static PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *m
 
 static PyObject *PyComplexVar_negative(PyObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_neg(((PyComplexVarObject *)self)->num);
@@ -456,11 +454,9 @@ static PyObject *PyComplexVar_negative(PyObject *self)
 
 static PyObject *PyComplexVar_positive(PyObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ((PyComplexVarObject *)self)->num;
@@ -491,8 +487,7 @@ static int PyComplexVar_bool(PyObject *self)
 
 static PyObject *PyComplexVar_invert(PyObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
         return nullptr;
@@ -577,11 +572,9 @@ static PyObject *PyComplexVar_inplace_power(PyComplexVarObject *self, PyObject *
 
 static PyObject *PyComplexVar_floor_divide(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyComplexVar_Check(self))
@@ -616,11 +609,9 @@ static PyObject *PyComplexVar_floor_divide(PyObject *self, PyObject *other)
 
 static PyObject *PyComplexVar_true_divide(PyObject *self, PyObject *other)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyComplexVar_Check(self))
@@ -681,11 +672,9 @@ static PyObject *PyComplexVar_inplace_true_divide(PyComplexVarObject *self, PyOb
 
 static PyObject *PyComplexVar_conj(PyComplexVarObject *self, PyObject *args)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_conj(self->num);
@@ -701,11 +690,9 @@ static PyObject *PyComplexVar_iconj(PyComplexVarObject *self, PyObject *args)
 
 static PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_exp(self->num);
@@ -714,11 +701,9 @@ static PyObject *PyComplexVar_exp(PyComplexVarObject *self, PyObject *args)
 
 static PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_ln(self->num);
@@ -727,11 +712,9 @@ static PyObject *PyComplexVar_ln(PyComplexVarObject *self, PyObject *args)
 
 static PyObject *PyComplexVar_sqrt(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_sqrt(self->num);
@@ -740,11 +723,9 @@ static PyObject *PyComplexVar_sqrt(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_sin(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_sin(self->num);
@@ -753,11 +734,9 @@ static PyObject *PyComplexVar_sin(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_cos(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_cos(self->num);
@@ -766,11 +745,9 @@ static PyObject *PyComplexVar_cos(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_tan(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_tan(self->num);
@@ -779,11 +756,9 @@ static PyObject *PyComplexVar_tan(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_cot(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_cot(self->num);
@@ -792,11 +767,9 @@ static PyObject *PyComplexVar_cot(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_sec(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_sec(self->num);
@@ -805,11 +778,9 @@ static PyObject *PyComplexVar_sec(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_csc(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_csc(self->num);
@@ -818,11 +789,9 @@ static PyObject *PyComplexVar_csc(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arcsin(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arcsin(self->num);
@@ -831,11 +800,9 @@ static PyObject *PyComplexVar_arcsin(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arccos(self->num);
@@ -844,11 +811,9 @@ static PyObject *PyComplexVar_arccos(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arctan(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arctan(self->num);
@@ -857,11 +822,9 @@ static PyObject *PyComplexVar_arctan(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arccot(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arccot(self->num);
@@ -870,11 +833,9 @@ static PyObject *PyComplexVar_arccot(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arcsec(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arcsec(self->num);
@@ -883,11 +844,9 @@ static PyObject *PyComplexVar_arcsec(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arccsc(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arccsc(self->num);
@@ -896,11 +855,9 @@ static PyObject *PyComplexVar_arccsc(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_sinh(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_sinh(self->num);
@@ -909,11 +866,9 @@ static PyObject *PyComplexVar_sinh(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_cosh(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_cosh(self->num);
@@ -922,11 +877,9 @@ static PyObject *PyComplexVar_cosh(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_tanh(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_tanh(self->num);
@@ -935,11 +888,9 @@ static PyObject *PyComplexVar_tanh(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_coth(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_coth(self->num);
@@ -948,11 +899,9 @@ static PyObject *PyComplexVar_coth(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_sech(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_sech(self->num);
@@ -961,11 +910,9 @@ static PyObject *PyComplexVar_sech(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_csch(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_csch(self->num);
@@ -974,11 +921,9 @@ static PyObject *PyComplexVar_csch(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arcsinh(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arcsinh(self->num);
@@ -987,11 +932,9 @@ static PyObject *PyComplexVar_arcsinh(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arccosh(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arccosh(self->num);
@@ -1000,11 +943,9 @@ static PyObject *PyComplexVar_arccosh(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arctanh(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arctanh(self->num);
@@ -1013,11 +954,9 @@ static PyObject *PyComplexVar_arctanh(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arccoth(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arccoth(self->num);
@@ -1026,11 +965,9 @@ static PyObject *PyComplexVar_arccoth(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arcsech(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arcsech(self->num);
@@ -1039,11 +976,9 @@ static PyObject *PyComplexVar_arcsech(PyComplexVarObject *self)
 
 static PyObject *PyComplexVar_arccsch(PyComplexVarObject *self)
 {
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_arccsch(self->num);
@@ -1058,11 +993,9 @@ static PyObject *PyComplexVar_log(PyComplexVarObject *self, PyObject *base)
         PyErr_SetNone(PyExc_TypeError);
         return nullptr;
     }
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_log(self->num, tmp);
@@ -1077,11 +1010,9 @@ static PyObject *PyComplexVar_rlog(PyComplexVarObject *self, PyObject *neur)
         PyErr_SetNone(PyExc_TypeError);
         return nullptr;
     }
-    PyComplexVarObject *result = nullptr;
-    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    PyComplexVarObject *result = internal_new_PyComplexVar();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = ComplexVar_log(tmp, self->num);

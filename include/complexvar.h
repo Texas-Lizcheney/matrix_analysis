@@ -80,9 +80,10 @@ struct PyComplexVarObject
     ComplexVar num;
 };
 
-int assignComplexVar(PyObject *, ComplexVar &);
-int assignComplexVar_withExc(PyObject *, ComplexVar &);
 extern PyTypeObject PyComplexVar_Type;
 #define PyComplexVar_Check(op) PyObject_TypeCheck(op, &PyComplexVar_Type)
 #define PyComplexVar_CheckExact(op) Py_IS_TYPE(op, &PyComplexVar_Type)
 #define CanBeComplexVar(op) (PyComplexVar_CheckExact(op) || Py_IsUnsure(op) || PyLong_CheckExact(op) || PyFloat_CheckExact(op) || PyComplex_CheckExact(op))
+int assignComplexVar(PyObject *, ComplexVar &);
+int assignComplexVar_withExc(PyObject *, ComplexVar &);
+PyComplexVarObject *internal_new_PyComplexVar();

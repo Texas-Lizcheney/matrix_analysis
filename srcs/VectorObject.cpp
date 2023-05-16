@@ -3,6 +3,19 @@
 extern int doubleprecision;
 extern PyObject *PyExc_ShapeError;
 
+PyVectorObject *internal_new_PyVector()
+{
+    PyVectorObject *result = nullptr;
+    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->matrix.elements = nullptr;
+    return result;
+}
+
 static PyObject *PyVector_repr(PyVectorObject *self)
 {
     std::stringstream repr;
@@ -483,15 +496,12 @@ static int PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds)
 
 static PyObject *PyVector_conj(PyVectorObject *self, PyObject *args)
 {
-    PyVectorObject *result = nullptr;
-    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    PyVectorObject *result = internal_new_PyVector();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->isHor = self->isHor;
-    result->matrix.elements = nullptr;
     if (Matrix_conj((PyMatrixObject *)self, &(result->matrix)))
     {
         Py_DECREF(result);
@@ -509,15 +519,12 @@ static PyObject *PyVector_iconj(PyVectorObject *self, PyObject *args)
 
 static PyObject *PyVector_T(PyVectorObject *self, PyObject *args)
 {
-    PyVectorObject *result = nullptr;
-    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    PyVectorObject *result = internal_new_PyVector();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->isHor = !self->isHor;
-    result->matrix.elements = nullptr;
     if (Matrix_copy(&(self->matrix), &(result->matrix)))
     {
         Py_DECREF(result);
@@ -537,15 +544,12 @@ static PyObject *PyVector_iT(PyVectorObject *self, PyObject *args)
 
 static PyObject *PyVector_H(PyVectorObject *self, PyObject *args)
 {
-    PyVectorObject *result = nullptr;
-    result = PyObject_New(PyVectorObject, &PyVector_Type);
+    PyVectorObject *result = internal_new_PyVector();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->isHor = !self->isHor;
-    result->matrix.elements = nullptr;
     if (Matrix_copy(&(self->matrix), &(result->matrix)))
     {
         Py_DECREF(result);

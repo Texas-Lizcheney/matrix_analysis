@@ -70,6 +70,7 @@ int PyMatrixAlloc(PyMatrixObject *);
 int PyMatrixAssign_withcheck(PyMatrixObject *, int, int, const ComplexVar &);
 int PyMatrixGet_withcheck(const PyMatrixObject *const, int, int, ComplexVar &);
 PyObject *PyMatrix_copy(const PyMatrixObject *const);
+PyMatrixObject *internal_new_PyMatrix();
 
 // Matrix module methods
 PyObject *PyMatrix_reshape(PyObject *, PyObject *, PyObject *);
