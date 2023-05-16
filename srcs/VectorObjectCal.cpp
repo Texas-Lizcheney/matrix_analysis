@@ -14,4 +14,5 @@ int Vector_dot(const PyVectorObject *const x, const PyVectorObject *const y, Com
     {
         result += PyVectorGetitem(x, i) * ComplexVar_conj(PyVectorGetitem(y, i));
     }
+    return 0;
 }

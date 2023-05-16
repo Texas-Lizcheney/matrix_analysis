@@ -76,6 +76,7 @@ error_double arccsch(const error_double &);
 error_double exp(const error_double &);
 error_double log(const error_double &);
 error_double pow(const error_double &, const error_double &);
+error_double fastpow(const error_double &, const int);
 error_double abs(const error_double &);
 error_double sqrt(const error_double &);
 error_double atan2(const error_double &, const error_double &);
@@ -93,3 +94,4 @@ struct PyErrordoubleObject
 extern PyTypeObject PyErrordouble_Type;
 #define PyErrordouble_Check(op) PyObject_TypeCheck(op, &PyErrordouble_Type)
 #define PyErrordouble_CheckExact(op) Py_IS_TYPE(op, &PyErrordouble_Type)
+PyErrordoubleObject* internal_new_PyErrordouble();

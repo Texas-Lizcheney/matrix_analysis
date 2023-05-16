@@ -292,3 +292,12 @@ class _SupportHadamard(Protocol[_E, T]):
 
 def hadamard(x: _SupportHadamard[_E, T], y: _SupportHadamard[_E, T]) -> T:
     ...
+
+
+class _SupportDot(Protocol[_E, T]):
+    def __dot__(self, _other: _E) -> T:
+        ...
+
+
+def dot(x: _SupportDot[_E, T], y: _SupportDot[_E, T]) -> T:
+    ...

@@ -239,6 +239,9 @@ class vector(matrix):
     def iH(self) -> Self:
         ...
 
+    def __dot__(self, other: matrix) -> variable:
+        ...
+
     @overload
     def __init__(self, dims: int, *, fill: __support_num = Unsure, is_horizontal: bool | None = None) -> None:
         ...

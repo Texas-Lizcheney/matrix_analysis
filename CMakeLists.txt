@@ -16,6 +16,7 @@ add_library("matrix" STATIC
 )
 add_library("vector" STATIC
     srcs/VectorObject.cpp
+    srcs/VectorObjectCal.cpp
 )
 add_library("var" STATIC
     srcs/ComplexVar.cpp

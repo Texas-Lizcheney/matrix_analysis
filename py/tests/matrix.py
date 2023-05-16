@@ -609,3 +609,12 @@ class Test_vector(externed_Testcase):
         self.assertEqual(k2, id(y))
         self.assertEqual(sys.getrefcount(y), 2)
         self.assertTrue(y.is_horizontal)
+
+    def test_dot(self):
+        x = matrix_analysis.matrix.vector([1, 2, 3+1j])
+        y = matrix_analysis.matrix.vector([2, 3, 2+1j])
+        self.assertAlmostEqual(matrix_analysis.funcs.dot(x, y), 15-1j)
+        with self.assertRaises(TypeError):
+            matrix_analysis.funcs.dot(x, 1)  # type: ignore
+        with self.assertRaises(matrix_analysis.ShapeError):
+            matrix_analysis.funcs.dot(x, matrix_analysis.matrix.vector([1, 2]))

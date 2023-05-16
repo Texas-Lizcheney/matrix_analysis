@@ -565,6 +565,27 @@ static PyObject *PyVector_iH(PyVectorObject *self, PyObject *args)
     return (PyObject *)self;
 }
 
+static PyObject *PyVector_dot(PyVectorObject *self, PyObject *other)
+{
+    if (!PyVector_Check(other))
+    {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    PyComplexVarObject *result = nullptr;
+    result = PyObject_New(PyComplexVarObject, &PyComplexVar_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    if (Vector_dot(self, (PyVectorObject *)other, result->num))
+    {
+        Py_DECREF(result);
+        return nullptr;
+    }
+    return (PyObject *)result;
+}
+
 // getset
 
 PyObject *PyVector_get_ishor(PyVectorObject *self, void *closure)
@@ -592,6 +613,7 @@ static PyMethodDef PyVector_methods[] = {
     {"iT", (PyCFunction)PyVector_iT, METH_NOARGS, nullptr},
     {"H", (PyCFunction)PyVector_H, METH_NOARGS, nullptr},
     {"iH", (PyCFunction)PyVector_iH, METH_NOARGS, nullptr},
+    {"__dot__", (PyCFunction)PyVector_dot, METH_O, nullptr},
     nullptr,
 };
 

@@ -87,3 +87,4 @@ def __binaryfunc_method(name: str, has_r: bool = True):
 log = __binaryfunc_method("log")
 hadamard = __binaryfunc_method("hadamard", False)
 kronecker = __binaryfunc_method("kronecker", False)
+dot = __binaryfunc_method("dot", False)

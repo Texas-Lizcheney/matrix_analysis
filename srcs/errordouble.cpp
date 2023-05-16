@@ -1,8 +1,10 @@
 #include <errordouble.h>
 extern bool print_error;
-const static error_double edOne = {1};
-const static error_double edTwo = {2};
-const static error_double edHalfPi = {1.5707963267948966192313216916397514420985846996875529104874722961539L};
+error_double edOne = {1};
+error_double edTwo = {2};
+error_double edHalfPi = {1.5707963267948966192313216916397514420985846996875529104874722961539L};
+error_double edPi = {std::numbers::pi_v<double>};
+error_double edTwoPi = {6.2831853071795864769252867665590057683943387987502116419498891846L};
 
 error_double::error_double(double value) noexcept : value(value),
                                                     error(cal_original_error(value))
@@ -203,7 +205,8 @@ std::ostream &operator<<(std::ostream &os, const error_double &x)
 
 error_double sin(const error_double &x)
 {
-    return error_double(sin(x.value), abs(cos(x.value) * x.error));
+    error_double tmp = x % edTwoPi;
+    return error_double(sin(tmp.value), abs(cos(tmp.value) * tmp.error));
 }
 
 error_double cos(const error_double &x)
@@ -386,6 +389,42 @@ error_double pow(const error_double &x, const error_double &y)
 {
     double tmp = pow(x.value, y.value);
     return error_double(tmp, log(x.value) * tmp * x.error + y.value * pow(x.value, y.value - 1) * y.error);
+}
+
+error_double fastpow(const error_double &x, const int exp)
+{
+    if (exp == 0)
+    {
+        return {0, 0};
+    }
+    int tmp_exp = abs(exp);
+    error_double tmp_x = x;
+    error_double result = {1, 0};
+    if (exp > 0)
+    {
+        while (tmp_exp)
+        {
+            if (tmp_exp & 1)
+            {
+                result *= tmp_x;
+            }
+            tmp_x *= tmp_x;
+            tmp_exp >>= 1;
+        }
+    }
+    else
+    {
+        while (tmp_exp)
+        {
+            if (tmp_exp & 1)
+            {
+                result /= tmp_x;
+            }
+            tmp_x *= tmp_x;
+            tmp_exp >>= 1;
+        }
+    }
+    return result;
 }
 
 error_double abs(const error_double &x)

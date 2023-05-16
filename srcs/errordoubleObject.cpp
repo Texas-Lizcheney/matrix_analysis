@@ -2,6 +2,19 @@
 
 extern int doubleprecision;
 
+PyErrordoubleObject *internal_new_PyErrordouble()
+{
+    PyErrordoubleObject *result = nullptr;
+    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    if (!result)
+    {
+        PyErr_SetNone(PyExc_MemoryError);
+        return nullptr;
+    }
+    result->parent = nullptr;
+    return result;
+}
+
 static void PyErrordoubleObject_dealloc(PyErrordoubleObject *self)
 {
     self->parent = nullptr;
@@ -112,11 +125,9 @@ static PyObject *PyErrordoubleObject_new(PyTypeObject *type, PyObject *args, PyO
 
 static PyObject *PyErrordouble_add(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyErrordouble_Check(self))
@@ -165,11 +176,9 @@ static PyObject *PyErrordouble_add(PyObject *self, PyObject *other)
 
 static PyObject *PyErrordouble_subtract(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyErrordouble_Check(self))
@@ -218,11 +227,9 @@ static PyObject *PyErrordouble_subtract(PyObject *self, PyObject *other)
 
 static PyObject *PyErrordouble_multiply(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyErrordouble_Check(self))
@@ -271,11 +278,9 @@ static PyObject *PyErrordouble_multiply(PyObject *self, PyObject *other)
 
 static PyObject *PyErrordouble_remainder(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyErrordouble_Check(self))
@@ -324,10 +329,8 @@ static PyObject *PyErrordouble_remainder(PyObject *self, PyObject *other)
 
 static PyObject *PyErrordouble_divmod(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *D = nullptr;
-    D = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
-    PyErrordoubleObject *M = nullptr;
-    M = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *D = internal_new_PyErrordouble();
+    PyErrordoubleObject *M = internal_new_PyErrordouble();
     if (!D || !M)
     {
         Py_XDECREF(D);
@@ -412,12 +415,12 @@ static PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *
         }
         else if (PyLong_Check(other))
         {
-            double tmp = PyLong_AsDouble(other);
+            int tmp = PyLong_AsLong(other);
             if (tmp == -1 && PyErr_Occurred())
             {
                 return nullptr;
             }
-            powvalue = pow(((PyErrordoubleObject *)self)->num, tmp);
+            powvalue = fastpow(((PyErrordoubleObject *)self)->num, tmp);
         }
         else
         {
@@ -426,27 +429,7 @@ static PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *
     }
     else if (PyFloat_Check(self))
     {
-        if (PyErrordouble_Check(other))
-        {
-            powvalue = pow(PyFloat_AsDouble(self), ((PyErrordoubleObject *)other)->num);
-        }
-        else if (PyFloat_Check(other))
-        {
-            powvalue = pow(PyFloat_AsDouble(self), PyFloat_AsDouble(other));
-        }
-        else if (PyLong_Check(other))
-        {
-            double tmp = PyLong_AsDouble(other);
-            if (tmp == -1 && PyErr_Occurred())
-            {
-                return nullptr;
-            }
-            powvalue = pow(PyFloat_AsDouble(self), tmp);
-        }
-        else
-        {
-            Py_RETURN_NOTIMPLEMENTED;
-        }
+        powvalue = pow(PyFloat_AsDouble(self), ((PyErrordoubleObject *)other)->num);
     }
     else if (PyLong_Check(self))
     {
@@ -455,37 +438,15 @@ static PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *
         {
             return nullptr;
         }
-        if (PyErrordouble_Check(other))
-        {
-            powvalue = pow(tmp, ((PyErrordoubleObject *)other)->num);
-        }
-        else if (PyFloat_Check(other))
-        {
-            powvalue = pow(tmp, PyFloat_AsDouble(other));
-        }
-        else if (PyLong_Check(other))
-        {
-            double tmpp = PyLong_AsDouble(other);
-            if (tmpp == -1 && PyErr_Occurred())
-            {
-                return nullptr;
-            }
-            powvalue = pow(tmp, tmpp);
-        }
-        else
-        {
-            Py_RETURN_NOTIMPLEMENTED;
-        }
+        powvalue = pow(tmp, ((PyErrordoubleObject *)other)->num);
     }
     else
     {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (Py_IsNone(mod))
@@ -520,11 +481,9 @@ static PyObject *PyErrordouble_power(PyObject *self, PyObject *other, PyObject *
 
 static PyObject *PyErrordouble_negative(PyObject *self)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = -((PyErrordoubleObject *)self)->num;
@@ -533,11 +492,9 @@ static PyObject *PyErrordouble_negative(PyObject *self)
 
 static PyObject *PyErrordouble_positive(PyObject *self)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = +((PyErrordoubleObject *)self)->num;
@@ -546,11 +503,9 @@ static PyObject *PyErrordouble_positive(PyObject *self)
 
 static PyObject *PyErrordouble_absolute(PyObject *self)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = abs(((PyErrordoubleObject *)self)->num);
@@ -737,11 +692,9 @@ static PyObject *PyErrordouble_inplace_power(PyErrordoubleObject *self, PyObject
 
 static PyObject *PyErrordouble_floor_divide(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyErrordouble_Check(self))
@@ -790,11 +743,9 @@ static PyObject *PyErrordouble_floor_divide(PyObject *self, PyObject *other)
 
 static PyObject *PyErrordouble_true_divide(PyObject *self, PyObject *other)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     if (PyErrordouble_Check(self))
@@ -924,11 +875,9 @@ static PyObject *PyErrordouble_round(PyErrordoubleObject *self, PyObject *const 
 
 static PyObject *PyErrordouble_exp(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = exp(self->num);
@@ -937,11 +886,9 @@ static PyObject *PyErrordouble_exp(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_ln(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = log(self->num);
@@ -950,11 +897,9 @@ static PyObject *PyErrordouble_ln(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_sqrt(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = sqrt(self->num);
@@ -963,11 +908,9 @@ static PyObject *PyErrordouble_sqrt(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_sin(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = sin(self->num);
@@ -976,11 +919,9 @@ static PyObject *PyErrordouble_sin(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_cos(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = cos(self->num);
@@ -989,11 +930,9 @@ static PyObject *PyErrordouble_cos(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_tan(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = tan(self->num);
@@ -1002,11 +941,9 @@ static PyObject *PyErrordouble_tan(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_cot(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = cot(self->num);
@@ -1015,11 +952,9 @@ static PyObject *PyErrordouble_cot(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_sec(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = sec(self->num);
@@ -1028,11 +963,9 @@ static PyObject *PyErrordouble_sec(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_csc(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = csc(self->num);
@@ -1041,11 +974,9 @@ static PyObject *PyErrordouble_csc(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arcsin(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arcsin(self->num);
@@ -1054,11 +985,9 @@ static PyObject *PyErrordouble_arcsin(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arccos(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arccos(self->num);
@@ -1067,11 +996,9 @@ static PyObject *PyErrordouble_arccos(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arctan(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arctan(self->num);
@@ -1080,11 +1007,9 @@ static PyObject *PyErrordouble_arctan(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arccot(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arccot(self->num);
@@ -1093,11 +1018,9 @@ static PyObject *PyErrordouble_arccot(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arcsec(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arcsec(self->num);
@@ -1106,11 +1029,9 @@ static PyObject *PyErrordouble_arcsec(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arccsc(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arccsc(self->num);
@@ -1119,11 +1040,9 @@ static PyObject *PyErrordouble_arccsc(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_sinh(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = sinh(self->num);
@@ -1132,11 +1051,9 @@ static PyObject *PyErrordouble_sinh(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_cosh(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = cosh(self->num);
@@ -1145,11 +1062,9 @@ static PyObject *PyErrordouble_cosh(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_tanh(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = tanh(self->num);
@@ -1158,11 +1073,9 @@ static PyObject *PyErrordouble_tanh(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_coth(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = coth(self->num);
@@ -1171,11 +1084,9 @@ static PyObject *PyErrordouble_coth(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_sech(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = sech(self->num);
@@ -1184,11 +1095,9 @@ static PyObject *PyErrordouble_sech(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_csch(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = csch(self->num);
@@ -1197,11 +1106,9 @@ static PyObject *PyErrordouble_csch(PyErrordoubleObject *self, PyObject *args)
 
 static PyObject *PyErrordouble_arcsinh(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arcsinh(self->num);
@@ -1210,11 +1117,9 @@ static PyObject *PyErrordouble_arcsinh(PyErrordoubleObject *self, PyObject *args
 
 static PyObject *PyErrordouble_arccosh(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arccosh(self->num);
@@ -1223,11 +1128,9 @@ static PyObject *PyErrordouble_arccosh(PyErrordoubleObject *self, PyObject *args
 
 static PyObject *PyErrordouble_arctanh(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arctanh(self->num);
@@ -1236,11 +1139,9 @@ static PyObject *PyErrordouble_arctanh(PyErrordoubleObject *self, PyObject *args
 
 static PyObject *PyErrordouble_arccoth(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arccoth(self->num);
@@ -1249,11 +1150,9 @@ static PyObject *PyErrordouble_arccoth(PyErrordoubleObject *self, PyObject *args
 
 static PyObject *PyErrordouble_arcsech(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arcsech(self->num);
@@ -1262,11 +1161,9 @@ static PyObject *PyErrordouble_arcsech(PyErrordoubleObject *self, PyObject *args
 
 static PyObject *PyErrordouble_arccsch(PyErrordoubleObject *self, PyObject *args)
 {
-    PyErrordoubleObject *result = nullptr;
-    result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
     if (!result)
     {
-        PyErr_SetNone(PyExc_MemoryError);
         return nullptr;
     }
     result->num = arccsch(self->num);
@@ -1278,11 +1175,9 @@ static PyObject *PyErrordouble_log(PyErrordoubleObject *self, PyObject *base)
     try
     {
         error_double tmp = {base};
-        PyErrordoubleObject *result = nullptr;
-        result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+        PyErrordoubleObject *result = internal_new_PyErrordouble();
         if (!result)
         {
-            PyErr_SetNone(PyExc_MemoryError);
             return nullptr;
         }
         result->num = log(self->num) / log(tmp);
@@ -1301,11 +1196,9 @@ static PyObject *PyErrordouble_rlog(PyErrordoubleObject *self, PyObject *base)
     try
     {
         error_double tmp = {base};
-        PyErrordoubleObject *result = nullptr;
-        result = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+        PyErrordoubleObject *result = internal_new_PyErrordouble();
         if (!result)
         {
-            PyErr_SetNone(PyExc_MemoryError);
             return nullptr;
         }
         result->num = log(tmp) / log(self->num);

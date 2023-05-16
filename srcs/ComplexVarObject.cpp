@@ -412,27 +412,13 @@ static PyObject *PyComplexVar_power(PyObject *self, PyObject *other, PyObject *m
     }
     else
     {
-        if (otherIsComplexVar)
+        ComplexVar tmp;
+        if (assignComplexVar(self, tmp))
         {
-            ComplexVar tmp;
-            if (assignComplexVar(self, tmp))
-            {
-                Py_DECREF(result);
-                Py_RETURN_NOTIMPLEMENTED;
-            }
-            powvalue = ComplexVar_pow(tmp, ((PyComplexVarObject *)other)->num);
+            Py_DECREF(result);
+            Py_RETURN_NOTIMPLEMENTED;
         }
-        else
-        {
-            ComplexVar tmpx;
-            ComplexVar tmpy;
-            if (assignComplexVar(self, tmpx) || assignComplexVar(other, tmpy))
-            {
-                Py_DECREF(result);
-                Py_RETURN_NOTIMPLEMENTED;
-            }
-            powvalue = ComplexVar_pow(tmpx, tmpy);
-        }
+        powvalue = ComplexVar_pow(tmp, ((PyComplexVarObject *)other)->num);
     }
     if (Py_IsNone(mod))
     {
@@ -1106,8 +1092,11 @@ static PyObject *PyComplexVar_rlog(PyComplexVarObject *self, PyObject *neur)
 
 static PyObject *PyComplexVar_get_real(PyComplexVarObject *self, void *closure)
 {
-    PyErrordoubleObject *real = nullptr;
-    real = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *real = internal_new_PyErrordouble();
+    if (!real)
+    {
+        return nullptr;
+    }
     real->num = self->num.real;
     real->parent = &(self->num.real);
     return (PyObject *)real;
@@ -1134,8 +1123,11 @@ static int PyComplexVar_set_real(PyComplexVarObject *self, PyObject *value, void
 
 static PyObject *PyComplexVar_get_imag(PyComplexVarObject *self, void *closure)
 {
-    PyErrordoubleObject *imag = nullptr;
-    imag = PyObject_New(PyErrordoubleObject, &PyErrordouble_Type);
+    PyErrordoubleObject *imag = internal_new_PyErrordouble();
+    if (!imag)
+    {
+        return nullptr;
+    }
     imag->num = self->num.imag;
     imag->parent = &(self->num.imag);
     return (PyObject *)imag;
