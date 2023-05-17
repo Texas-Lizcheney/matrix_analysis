@@ -590,6 +590,60 @@ static PyObject *PyVector_dot(PyVectorObject *self, PyObject *other)
     return (PyObject *)result;
 }
 
+static PyObject *PyVector_minkowsi_distance(PyVectorObject *self, PyObject *p)
+{
+    int tmp = PyLong_AsLong(p);
+    if (tmp == -1 && PyErr_Occurred())
+    {
+        return nullptr;
+    }
+    if (tmp <= 0)
+    {
+        PyErr_Format(PyExc_ValueError, "invalid p %ld", tmp);
+        return nullptr;
+    }
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
+    if (!result)
+    {
+        return nullptr;
+    }
+    result->num = Vector_minkowsi_distance(self, tmp);
+    return (PyObject *)result;
+}
+
+static PyObject *PyVector_L1(PyVectorObject *self, PyObject *p)
+{
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
+    if (!result)
+    {
+        return nullptr;
+    }
+    result->num = Vector_L1(self);
+    return (PyObject *)result;
+}
+
+static PyObject *PyVector_L2(PyVectorObject *self, PyObject *p)
+{
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
+    if (!result)
+    {
+        return nullptr;
+    }
+    result->num = Vector_L2(self);
+    return (PyObject *)result;
+}
+
+static PyObject *PyVector_Linf(PyVectorObject *self, PyObject *p)
+{
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
+    if (!result)
+    {
+        return nullptr;
+    }
+    result->num = Vector_Linf(self);
+    return (PyObject *)result;
+}
+
 // getset
 
 PyObject *PyVector_get_ishor(PyVectorObject *self, void *closure)
@@ -618,6 +672,10 @@ static PyMethodDef PyVector_methods[] = {
     {"H", (PyCFunction)PyVector_H, METH_NOARGS, nullptr},
     {"iH", (PyCFunction)PyVector_iH, METH_NOARGS, nullptr},
     {"__dot__", (PyCFunction)PyVector_dot, METH_O, nullptr},
+    {"minkowsi_distance", (PyCFunction)PyVector_minkowsi_distance, METH_O, nullptr},
+    {"L1", (PyCFunction)PyVector_L1, METH_NOARGS, nullptr},
+    {"L2", (PyCFunction)PyVector_L2, METH_NOARGS, nullptr},
+    {"Linf", (PyCFunction)PyVector_Linf, METH_NOARGS, nullptr},
     nullptr,
 };
 

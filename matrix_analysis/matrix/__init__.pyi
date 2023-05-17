@@ -1,6 +1,6 @@
 from typing import overload, TypeVar, Self
 from numpy import ndarray
-from ..var import variable
+from ..var import variable, errordouble
 from ..__init__ import unsure, Unsure
 
 __support_num = unsure | int | float | complex | variable
@@ -240,6 +240,18 @@ class vector(matrix):
         ...
 
     def __dot__(self, other: matrix) -> variable:
+        ...
+
+    def minkowsi_distance(self, p: int) -> errordouble:
+        ...
+
+    def L1(self) -> errordouble:
+        ...
+
+    def L2(self) -> errordouble:
+        ...
+
+    def Linf(self) -> errordouble:
         ...
 
     @overload

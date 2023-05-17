@@ -2,6 +2,22 @@
 
 extern int doubleprecision;
 
+int assignErrordouble(PyObject *value, error_double &target)
+{
+    if (!value)
+    {
+        target.value = 0;
+        target.error = 0;
+    }
+    double tmp = PyFloat_AsDouble(value);
+    if (tmp == -1 && PyErr_Occurred())
+    {
+        return -1;
+    }
+    target = tmp;
+    return 0;
+}
+
 PyErrordoubleObject *internal_new_PyErrordouble()
 {
     PyErrordoubleObject *result = nullptr;
@@ -94,11 +110,10 @@ static int PyErrordoubleObject_init(PyErrordoubleObject *self, PyObject *args, P
         (char *)"error",
         nullptr,
     };
-    double tmp;
-    if (PyArg_ParseTupleAndKeywords(args, kwds, "d|", kwlist0, &tmp))
+    PyObject *v = nullptr;
+    if (PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist0, &v))
     {
-        self->num = tmp;
-        return 0;
+        return assignErrordouble(v, self->num);
     }
     PyErr_Clear();
     if (PyArg_ParseTupleAndKeywords(args, kwds, "dd|", kwlist1, &self->num.value, &self->num.error))
@@ -1172,44 +1187,34 @@ static PyObject *PyErrordouble_arccsch(PyErrordoubleObject *self, PyObject *args
 
 static PyObject *PyErrordouble_log(PyErrordoubleObject *self, PyObject *base)
 {
-    try
+    error_double tmp;
+    if (assignErrordouble(base, tmp))
     {
-        error_double tmp = {base};
-        PyErrordoubleObject *result = internal_new_PyErrordouble();
-        if (!result)
-        {
-            return nullptr;
-        }
-        result->num = log(self->num) / log(tmp);
-        return (PyObject *)result;
-    }
-    catch (const std::exception &e)
-    {
-        PyErr_SetNone(PyExc_TypeError);
         return nullptr;
     }
-    return nullptr;
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
+    if (!result)
+    {
+        return nullptr;
+    }
+    result->num = log(self->num) / log(tmp);
+    return (PyObject *)result;
 }
 
 static PyObject *PyErrordouble_rlog(PyErrordoubleObject *self, PyObject *base)
 {
-    try
+    error_double tmp;
+    if (assignErrordouble(base, tmp))
     {
-        error_double tmp = {base};
-        PyErrordoubleObject *result = internal_new_PyErrordouble();
-        if (!result)
-        {
-            return nullptr;
-        }
-        result->num = log(tmp) / log(self->num);
-        return (PyObject *)result;
-    }
-    catch (const std::exception &e)
-    {
-        PyErr_SetNone(PyExc_TypeError);
         return nullptr;
     }
-    return nullptr;
+    PyErrordoubleObject *result = internal_new_PyErrordouble();
+    if (!result)
+    {
+        return nullptr;
+    }
+    result->num = log(tmp) / log(self->num);
+    return (PyObject *)result;
 }
 
 // getset

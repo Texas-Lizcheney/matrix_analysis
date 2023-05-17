@@ -1,39 +1,41 @@
 #include <errordouble.h>
 extern bool print_error;
-error_double edOne = {1};
-error_double edTwo = {2};
-error_double edHalfPi = {1.5707963267948966192313216916397514420985846996875529104874722961539L};
+error_double edHalfPi = {1.5707963267948966192313216916397514420985846996875529104874722961539};
 error_double edPi = {std::numbers::pi_v<double>};
-error_double edTwoPi = {6.2831853071795864769252867665590057683943387987502116419498891846L};
 
-error_double::error_double(double value) noexcept : value(value),
-                                                    error(cal_original_error(value))
+error_double::error_double() noexcept
+    : value(0),
+      error(0)
 {
 }
 
-error_double::error_double(double value, double error) noexcept : value(value),
-                                                                  error(error)
+template <is_double T>
+error_double::error_double(T value) noexcept
+    : value(value),
+      error(cal_original_error(value))
 {
 }
 
-error_double::error_double(const error_double &x) noexcept : value(x.value),
-                                                             error(x.error)
+error_double::error_double(int64_t v) noexcept
+    : value(v),
+      error(0)
 {
-}
-
-error_double::error_double(PyObject *x)
-{
-    if (PyErrordouble_Check(x))
+    if (abs(value) >= (1LL << 54))
     {
-        value = ((PyErrordoubleObject *)x)->num.value;
-        error = ((PyErrordoubleObject *)x)->num.error;
+        error = cal_original_error(value);
     }
-    value = PyFloat_AsDouble(x);
-    if (value == -1 && PyErr_Occurred())
-    {
-        throw std::exception();
-    }
-    error = cal_original_error(value);
+}
+
+error_double::error_double(double value, double error) noexcept
+    : value(value),
+      error(error)
+{
+}
+
+error_double::error_double(const error_double &x) noexcept
+    : value(x.value),
+      error(x.error)
+{
 }
 
 error_double error_double::operator+(const error_double &other) const
@@ -186,13 +188,6 @@ void error_double::operator=(const error_double &x)
     return;
 }
 
-void error_double::operator=(const double &x)
-{
-    value = x;
-    error = cal_original_error(x);
-    return;
-}
-
 std::ostream &operator<<(std::ostream &os, const error_double &x)
 {
     os << x.value;
@@ -205,8 +200,7 @@ std::ostream &operator<<(std::ostream &os, const error_double &x)
 
 error_double sin(const error_double &x)
 {
-    error_double tmp = x % edTwoPi;
-    return error_double(sin(tmp.value), abs(cos(tmp.value) * tmp.error));
+    return error_double(sin(x.value), abs(cos(x.value) * x.error));
 }
 
 error_double cos(const error_double &x)
@@ -221,17 +215,17 @@ error_double tan(const error_double &x)
 
 error_double cot(const error_double &x)
 {
-    return edOne / tan(x);
+    return 1 / tan(x);
 }
 
 error_double sec(const error_double &x)
 {
-    return edOne / cos(x);
+    return 1 / cos(x);
 }
 
 error_double csc(const error_double &x)
 {
-    return edOne / sin(x);
+    return 1 / sin(x);
 }
 
 error_double arcsin(const error_double &x)
@@ -281,17 +275,17 @@ error_double arccsc(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return arcsin(edOne / x);
+    return arcsin(1 / x);
 }
 
 error_double sinh(const error_double &x)
 {
-    return (exp(x) - exp(-x)) / edTwo;
+    return (exp(x) - exp(-x)) / 2;
 }
 
 error_double cosh(const error_double &x)
 {
-    return (exp(x) + exp(-x)) / edTwo;
+    return (exp(x) + exp(-x)) / 2;
 }
 
 error_double tanh(const error_double &x)
@@ -306,17 +300,17 @@ error_double coth(const error_double &x)
 
 error_double sech(const error_double &x)
 {
-    return edOne / cosh(x);
+    return 1 / cosh(x);
 }
 
 error_double csch(const error_double &x)
 {
-    return edOne / sinh(x);
+    return 1 / sinh(x);
 }
 
 error_double arcsinh(const error_double &x)
 {
-    return log(x + sqrt(x * x + edOne));
+    return log(x + sqrt(x * x + 1));
 }
 
 error_double arccosh(const error_double &x)
@@ -326,7 +320,7 @@ error_double arccosh(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return log(x + sqrt(x * x - edOne));
+    return log(x + sqrt(x * x - 1));
 }
 
 error_double arctanh(const error_double &x)
@@ -336,7 +330,7 @@ error_double arctanh(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return log((edOne + x) / (edOne - x)) / edTwo;
+    return log((1 + x) / (1 - x)) / 2;
 }
 
 error_double arccoth(const error_double &x)
@@ -346,7 +340,7 @@ error_double arccoth(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return log((x + edOne) / (x - edOne)) / edTwo;
+    return log((x + 1) / (x - 1)) / 2;
 }
 
 error_double arcsech(const error_double &x)
@@ -356,7 +350,7 @@ error_double arcsech(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return arccosh(edOne / x);
+    return arccosh(1 / x);
 }
 
 error_double arccsch(const error_double &x)
@@ -366,7 +360,7 @@ error_double arccsch(const error_double &x)
         PyErr_WarnEx(PyExc_RuntimeWarning, "Out of domain", 2);
         return error_double(std::nan(""));
     }
-    return arcsinh(edOne / x);
+    return arcsinh(1 / x);
 }
 
 error_double exp(const error_double &x)

@@ -30,16 +30,12 @@ int assignComplexVar(PyObject *value, ComplexVar &target)
         target.imag = PyComplex_ImagAsDouble(value);
         return 0;
     }
-    try
-    {
-        target.real = error_double(value);
-        target.imag = 0;
-        target.isArbitrary = false;
-    }
-    catch (std::exception &e)
+    if (assignErrordouble(value, target.real))
     {
         return -1;
     }
+    target.imag = 0;
+    target.isArbitrary = false;
     return 0;
 }
 
@@ -1041,11 +1037,7 @@ static int PyComplexVar_set_real(PyComplexVarObject *self, PyObject *value, void
         self->num.real = 0;
         return 0;
     }
-    try
-    {
-        self->num.real = error_double(value);
-    }
-    catch (std::exception &e)
+    if (assignErrordouble(value, self->num.real))
     {
         return -1;
     }
@@ -1072,11 +1064,7 @@ static int PyComplexVar_set_imag(PyComplexVarObject *self, PyObject *value, void
         self->num.imag = 0;
         return 0;
     }
-    try
-    {
-        self->num.imag = error_double(value);
-    }
-    catch (std::exception &e)
+    if (assignErrordouble(value, self->num.imag))
     {
         return -1;
     }
@@ -1103,14 +1091,12 @@ static int PyComplexVar_set_len(PyComplexVarObject *self, PyObject *value, void 
     {
         PyErr_WarnEx(PyExc_UndefinedWarning, "This object is still undefined", 1);
     }
-    try
-    {
-        setvalue_frompolar(error_double(value), ComplexVar_arg(self->num), self->num);
-    }
-    catch (std::exception &e)
+    error_double tmp;
+    if (assignErrordouble(value, tmp))
     {
         return -1;
     }
+    setvalue_frompolar(tmp, ComplexVar_arg(self->num), self->num);
     return 0;
 }
 
@@ -1140,20 +1126,17 @@ static int PyComplexVar_set_arg(PyComplexVarObject *self, PyObject *value, void 
     {
         PyErr_WarnEx(PyExc_UndefinedWarning, "This object is still undefined", 1);
     }
-    try
-    {
-        error_double arg{value};
-        if (*((bool *)closure))
-        {
-            arg *= std::numbers::pi;
-            arg /= 180;
-        }
-        setvalue_frompolar(ComplexVar_L2(self->num), arg, self->num);
-    }
-    catch (std::exception &e)
+    error_double arg;
+    if (assignErrordouble(value, arg))
     {
         return -1;
     }
+    if (*((bool *)closure))
+    {
+        arg *= std::numbers::pi;
+        arg /= 180;
+    }
+    setvalue_frompolar(ComplexVar_L2(self->num), arg, self->num);
     return 0;
 }
 

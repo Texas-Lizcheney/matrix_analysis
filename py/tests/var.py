@@ -2,6 +2,7 @@ from .Testcase import externed_Testcase
 import matrix_analysis
 import math
 import sys
+import numpy
 Unsure = matrix_analysis.Unsure
 
 
@@ -13,7 +14,7 @@ class Test_errordouble(externed_Testcase):
             z = matrix_analysis.var.errordouble("abc")  # type: ignore
 
     def test_repr(self):
-        x = matrix_analysis.var.errordouble(1)
+        x = matrix_analysis.var.errordouble(1.0)
         self.assertEqual(repr(x), "1")
         matrix_analysis.var.set_print_error(True)
         self.assertEqual(repr(x), "1(±2.220446e-16)")

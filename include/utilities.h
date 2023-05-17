@@ -27,3 +27,5 @@ concept npy_complex = requires(T a) {
     a.real;
     a.imag;
 };
+template <typename T>
+concept is_double = std::is_same_v<T, double>;

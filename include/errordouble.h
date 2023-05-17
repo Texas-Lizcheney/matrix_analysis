@@ -14,10 +14,12 @@ public:
     double value;
     double error;
 
-    error_double(double = 0) noexcept;
+    error_double() noexcept;
+    template <is_double T>
+    error_double(T) noexcept;
+    error_double(int64_t) noexcept;
     error_double(double, double) noexcept;
     error_double(const error_double &) noexcept;
-    error_double(PyObject *);
     error_double operator+(const error_double &) const;
     friend error_double operator+(const double &, const error_double &);
     error_double &operator+=(const error_double &);
@@ -39,7 +41,6 @@ public:
     bool operator==(const double &) const;
     int operator>(const double &) const;
     void operator=(const error_double &);
-    void operator=(const double &);
     friend std::ostream &operator<<(std::ostream &, const error_double &);
 };
 
@@ -94,4 +95,5 @@ struct PyErrordoubleObject
 extern PyTypeObject PyErrordouble_Type;
 #define PyErrordouble_Check(op) PyObject_TypeCheck(op, &PyErrordouble_Type)
 #define PyErrordouble_CheckExact(op) Py_IS_TYPE(op, &PyErrordouble_Type)
-PyErrordoubleObject* internal_new_PyErrordouble();
+int assignErrordouble(PyObject *, error_double &);
+PyErrordoubleObject *internal_new_PyErrordouble();

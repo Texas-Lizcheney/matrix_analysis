@@ -618,3 +618,14 @@ class Test_vector(externed_Testcase):
             matrix_analysis.funcs.dot(x, 1)  # type: ignore
         with self.assertRaises(matrix_analysis.ShapeError):
             matrix_analysis.funcs.dot(x, matrix_analysis.matrix.vector([1, 2]))
+
+    def test_metric(self):
+        x = matrix_analysis.matrix.vector([1, 2, 3+1j])
+        self.assertAlmostEqual(x.L1(), 6.16227766)
+        self.assertAlmostEqual(x.L2(), 3.872983346)
+        self.assertAlmostEqual(x.Linf(), 3.16227766)
+        self.assertAlmostEqual(x.minkowsi_distance(3), 3.437609452)
+        with self.assertRaises(TypeError):
+            x.minkowsi_distance("abc")  # type: ignore
+        with self.assertRaises(ValueError):
+            x.minkowsi_distance(-2)
